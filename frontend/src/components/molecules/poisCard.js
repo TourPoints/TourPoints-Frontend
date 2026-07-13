@@ -48,6 +48,7 @@ export function poiCard({
             </div>
           </div>
           <h3 class="poi-card-title">${name}</h3>
+          <p class="pois-card-description">${description} </p>       
         </div>
       `
           : ""
