@@ -1,0 +1,99 @@
+.header-global {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--color-gris-claro);
+  margin: 0 auto;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.04);
+}
+
+.nav-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1rem;
+  width: 70%;
+}
+
+
+.navegation {
+  display: flex;
+  gap: 1rem;
+}
+
+.menu {
+  font-family: var(--font-base);
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5rem;
+  color: var(--color-gris-oscuro);
+  text-decoration: none;
+  transition: color 0.5s ease;
+}
+
+.menu:hover {
+  border-bottom: 2px solid var(--color-principal);
+  color: var(--color-principal);
+}
+
+.menu-active {
+  font-weight: 700;
+  color: var(--color-principal);
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--color-principal);
+}
+
+.buttons-container {
+  width: 30%;
+  justify-content: flex-end;
+  display: flex;
+  gap: 1.25rem;
+}
+
+.user-button {
+  display: none;
+}
+/*TABLETS GRANDES / LAPTOPS PEQUEÑAS (Horizontal)*/
+@media (max-width: 1024px) {
+  .nav-container {
+    gap: 2rem;
+    width: 60%;
+  }
+  .buttons-container {
+    width: 40%;
+    gap: 1.25rem;
+  }
+  .buttons-container {
+    display: none;
+  }
+  .user-button {
+    display: inline-flex;
+    align-items: center;
+    background: none;
+    border: none;
+    display: block;
+    color: var(--color-principal);
+  }
+  
+  .user-button svg {
+    display: block;
+    width: 2rem;
+    height: 2rem;
+  }
+}
+
+/* TABLETS ESTÁNDAR (vertical) */
+@media (max-width: 768px) {
+  .nav-container {
+    gap: 2rem;
+    width: 60%;
+  }
+  .navegation {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+}

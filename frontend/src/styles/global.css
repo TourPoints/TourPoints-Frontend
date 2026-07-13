@@ -1,0 +1,44 @@
+/* 1. Reinicio general (Reset/Normalize) */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* 2. Variables globales (Colores y fuentes) */
+:root {
+  /* Colores */
+  --color-principal: #004ac6;
+  --color-turquesa: #06b6d4;
+  --color-amarillo: #fbbf24;
+  --color-gris-claro: #f8fafc;
+  --color-blanco: #ffffff;
+  --color-gris-oscuro: #1e293b;
+  /* Fuentes */
+  --font-base: "Poppins", sans-serif;
+  --font-texto: "inter", sans-serif;
+}
+
+
+
+main{
+  width: 100%;
+  padding:  3.1rem 0;
+} 
+
+.logo {
+  font-family: var(--font-base);
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--color-principal);
+  text-decoration: none;
+  margin-right: 2rem;
+}
+
+.logo--blanco {
+  font-family: var(--font-base);
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--color-blanco);
+  text-decoration: none;
+}
