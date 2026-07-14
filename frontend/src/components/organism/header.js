@@ -12,7 +12,7 @@ export function header() {
         <a class="menu" href="/explore" data-link>Explora</a>
         <a class="menu" href="" data-link>Retos</a>
         <a class="menu" href="" data-link>Recompesas</a>
-        <a class="menu" href="" data-link>Mapa</a>
+        <a class="menu" href="/map" data-link>Mapa</a>
       </nav>
       </div>
       <div class="buttons-container">

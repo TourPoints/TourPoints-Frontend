@@ -3,6 +3,7 @@ import { login } from "../pages/auth/login.js";
 import { register } from "../pages/auth/register.js";
 import { notFound } from "../pages/notFound.js";
 import { explore, initExplore } from "../pages/explore.js";
+import { map, initMap } from "../pages/map.js";
 
 
 export const routes = {
@@ -16,6 +17,13 @@ export const routes = {
     "/explore": {
         component: explore,
         init: initExplore,
+        layout: "public",
+        auth: false
+    },
+
+    "/map": {
+        component: map,
+        init: initMap,
         layout: "public",
         auth: false
     },
