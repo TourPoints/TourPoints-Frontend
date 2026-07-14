@@ -1,0 +1,50 @@
+.challenge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* 3 columnas en escritorio */
+  grid-auto-rows: auto;
+  gap: 24px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.challenge-empty {
+  text-align: center;
+  padding: 40px;
+  color: #64748b;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 1024px) {
+  .challenge-grid {
+    padding: 0 24px; /* Damos un aire de seguridad a los lados de la pantalla */
+    box-sizing: border-box;
+  }
+}
+
+
+@media (max-width: 768px) {
+  .challenge-grid {
+    gap: 20px; 
+    padding: 0 20px;
+  }
+  
+  .challenge-empty {
+    padding: 30px 20px;
+    font-size: 1rem;
+  }
+}
+
+
+@media (max-width: 480px) {
+  .challenge-grid {
+    grid-template-columns: 1fr; 
+    gap: 16px; 
+    padding: 0 16px; 
+  }
+
+  .challenge-empty {
+    padding: 24px 16px;
+    font-size: 0.95rem;
+  }
+}
