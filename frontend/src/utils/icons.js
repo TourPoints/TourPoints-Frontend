@@ -11,7 +11,12 @@ import {
   Church,
   ShoppingBag,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  MapPin,
+  Clock,
+  LayoutGrid,
+  ExternalLink,
+  MapPinCheck
 } from "lucide";
 
 export const loadIcons = () => {
@@ -28,7 +33,12 @@ export const loadIcons = () => {
       Church,
       ShoppingBag,
       ChevronLeft,
-      ChevronRight
+      ChevronRight,
+      MapPin,
+      Clock,
+      LayoutGrid,
+      ExternalLink,
+      MapPinCheck
     },
   });
 };

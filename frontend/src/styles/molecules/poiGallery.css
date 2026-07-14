@@ -1,0 +1,101 @@
+.poi-gallery {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 0.75rem;
+  height: 100%;
+  margin-bottom: 2rem;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.poi-gallery-main {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+}
+
+.poi-gallery-main-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.poi-gallery-thumbs {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 0.75rem;
+  position: relative;
+}
+
+.poi-gallery-thumb {
+  border: none;
+  padding: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.poi-gallery-thumb:hover {
+  opacity: 0.85;
+  transform: scale(1.02);
+}
+
+.poi-gallery-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.poi-gallery-view-all {
+  position: absolute;
+  bottom: 0.75rem;
+  right: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background-color: var(--color-principal);
+  color: var(--color-blanco);
+  border: none;
+  border-radius: 50px;
+  padding: 0.5rem 1rem;
+  font-family: var(--font-base);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  z-index: 2;
+}
+
+.poi-gallery-view-all:hover {
+  background-color: #003a9e;
+}
+
+.poi-gallery-view-all .lucide-layout-grid {
+  width: 1rem;
+  height: 1rem;
+}
+
+@media (max-width: 768px) {
+  .poi-gallery {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+
+  .poi-gallery-main {
+    height: 240px;
+  }
+
+  .poi-gallery-thumbs {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: 80px;
+  }
+
+  .poi-gallery-view-all {
+    bottom: 0.5rem;
+    right: 0.5rem;
+    font-size: 0.75rem;
+    padding: 0.35rem 0.75rem;
+  }
+}
