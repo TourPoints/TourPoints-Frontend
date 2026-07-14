@@ -11,7 +11,7 @@ export function header() {
         <a class="menu" href="/" data-link>Inicio</a>
         <a class="menu" href="" data-link>Explora</a>
         <a class="menu" href="" data-link>Retos</a>
-        <a class="menu" href="" data-link>Recompesas</a>
+        <a class="menu" href="/recompensas" data-link>Recompensas</a>
         <a class="menu" href="" data-link>Mapa</a>
       </nav>
       </div>
