@@ -9,7 +9,7 @@ export function header() {
       <a href="/" class="logo">TourPoints</a>
       <nav class="navegation">
         <a class="menu" href="/" data-link>Inicio</a>
-        <a class="menu" href="" data-link>Explora</a>
+        <a class="menu" href="/explore" data-link>Explora</a>
         <a class="menu" href="" data-link>Retos</a>
         <a class="menu" href="" data-link>Recompesas</a>
         <a class="menu" href="" data-link>Mapa</a>

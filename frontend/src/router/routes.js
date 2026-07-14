@@ -2,12 +2,20 @@ import { home } from "../pages/home.js";
 import { login } from "../pages/auth/login.js";
 import { register } from "../pages/auth/register.js";
 import { notFound } from "../pages/notFound.js";
+import { explore, initExplore } from "../pages/explore.js";
 
 
 export const routes = {
 
     "/": {
         component: home,
+        layout: "public",
+        auth: false
+    },
+
+    "/explore": {
+        component: explore,
+        init: initExplore,
         layout: "public",
         auth: false
     },
