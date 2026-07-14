@@ -4,6 +4,31 @@
   grid-auto-rows: 333px;
   gap: 24px;
   width: 100%;
-  max-width: 1200px;
   margin: 0 auto;
+}
+
+@media (max-width: 1024px) {
+  .o-poi-grid {
+    grid-template-columns: repeat(2, 1fr); /* Pasamos de 3 a 2 columnas */
+    grid-auto-rows: auto; /* Dejamos que el contenido maneje el alto flexible */
+    padding: 0 24px;
+    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 768px) {
+  .o-poi-grid {
+    grid-template-columns: repeat(2, 1fr); /* Se mantiene en 2 columnas, pero con menos espacio */
+    gap: 16px;
+    padding: 0 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .o-poi-grid {
+    grid-template-columns: 1fr;
+    grid-auto-rows: auto;    
+    gap: 20px;
+    padding: 0 16px;
+  }
 }

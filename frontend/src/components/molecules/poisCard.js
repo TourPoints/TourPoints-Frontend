@@ -36,7 +36,7 @@ export function poiCard({
             : ""
         }
       </div>
-
+        
       ${
         !isFeatured
           ? `
