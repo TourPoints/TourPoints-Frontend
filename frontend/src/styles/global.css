@@ -21,10 +21,11 @@
 
 
 
-main{
+/* Padding solo para layout público; el admin maneja su propio spacing */
+.public-layout main {
   width: 100%;
-  padding:  3.1rem 0;
-} 
+  padding: 3.1rem 0;
+}
 
 .logo {
   font-family: var(--font-base);

@@ -1,0 +1,31 @@
+/* src/styles/organism/sidebar.css */
+/* Premium sidebar with dark glass‑morphism */
+.sidebar {
+  width: 260px;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(12px);
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.4);
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sidebar-link {
+  color: #e0e0e0;
+  text-decoration: none;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.sidebar-link:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateX(4px);
+}
+
+.sidebar-link.admin {
+  font-weight: 600;
+  color: #ffd700; /* gold for admin links */
+}
