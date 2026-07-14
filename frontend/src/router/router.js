@@ -1,4 +1,4 @@
-import { routes, notFoundView } from "./routes.js";
+import { routes, dynamicRoutes, notFoundView } from "./routes.js";
 import { renderLayout } from "./layouts.js";
 import { loadIcons } from "../utils/icons.js";
 import { updateActiveMenu } from "../utils/activeMenu.js";
@@ -11,9 +11,23 @@ export function navigate(path) {
   renderRoute();
 }
 
-export function renderRoute() {
-  const path = location.pathname;
-  const route = routes[path];
+export function renderRoute(){
+
+    const path = location.pathname;
+
+    let route = routes[path];
+    let params = {};
+
+    if (!route) {
+        for (const dynRoute of dynamicRoutes) {
+            const match = path.match(dynRoute.pattern);
+            if (match) {
+                route = dynRoute;
+                params = dynRoute.parseParams(match);
+                break;
+            }
+        }
+    }
 
   if (!route) {
     app.innerHTML = renderLayout("public", notFoundView());
@@ -27,9 +41,9 @@ export function renderRoute() {
   updateActiveMenu();
   loadIcons();
 
-  if (route.init) {
-    route.init();
-  }
+    if (route.init) {
+        route.init(params);
+    }
 }
 
 // Botón atrás / adelante del navegador

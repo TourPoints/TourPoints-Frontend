@@ -10,6 +10,7 @@ import { poisManagement }       from "../pages/admin/poisManagement.js";
 import { challengesManagement } from "../pages/admin/challengesManagement.js";
 import { rewardsManagement }    from "../pages/admin/rewardsManagement.js";
 import { adminSettings }        from "../pages/admin/settings.js";
+import { poiDetail, initPoiDetail } from "../pages/poiDetail.js";
 
 export const routes = {
 
@@ -67,5 +68,16 @@ export const routes = {
     layout: "admin",
   },
 };
+
+export const dynamicRoutes = [
+    {
+        pattern: /^\/poi\/(\d+)$/,
+        component: poiDetail,
+        init: initPoiDetail,
+        layout: "public",
+        auth: false,
+        parseParams: (match) => ({ id: match[1] }),
+    },
+];
 
 export const notFoundView = notFound;
