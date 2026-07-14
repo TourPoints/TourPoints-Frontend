@@ -3,7 +3,6 @@ import "/src/styles/molecules/poiCard.css";
 export function poiCard({
   id,
   name,
-  description,
   category,
   image,
   rating,
