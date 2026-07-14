@@ -4,6 +4,8 @@ import { register } from "../pages/auth/register.js";
 import { rewards } from "../pages/rewards.js";
 import { notFound } from "../pages/notFound.js";
 import { explore, initExplore } from "../pages/explore.js";
+import { map, initMap } from "../pages/map.js";
+import { poiDetail, initPoiDetail } from "../pages/poiDetail.js";
 
 
 export const routes = {
@@ -17,6 +19,13 @@ export const routes = {
     "/explore": {
         component: explore,
         init: initExplore,
+        layout: "public",
+        auth: false
+    },
+
+    "/map": {
+        component: map,
+        init: initMap,
         layout: "public",
         auth: false
     },
@@ -39,6 +48,17 @@ export const routes = {
         auth: false
     }
 };
+
+export const dynamicRoutes = [
+    {
+        pattern: /^\/poi\/(\d+)$/,
+        component: poiDetail,
+        init: initPoiDetail,
+        layout: "public",
+        auth: false,
+        parseParams: (match) => ({ id: match[1] }),
+    },
+];
 
 export const notFoundView = notFound;
 

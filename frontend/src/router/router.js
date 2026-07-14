@@ -1,4 +1,4 @@
-import { routes, notFoundView } from "./routes.js";
+import { routes, dynamicRoutes, notFoundView } from "./routes.js";
 import { renderLayout } from "./layouts.js";
 import { isAuthenticated, getUserRole } from "./guards.js";
 import { loadIcons } from "../utils/icons.js";
@@ -18,7 +18,19 @@ export function renderRoute(){
 
     const path = location.pathname;
 
-    const route = routes[path];
+    let route = routes[path];
+    let params = {};
+
+    if (!route) {
+        for (const dynRoute of dynamicRoutes) {
+            const match = path.match(dynRoute.pattern);
+            if (match) {
+                route = dynRoute;
+                params = dynRoute.parseParams(match);
+                break;
+            }
+        }
+    }
 
     if(!route){
 
@@ -59,7 +71,7 @@ export function renderRoute(){
     loadIcons();
 
     if (route.init) {
-        route.init();
+        route.init(params);
     }
 }
 

@@ -4,11 +4,11 @@ export function footer() {
   return `
     <footer class="footer-global">
         <div class="footer-container">
-            <div class="footer-info">
-                <div class="logo-container">
-                    <img src="./public/icons/isotipo_tourPoints_blanco.svg" alt="TourPoints Logo" class="logo-footer">
-                    <a href="/" class="logo--blanco" data-link>TourPoints</a>
-                </div>
+        <div class="footer-info">
+            <div class="logo-container"> 
+            <img src="./public/icons/isotipo_tourPoints_blanco.svg" alt="TourPoints Logo" class="logo-footer">
+            <a href="/" class="logo--blanco">TourPoints</a>
+            </div>
                 <p>Haciendo que cada paso por la ciudad cuente. La plataforma lider en gamificacion de turismo local.</p>
             </div>
             <div class="footer-links">

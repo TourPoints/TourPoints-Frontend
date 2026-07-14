@@ -1,0 +1,77 @@
+.info-card {
+  background-color: var(--color-gris-claro);
+  border-radius: 16px;
+  padding: 1.25rem;
+  flex: 1;
+}
+
+.info-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.info-card-header i {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--color-principal);
+}
+
+.info-card-header h3 {
+  font-family: var(--font-base);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-gris-oscuro);
+}
+
+.info-card-text {
+  font-family: var(--font-texto);
+  font-size: 0.95rem;
+  color: var(--color-gris-oscuro);
+  line-height: 1.5;
+}
+
+.schedule-badge {
+  display: inline-block;
+  font-family: var(--font-base);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 50px;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.schedule-badge--open {
+  background-color: #dcfce7;
+  color: #16a34a;
+}
+
+.schedule-badge--closed {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.schedule-hours {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.schedule-row {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-texto);
+  font-size: 0.9rem;
+  color: var(--color-gris-oscuro);
+}
+
+.schedule-day {
+  font-weight: 500;
+}
+
+.schedule-time {
+  color: #64748b;
+}
