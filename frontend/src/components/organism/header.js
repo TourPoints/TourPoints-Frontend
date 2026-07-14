@@ -1,5 +1,12 @@
 import {buttonLinks} from "../atoms/buttonLinks.js";
-import "/src/styles/organism/header.css";
+import "../../styles/organism/header.css";
+import { clearRole } from "../../utils/role.js";
+
+function handleLogout() {
+  clearRole();
+  window.location.href = '/';
+}
+window.handleLogout = handleLogout;
 
 export function header() {
   return `
@@ -18,6 +25,7 @@ export function header() {
       <div class="buttons-container">
       ${buttonLinks("/login", "Iniciar Sesion", "secondary")} 
       ${buttonLinks("/register", "Registrarse", "primary")}
+      <button class="logout-button" onclick="handleLogout()">Logout</button>
       </div>
       <button class="user-button">
       <i data-lucide="circle-user-round"></i> 
