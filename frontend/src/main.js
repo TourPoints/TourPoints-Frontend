@@ -1,3 +1,1 @@
-import { renderRoute } from "../src/router/router.js";
-
-renderRoute();
+import "./router/router.js";
