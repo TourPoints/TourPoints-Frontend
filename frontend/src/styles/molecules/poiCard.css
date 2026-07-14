@@ -141,7 +141,17 @@
   font-family: var(--font-base);
   font-size: 1.25rem;
   font-size: 600;
+}
 
+.pois-card-description{
+  font-family: var(--font-texto);
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--color-gris-oscuro);
+  display: -webkit-box;
+  -webkit-line-clamp: 1;        /* 🎯 Número exacto de líneas visibles antes de poner los "..." */
+  -webkit-box-orient: vertical;  
+  overflow: hidden;
 }
 
 
