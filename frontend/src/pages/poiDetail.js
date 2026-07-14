@@ -27,7 +27,7 @@ function buildDetailHTML(poi, reviews, favorite, visited) {
   const categoryClass = getCategoryClass(poi.category);
 
   return `
-    <div class="poi-detail-page">
+    <section class="poi-detail-page">
       ${poiGallery({ images, name: poi.name })}
 
       <div class="poi-detail-layout">
@@ -74,7 +74,7 @@ function buildDetailHTML(poi, reviews, favorite, visited) {
 
         ${poiSidebar({ isFavorite: favorite, hasVisited: visited })}
       </div>
-    </div>
+    </section>
   `;
 }
 
@@ -195,7 +195,7 @@ function getUserCoords() {
 
 export function poiDetail() {
   return `
-    <div class="poi-detail-page">
+    <div class="poi-detail">
       <div id="poi-detail-root" class="poi-detail-loading">
         <p>Cargando punto de interés...</p>
       </div>

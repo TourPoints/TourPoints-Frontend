@@ -26,7 +26,7 @@ export function poiGallery({ images = [], name = "" }) {
       : "";
 
   return `
-    <section class="poi-gallery" aria-label="Galería de imágenes">
+    <section class="poi-gallery-container" aria-label="Galería de imágenes">
       <div class="poi-gallery-main">
         <img
           id="poi-gallery-main-img"

@@ -2,7 +2,6 @@
 
 .poi-detail-page {
   width: 100%;
-  max-width: 1200px;
   margin: 0 auto;
   padding: 1.5rem 1rem;
   font-family: var(--font-base);
