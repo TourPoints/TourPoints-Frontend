@@ -58,6 +58,9 @@ export function renderRoute(){
 
     loadIcons();
 
+    if (route.init) {
+        route.init();
+    }
 }
 
 window.addEventListener("popstate", renderRoute);

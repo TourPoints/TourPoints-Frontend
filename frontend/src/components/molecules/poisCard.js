@@ -9,6 +9,8 @@ export function poiCard({
   rating,
   points,
   typePoints,
+  description = "",
+  location = "",
   isFeatured = false,
 }) {
   // Cambiamos la clase si es la tarjeta principal destacada
@@ -49,7 +51,8 @@ export function poiCard({
             </div>
           </div>
           <h3 class="poi-card-title">${name}</h3>
-          <p class="pois-card-description">${description} </p>       
+          <p class="pois-card-description">${description}</p>       
+          <a href="/poi/${id}" data-link class="btn btn--primary btn-card-more">Ver más</a>
         </div>
       `
           : ""

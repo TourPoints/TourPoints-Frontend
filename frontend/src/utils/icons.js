@@ -1,4 +1,18 @@
-import { createIcons, Search, CircleUserRound, Heart, Star } from "lucide";
+import { 
+  createIcons, 
+  Search, 
+  CircleUserRound, 
+  Heart, 
+  Star,
+  Compass,
+  Landmark,
+  Leaf,
+  Utensils,
+  Church,
+  ShoppingBag,
+  ChevronLeft,
+  ChevronRight
+} from "lucide";
 
 export const loadIcons = () => {
   createIcons({
@@ -7,6 +21,14 @@ export const loadIcons = () => {
       CircleUserRound,
       Heart,
       Star,
+      Compass,
+      Landmark,
+      Leaf,
+      Utensils,
+      Church,
+      ShoppingBag,
+      ChevronLeft,
+      ChevronRight
     },
   });
 };
