@@ -17,6 +17,19 @@
   /* Fuentes */
   --font-base: "Poppins", sans-serif;
   --font-texto: "inter", sans-serif;
+
+  /* La interfaz está diseñada solo en claro. Sin esto, un navegador en modo
+     oscuro pinta el lienzo de negro por defecto y los textos, que sí están
+     fijados en tonos oscuros, se vuelven ilegibles. */
+  color-scheme: light;
+}
+
+/* Fondo explícito: html y body eran transparentes y heredaban el color por
+   defecto del navegador, que cambia según el tema del sistema. */
+html,
+body {
+  background-color: var(--color-blanco);
+  color: var(--color-gris-oscuro);
 }
 
 
