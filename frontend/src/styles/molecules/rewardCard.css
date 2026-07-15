@@ -27,6 +27,15 @@
   display: block;
 }
 
+/* Cuando la recompensa no tiene imagen, se usa su emoji como fallback. */
+.reward-card-img--emoji {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3.5rem;
+  background-color: var(--color-fondo-suave, #f3f4f6);
+}
+
 .reward-card-points {
   position: absolute;
   top: 1rem;

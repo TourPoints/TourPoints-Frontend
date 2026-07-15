@@ -68,6 +68,8 @@ const { view, init } = createAdminCrudView({
     { name: "status", label: "Estado", type: "select", options: CHALLENGE_STATUSES, required: true },
     { name: "points", label: "Puntos", type: "number", min: 0, required: true },
     { name: "deadline", label: "Fecha límite", type: "date", required: true, wide: true },
+    { name: "image", label: "URL de la imagen", wide: true, placeholder: "https://..." },
+    { name: "description", label: "Descripción", type: "textarea", wide: true },
   ],
 
   stats: (items) => {

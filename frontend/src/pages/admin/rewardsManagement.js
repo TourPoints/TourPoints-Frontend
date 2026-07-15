@@ -72,7 +72,9 @@ const { view, init } = createAdminCrudView({
     { name: "status", label: "Estado", type: "select", options: REWARD_STATUSES, required: true },
     { name: "pointsCost", label: "Coste en puntos", type: "number", min: 0, required: true },
     { name: "stock", label: "Stock disponible", type: "number", min: 0, required: true },
-    { name: "emoji", label: "Icono (emoji)", placeholder: "🎁", wide: true },
+    { name: "emoji", label: "Icono (emoji)", placeholder: "🎁" },
+    { name: "image", label: "URL de la imagen", wide: true, placeholder: "https://..." },
+    { name: "description", label: "Descripción", type: "textarea", wide: true },
   ],
 
   stats: (items) => {

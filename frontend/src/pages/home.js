@@ -3,93 +3,13 @@ import { searchBar } from "../components/molecules/searchBar.js";
 import { poiGrid } from "../components/organism/poiGrid.js";
 import { challengeGrid } from "../components/organism/challengeGrid.js";
 import { buttonLinks } from "../components/atoms/buttonLinks.js";
+import { getPois } from "../services/poi.service.js";
+import { getChallenges } from "../services/challenge.service.js";
+import { loadIcons } from "../utils/icons.js";
 
-const mockPois = [
-  {
-    id: 1,
-    name: "Letrero de Barranquilla",
-    category: "Monumento",
-    image:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSflsGufn-Yokun0Kpct3Yiciet2lkpOB_1IZFgwS31NA&s=10",
-    rating: 5.0,
-    points: 250,
-    description:
-      "Parada fotográfica obligatoria con las coloridas letras de la ciudad y una gran vista panorámica.",
-  },
-  {
-    id: 2,
-    name: "Cafetería Central",
-    category: "Gastronomía",
-    image:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSflsGufn-Yokun0Kpct3Yiciet2lkpOB_1IZFgwS31NA&s=10",
-    rating: 4.8,
-    points: 50,
-    description:
-      "El mejor café artesanal del centro histórico, ideal para descansar y probar bocados típicos locales.",
-  },
-  {
-    id: 3,
-    name: "Parque del Escultor",
-    category: "Naturaleza",
-    image:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSflsGufn-Yokun0Kpct3Yiciet2lkpOB_1IZFgwS31NA&s=10",
-    rating: 4.5,
-    points: 100,
-    description:
-      "Un espacio verde lleno de esculturas modernas al aire libre, perfecto para caminar o hacer ejercicio.",
-  },
-  {
-    id: 4,
-    name: "Restaurante Vista Nocturna",
-    category: "Gastronomía",
-    image:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSflsGufn-Yokun0Kpct3Yiciet2lkpOB_1IZFgwS31NA&s=10",
-    rating: 4.9,
-    points: 150,
-    description:
-      "Disfruta de una cena gourmet con la mejor perspectiva iluminada de toda la ciudad desde las alturas.",
-  },
-  {
-    id: 5,
-    name: "Playa de la Niebla",
-    category: "Aventura",
-    image:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSflsGufn-Yokun0Kpct3Yiciet2lkpOB_1IZFgwS31NA&s=10",
-    rating: 4.7,
-    points: 80,
-    description:
-      "Un rincón costero tranquilo para desconectarse del ruido urbano y contemplar el amanecer.",
-  },
-];
-const mockChallenges = [
-  {
-    id: 1,
-    name: "Cazador de Monumentos",
-    points: 350,
-    image:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSflsGufn-Yokun0Kpct3Yiciet2lkpOB_1IZFgwS31NA&s=10",
-    description:
-      "Visita y tómate una foto en 3 monumentos icónicos de la ciudad, incluyendo el Letrero de Barranquilla.",
-  },
-  {
-    id: 2,
-    name: "Ruta del Sabor Local",
-    points: 150,
-    image:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSflsGufn-Yokun0Kpct3Yiciet2lkpOB_1IZFgwS31NA&s=10",
-    description:
-      "Haz check-in en 2 cafeterías o restaurantes del centro histórico y desbloquea el sabor tradicional.",
-  },
-  {
-    id: 3,
-    name: "Explorador del Río",
-    points: 400,
-    image:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSflsGufn-Yokun0Kpct3Yiciet2lkpOB_1IZFgwS31NA&s=10",
-    description:
-      "Camina por el Gran Malecón del Río durante el atardecer y registra tu visita para ganar el puntaje máximo.",
-  },
-];
+// Nº de destinos y retos destacados en la portada. El primer POI se pinta grande.
+const FEATURED_COUNT = 5;
+const FEATURED_CHALLENGES_COUNT = 3;
 
 export function home() {
   return `
@@ -109,10 +29,10 @@ export function home() {
         <h2>Destinos destacados</h2>
         <p>Lugares populares que te esperan</p>
         </div>
-        <a class="link" href="" data-link>Ver todos</a> 
+        <a class="link" href="/explore" data-link>Ver todos</a>
       </div>
-      <div class="highlights-points">
-        ${poiGrid(mockPois)}
+      <div class="highlights-points" id="home-pois">
+        <p class="u-text-center">Cargando destinos destacados...</p>
       </div>
     </section>
 
@@ -121,7 +41,9 @@ export function home() {
         <h2>Retos destacados</h2>
         <p>Completa desafíos únicos, descubre nuevos lugares y acumula puntos para desbloquear recompensas exclusivas.</p>
         </div>
-        ${challengeGrid(mockChallenges)}
+        <div id="home-challenges">
+          <p class="u-text-center">Cargando retos destacados...</p>
+        </div>
     </section>
 
     <section class="steps">
@@ -191,4 +113,45 @@ export function home() {
       </div>
     </section>
   `;
+}
+
+/**
+ * Carga los destinos y retos destacados con datos reales.
+ * Antes los POIs nunca se pintaban (getPois() se importaba pero no se
+ * llamaba) y los retos venían hardcodeados en este archivo.
+ */
+export async function initHome() {
+  const poisContainer = document.getElementById("home-pois");
+  const challengesContainer = document.getElementById("home-challenges");
+
+  await Promise.all([loadFeaturedPois(poisContainer), loadFeaturedChallenges(challengesContainer)]);
+
+  loadIcons();
+}
+
+async function loadFeaturedPois(container) {
+  if (!container) return;
+
+  try {
+    const pois = await getPois();
+    container.innerHTML = poiGrid(pois.slice(0, FEATURED_COUNT));
+  } catch (error) {
+    console.error("Error al cargar los destinos destacados:", error);
+    container.innerHTML = `<p class="u-text-center">Hubo un error al cargar los destinos destacados.</p>`;
+  }
+}
+
+async function loadFeaturedChallenges(container) {
+  if (!container) return;
+
+  try {
+    const challenges = await getChallenges();
+    const featured = challenges
+      .filter((challenge) => challenge.status === "Activo")
+      .slice(0, FEATURED_CHALLENGES_COUNT);
+    container.innerHTML = challengeGrid(featured);
+  } catch (error) {
+    console.error("Error al cargar los retos destacados:", error);
+    container.innerHTML = `<p class="u-text-center">Hubo un error al cargar los retos destacados.</p>`;
+  }
 }

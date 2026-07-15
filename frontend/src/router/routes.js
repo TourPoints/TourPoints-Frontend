@@ -1,7 +1,7 @@
-import { home } from "../pages/home.js";
+import { home, initHome } from "../pages/home.js";
 import { login, initLogin } from "../pages/auth/login.js";
 import { register, initRegister } from "../pages/auth/register.js";
-import { rewards } from "../pages/rewards.js";
+import { rewards, initRewards } from "../pages/rewards.js";
 import { notFound } from "../pages/notFound.js";
 import { adminDashboard, initAdminDashboard } from "../pages/admin/dashboard.js";
 import { usersManagement, initUsersManagement } from "../pages/admin/usersManagement.js";
@@ -17,6 +17,7 @@ export const routes = {
 
     "/": {
         component: home,
+        init: initHome,
         layout: "public",
         auth: false
     },
@@ -49,6 +50,7 @@ export const routes = {
     },
     "/rewards": {
         component: rewards,
+        init: initRewards,
         layout: "public",
         auth: false
     },
