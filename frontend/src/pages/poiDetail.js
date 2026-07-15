@@ -6,7 +6,7 @@ import { poiGallery, initPoiGallery } from "../components/molecules/poiGallery.j
 import { addressCard, scheduleCard } from "../components/molecules/infoCard.js";
 import { poiSidebar } from "../components/organism/poiSidebar.js";
 import { reviewsList } from "../components/organism/reviewsList.js";
-import { isAuthenticated } from "../router/guards.js";
+import { isAuthenticated } from "../services/auth.service.js";
 import { navigate } from "../router/router.js";
 import { loadIcons } from "../utils/icons.js";
 import "/src/styles/pages/poiDetail.css";
