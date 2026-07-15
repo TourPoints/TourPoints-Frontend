@@ -1,0 +1,51 @@
+/* Barra de navegación inferior (solo móvil). */
+
+.bottom-nav {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 900;
+    display: flex;
+    justify-content: space-around;
+    background: var(--color-blanco);
+    border-top: 1px solid #e2e8f0;
+    padding: 0.4rem 0.5rem calc(0.4rem + env(safe-area-inset-bottom));
+    box-shadow: 0 -4px 16px rgba(15, 23, 42, 0.08);
+  }
+
+  .bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15rem;
+    padding: 0.35rem 0.9rem;
+    border-radius: 10px;
+    color: #64748b;
+    font-family: var(--font-base);
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.15s ease, background 0.15s ease;
+  }
+
+  .bottom-nav-item svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .bottom-nav-item.active {
+    background: var(--color-principal);
+    color: var(--color-blanco);
+  }
+
+  /* Que el contenido no quede oculto detrás de la barra */
+  .public-layout main {
+    padding-bottom: 5rem;
+  }
+}

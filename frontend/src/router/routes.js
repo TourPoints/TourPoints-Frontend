@@ -10,6 +10,7 @@ import { challengesManagement, initChallengesManagement } from "../pages/admin/c
 import { rewardsManagement, initRewardsManagement } from "../pages/admin/rewardsManagement.js";
 import { adminSettings }        from "../pages/admin/settings.js";
 import { explore, initExplore } from "../pages/explore.js";
+import { challenges, initChallenges } from "../pages/challenges.js";
 import { map, initMap } from "../pages/map.js";
 import { poiDetail, initPoiDetail } from "../pages/poiDetail.js";
 
@@ -24,6 +25,13 @@ export const routes = {
     "/explore": {
         component: explore,
         init: initExplore,
+        layout: "public",
+        auth: false
+    },
+
+    "/challenges": {
+        component: challenges,
+        init: initChallenges,
         layout: "public",
         auth: false
     },

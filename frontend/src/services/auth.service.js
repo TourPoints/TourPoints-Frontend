@@ -97,6 +97,22 @@ export async function register({ name, email }) {
   return { ok: true, user };
 }
 
+/**
+ * Actualiza campos del usuario en la sesión activa (p.ej. los puntos tras
+ * completar un reto). No toca la colección de usuarios: eso es cosa de
+ * user.service; aquí solo se refresca la copia de la sesión.
+ * @param {Object} changes - Campos a fusionar.
+ * @returns {Object|null} El usuario de sesión actualizado.
+ */
+export function updateSessionUser(changes) {
+  const user = getCurrentUser();
+  if (!user) return null;
+
+  const updated = { ...user, ...changes, id: user.id };
+  localStorage.setItem(SESSION_KEY, JSON.stringify(updated));
+  return updated;
+}
+
 /** Cierra la sesión actual. */
 export function logout() {
   localStorage.removeItem(SESSION_KEY);

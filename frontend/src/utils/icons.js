@@ -20,6 +20,9 @@ import {
   ExternalLink,
   MapPinCheck,
   LocateFixed,
+  Trophy,
+  Gift,
+  Map,
   Globe
 } from "lucide";
 
@@ -50,6 +53,9 @@ export const loadIcons = () => {
       ExternalLink,
       MapPinCheck,
       LocateFixed,
+      Trophy,
+      Gift,
+      Map,
       Globe
     },
   });

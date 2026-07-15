@@ -1,0 +1,314 @@
+/* --- Página de Retos (US TOUR-35) --- */
+
+.challenges-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ---- Cabecera: título + pestañas ---- */
+.challenges-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.challenges-header-text h1 {
+  font-family: var(--font-base);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-gris-oscuro);
+  margin-bottom: 0.35rem;
+}
+
+.challenges-header-text p {
+  font-family: var(--font-texto);
+  font-size: 0.9rem;
+  color: #64748b;
+  max-width: 34rem;
+  line-height: 1.5;
+}
+
+/* Pestañas: segmentadas en desktop, subrayadas en móvil */
+.challenges-tabs {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  background: #f1f5f9;
+  border-radius: 10px;
+}
+
+.challenges-tab {
+  padding: 0.45rem 1rem;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: #64748b;
+  font-family: var(--font-base);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.challenges-tab:hover {
+  color: var(--color-gris-oscuro);
+}
+
+.challenges-tab.active {
+  background: var(--color-principal);
+  color: var(--color-blanco);
+}
+
+.challenges-tab:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 74, 198, 0.3);
+}
+
+/* ---- Barra de métricas (desktop) ---- */
+.challenges-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background: var(--color-principal);
+  border-radius: 12px;
+  padding: 1.1rem 1.5rem;
+}
+
+.challenges-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.challenges-stat + .challenges-stat {
+  border-left: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.challenges-stat-label {
+  font-family: var(--font-base);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.challenges-stat-value {
+  font-family: var(--font-base);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--color-blanco);
+}
+
+/* ---- Buscador y progreso: solo móvil, como en el diseño ---- */
+.challenges-search-wrapper {
+  display: none;
+  position: relative;
+}
+
+.challenges-progress-card {
+  display: none;
+}
+
+/* ---- Grid de retos ---- */
+.challenges-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.challenges-loading,
+.challenges-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #64748b;
+  font-size: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* ---- Modal de detalle ---- */
+.challenge-detail {
+  padding: 0;
+  overflow: hidden;
+}
+
+.challenge-detail-media {
+  position: relative;
+  height: 200px;
+}
+
+.challenge-detail-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.challenge-detail-media .challenge-card-points {
+  top: 1rem;
+  left: 1rem;
+}
+
+.challenge-detail-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.challenge-detail-tags {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.challenge-badge-active {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.challenge-detail-title {
+  font-family: var(--font-base);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--color-gris-oscuro);
+}
+
+.challenge-detail-desc {
+  font-size: 0.9rem;
+  color: #475569;
+  line-height: 1.55;
+}
+
+.challenge-detail-deadline {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+/* ==========================================================
+   RESPONSIVE
+   ========================================================== */
+@media (max-width: 1024px) {
+  .challenges-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .challenges-page {
+    gap: 1rem;
+  }
+
+  /* Buscador visible */
+  .challenges-search-wrapper {
+    display: block;
+  }
+
+  .challenges-search-wrapper .search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1.1rem;
+    height: 1.1rem;
+    color: #94a3b8;
+  }
+
+  .challenges-search {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    border-radius: 50px;
+    border: 1px solid #cbd5e1;
+    background: #f8fafc;
+    font-family: var(--font-texto);
+    font-size: 0.875rem;
+    outline: none;
+  }
+
+  .challenges-search:focus {
+    border-color: var(--color-principal);
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(0, 74, 198, 0.1);
+  }
+
+  /* Tarjeta de progreso visible; barra de métricas de desktop fuera */
+  .challenges-progress-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--color-principal);
+    border-radius: 14px;
+    padding: 1.1rem 1.25rem;
+  }
+
+  .progress-card-label {
+    display: block;
+    font-family: var(--font-base);
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  .progress-card-value {
+    font-family: var(--font-base);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-blanco);
+  }
+
+  .progress-card-trophy {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: 50%;
+    font-size: 1.25rem;
+  }
+
+  .challenges-stats {
+    display: none;
+  }
+
+  /* Pestañas subrayadas, ancho completo */
+  .challenges-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .challenges-tabs {
+    background: transparent;
+    padding: 0;
+    border-bottom: 1px solid #e2e8f0;
+    border-radius: 0;
+    gap: 0;
+  }
+
+  .challenges-tab {
+    flex: 1;
+    border-radius: 0;
+    padding: 0.6rem 0.5rem;
+    border-bottom: 2px solid transparent;
+  }
+
+  .challenges-tab.active {
+    background: transparent;
+    color: var(--color-principal);
+    border-bottom-color: var(--color-principal);
+  }
+
+  .challenges-grid {
+    grid-template-columns: 1fr;
+  }
+}
