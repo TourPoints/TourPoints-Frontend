@@ -8,6 +8,7 @@ import { poiSidebar } from "../components/organism/poiSidebar.js";
 import { reviewsList } from "../components/organism/reviewsList.js";
 import { isAuthenticated } from "../services/auth.service.js";
 import { navigate } from "../router/router.js";
+import { goBackOr } from "../utils/navigation.js";
 import { loadIcons } from "../utils/icons.js";
 import "/src/styles/pages/poiDetail.css";
 
@@ -28,7 +29,16 @@ function buildDetailHTML(poi, reviews, favorite, visited) {
 
   return `
     <div class="poi-detail-page">
-      ${poiGallery({ images, name: poi.name })}
+      <!-- El botón flota sobre la galería para no empujar la portada hacia
+           abajo. El contenedor existe solo para anclarlo: la galería tiene
+           overflow:hidden y lo recortaría si viviera dentro. -->
+      <div class="poi-detail-hero">
+        <button type="button" class="poi-detail-back" id="poi-detail-back">
+          <i data-lucide="arrow-left" aria-hidden="true"></i>
+          <span>Volver</span>
+        </button>
+        ${poiGallery({ images, name: poi.name })}
+      </div>
 
       <div class="poi-detail-layout">
         <div class="poi-detail-main">
@@ -118,6 +128,13 @@ function initDetailMap(poi) {
   }, 150);
 
   loadIcons();
+}
+
+function bindBackButton() {
+  document.getElementById("poi-detail-back")?.addEventListener("click", () => {
+    // Explora es el respaldo natural: es de donde se llega a un POI.
+    goBackOr("/explore");
+  });
 }
 
 function bindSidebarActions(poi) {
@@ -239,6 +256,7 @@ export async function initPoiDetail({ id } = {}) {
 
     initPoiGallery(images);
     initDetailMap(poi);
+    bindBackButton();
     bindSidebarActions(poi);
 
     window.scrollTo({ top: 0, behavior: "instant" });
