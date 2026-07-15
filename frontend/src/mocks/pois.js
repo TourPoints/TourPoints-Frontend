@@ -13,6 +13,8 @@ export const mockPois = [
     rating: 4.9,
     reviewCount: 1240,
     points: 320,
+
+    status: "Activo",
     description: "Un oasis de paz en pleno centro de Madrid con una colección espectacular de plantas y flores de todo el mundo. Fundado en el siglo XVIII, el Real Jardín Botánico alberga más de 5.000 especies vegetales distribuidas en elegantes parterres, invernaderos históricos y senderos sombreados ideales para un paseo relajante.",
     location: "Madrid, ES",
     address: "Plaza de Murillo, 2, 28014 Madrid, España",
@@ -40,6 +42,8 @@ export const mockPois = [
     rating: 4.8,
     reviewCount: 980,
     points: 150,
+
+    status: "Activo",
     description: "La catedral metropolitana de Madrid, famosa por su arquitectura neogótica y las impresionantes vistas al Palacio Real. Su construcción duró más de un siglo y combina estilos neoclásico, gótico y neogótico en una obra monumental única en la capital.",
     location: "Madrid, ES",
     address: "Calle de Bailén, 10, 28013 Madrid, España",
@@ -67,6 +71,8 @@ export const mockPois = [
     rating: 4.7,
     reviewCount: 2150,
     points: 200,
+
+    status: "Activo",
     description: "El corazón del Madrid de los Austrias, rodeado de soportales históricos y restaurantes de tapas. Esta plaza rectangular de 129 metros de largo fue escenario de mercados, corridas de toros y eventos públicos durante siglos de historia madrileña.",
     location: "Madrid, ES",
     address: "Plaza Mayor, 28012 Madrid, España",
@@ -93,6 +99,8 @@ export const mockPois = [
     rating: 4.9,
     reviewCount: 1870,
     points: 250,
+
+    status: "Activo",
     description: "Fundado en 1725, certificado por el Libro Guinness como el restaurante más antiguo del mundo. Su horno de leña original sigue funcionando y es famoso por su cochinillo asado y cordero lechal, platos que han deleitado a generaciones de comensales.",
     location: "Madrid, ES",
     address: "Calle de Cuchilleros, 17, 28005 Madrid, España",
@@ -120,6 +128,8 @@ export const mockPois = [
     rating: 4.9,
     reviewCount: 3200,
     points: 300,
+
+    status: "Pendiente",
     description: "Un templo egipcio del siglo II a.C. regalado a España, famoso por sus atardeceres mágicos con el Palacio Real de fondo. Fue desmontado piedra a piedra en Egipto y reconstruido en Madrid como agradecimiento por la ayuda española en la salvación de Abu Simbel.",
     location: "Madrid, ES",
     address: "Calle de Ferraz, 1, 28008 Madrid, España",
@@ -147,6 +157,8 @@ export const mockPois = [
     rating: 4.6,
     reviewCount: 540,
     points: 100,
+
+    status: "Inactivo",
     description: "Exclusivo centro comercial en un edificio histórico neomudéjar del paseo de la Castellana. Alberga boutiques de lujo, galerías de arte y restaurantes gourmet en un entorno arquitectónico de principios del siglo XX.",
     location: "Madrid, ES",
     address: "Paseo de la Castellana, 34, 28046 Madrid, España",
@@ -174,6 +186,8 @@ export const mockPois = [
     rating: 4.8,
     reviewCount: 4100,
     points: 180,
+
+    status: "Activo",
     description: "El pulmón verde de Madrid, con su hermoso estanque grande, el Palacio de Cristal y jardines de rosas. Con más de 125 hectáreas, es uno de los parques urbanos más bellos de Europa y Patrimonio de la Humanidad junto al Paseo del Prado.",
     location: "Madrid, ES",
     address: "Plaza de la Independencia, 7, 28001 Madrid, España",
@@ -201,6 +215,8 @@ export const mockPois = [
     rating: 4.9,
     reviewCount: 5600,
     points: 280,
+
+    status: "Activo",
     description: "Una de las pinacotecas más importantes del mundo, albergando obras maestras de Velázquez, Goya y El Greco. Su colección permanente incluye más de 8.000 pinturas y es considerada una de las mejores galerías de arte europeo.",
     location: "Madrid, ES",
     address: "Calle de Ruiz de Alarcón, 23, 28014 Madrid, España",
