@@ -18,8 +18,13 @@
 }
 
 
+/* align-items explícito: sin él vale "stretch", y como el enlace activo mide
+   más alto (subrayado + padding) estiraba a todos los enlaces, dejando el
+   texto pegado arriba de una caja más alta. Cualquier icono con altura propia
+   se centraba en esa caja y quedaba por debajo de la línea del texto. */
 .navegation {
   display: flex;
+  align-items: flex-start;
   gap: 1rem;
 }
 
@@ -50,12 +55,15 @@
    emborrona; un corazón se reconoce sin leerlo. Reposa en rosa suave para
    insinuarse sin competir con el azul de la navegación, y se rellena en el
    rosa fuerte —el mismo de las tarjetas— cuando estás en la vista. */
+/* Ocupa exactamente la banda del texto (line-height: 1.5rem) en vez de una
+   caja mayor: así el corazón se centra sobre la línea de los enlaces y no
+   flota por debajo. */
 .nav-favorites {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
+  width: 1.5rem;
+  height: 1.5rem;
   border-radius: 50%;
   color: var(--color-rosa-suave);
   text-decoration: none;
@@ -63,8 +71,8 @@
 }
 
 .nav-favorites svg {
-  width: 1.15rem;
-  height: 1.15rem;
+  width: 1rem;
+  height: 1rem;
   fill: none;
   transition: fill 0.2s ease;
 }
