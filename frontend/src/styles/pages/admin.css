@@ -325,8 +325,15 @@
 
 .admin-search-icon { color: #94a3b8; font-size: 0.9rem; }
 
+/* La tabla scrollea dentro de su propio contenedor: con muchas columnas
+   no debe desbordar la sección ni empujar el layout del panel. */
+.admin-table-scroll {
+  overflow-x: auto;
+}
+
 .admin-table {
   width: 100%;
+  min-width: 720px;
   border-collapse: collapse;
 }
 
@@ -400,6 +407,8 @@
 .badge-gastronomia { background: #fed7aa; color: #c2410c; }
 .badge-naturaleza { background: #bbf7d0; color: #15803d; }
 .badge-cultura    { background: #dbeafe; color: #1d4ed8; }
+.badge-religiosa  { background: #ede9fe; color: #6d28d9; }
+.badge-compras    { background: #fce7f3; color: #be185d; }
 .badge-default    { background: #f1f5f9; color: #475569; }
 
 /* Status dots */
@@ -528,6 +537,123 @@
 }
 
 .access-denied p { font-size: 1.05rem; }
+.access-denied-icon { font-size: 2rem; }
+.access-denied-link { margin-top: 1rem; }
+
+/* Miniatura de POI: acepta emoji o imagen real */
+.poi-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+/* Fila de tabla vacía o en error */
+.admin-empty {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+/* Texto secundario dentro de celdas (fechas, notas) */
+.cell-muted {
+  color: #94a3b8;
+  font-size: 0.82rem;
+}
+
+/* Stock por debajo del umbral de aviso */
+.stock-low {
+  color: #ef4444;
+}
+
+/* ---- Botón de cerrar sesión (sidebar) ----
+   Acción destructiva: reposa en gris para no competir con la navegación,
+   y solo se tiñe de rojo al interactuar, cuando la intención ya es explícita. */
+.sidebar-logout {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  background: transparent;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #64748b;
+  text-align: left;
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease,
+    transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.sidebar-logout-icon {
+  font-size: 1rem;
+  line-height: 1;
+  transition: transform 0.18s ease;
+}
+
+.sidebar-logout-label {
+  flex: 1;
+}
+
+/* La flecha vive oculta a la izquierda y sale al pasar el ratón:
+   refuerza la idea de "salir" sin ocupar espacio en reposo. */
+.sidebar-logout-arrow {
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.sidebar-logout:hover {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.12);
+}
+
+.sidebar-logout:hover .sidebar-logout-icon {
+  transform: translateX(2px) rotate(-8deg);
+}
+
+.sidebar-logout:hover .sidebar-logout-arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.sidebar-logout:active {
+  transform: translateY(0);
+  box-shadow: none;
+  background: #fee2e2;
+}
+
+/* Foco visible por teclado: obligatorio en una acción destructiva. */
+.sidebar-logout:focus-visible {
+  outline: none;
+  border-color: #dc2626;
+  color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.25);
+}
+
+/* Respeta a quien pide menos movimiento en el sistema. */
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-logout,
+  .sidebar-logout-icon,
+  .sidebar-logout-arrow {
+    transition: none;
+  }
+
+  .sidebar-logout:hover {
+    transform: none;
+  }
+
+  .sidebar-logout:hover .sidebar-logout-icon {
+    transform: none;
+  }
+}
 
 /* ---- Admin content (dashboard home) ---- */
 .admin-content { max-width: 100%; }

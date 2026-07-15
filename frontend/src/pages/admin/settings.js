@@ -3,17 +3,10 @@
 // Estructura base; el backend conectará esto con servicios de configuración del sistema.
 
 import { isAdmin } from "../../utils/role.js";
+import { accessDenied } from "./accessDenied.js";
 
 export function adminSettings() {
-  if (!isAdmin()) {
-    return `
-      <div class="access-denied">
-        <p style="font-size:2rem">⛔</p>
-        <p>Acceso denegado. Solo administradores.</p>
-        <a href="#/" class="btn-primary" style="margin-top:1rem">Volver al inicio</a>
-      </div>
-    `;
-  }
+  if (!isAdmin()) return accessDenied();
 
   return `
     <div class="admin-page-header">

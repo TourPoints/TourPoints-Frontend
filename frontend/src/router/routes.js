@@ -3,11 +3,11 @@ import { login } from "../pages/auth/login.js";
 import { register } from "../pages/auth/register.js";
 import { rewards } from "../pages/rewards.js";
 import { notFound } from "../pages/notFound.js";
-import { adminDashboard }       from "../pages/admin/dashboard.js";
-import { usersManagement }      from "../pages/admin/usersManagement.js";
-import { poisManagement }       from "../pages/admin/poisManagement.js";
-import { challengesManagement } from "../pages/admin/challengesManagement.js";
-import { rewardsManagement }    from "../pages/admin/rewardsManagement.js";
+import { adminDashboard, initAdminDashboard } from "../pages/admin/dashboard.js";
+import { usersManagement, initUsersManagement } from "../pages/admin/usersManagement.js";
+import { poisManagement, initPoisManagement } from "../pages/admin/poisManagement.js";
+import { challengesManagement, initChallengesManagement } from "../pages/admin/challengesManagement.js";
+import { rewardsManagement, initRewardsManagement } from "../pages/admin/rewardsManagement.js";
 import { adminSettings }        from "../pages/admin/settings.js";
 import { explore, initExplore } from "../pages/explore.js";
 import { map, initMap } from "../pages/map.js";
@@ -52,29 +52,35 @@ export const routes = {
     },
     "/admin": {
         component: adminDashboard,
+        init: initAdminDashboard,
         layout: "admin",
         auth: true
     },
 
     "/admin/users": {
         component: usersManagement,
+        init: initUsersManagement,
         layout: "admin",
-        auth: true   
+        auth: true
       },
       "/admin/pois": {
         component: poisManagement,
+        init: initPoisManagement,
         layout: "admin",
-        auth: true   
+        auth: true
       },
       "/admin/challenges": {
         component: challengesManagement,
+        init: initChallengesManagement,
         layout: "admin",
-        auth: true   
+        auth: true
       },
       "/admin/rewards": {
         component: rewardsManagement,
+        init: initRewardsManagement,
         layout: "admin",
-        auth: true },
+        auth: true
+      },
         "/admin/settings": {
         component: adminSettings,
         layout: "admin",
