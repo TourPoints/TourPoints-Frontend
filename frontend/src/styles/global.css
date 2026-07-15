@@ -56,3 +56,19 @@ body {
   color: var(--color-blanco);
   text-decoration: none;
 }
+/* ---- Utilidades ---- */
+
+/* Visible solo para lectores de pantalla. Vivía en searchBar.css, donde solo
+   existía si esa vista estaba cargada; la usan también las estrellas del
+   formulario de comentarios y las etiquetas de los formularios. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

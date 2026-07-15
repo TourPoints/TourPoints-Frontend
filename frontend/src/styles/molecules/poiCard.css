@@ -153,7 +153,10 @@
   font-weight: 400;
 }
 
-.lucide-star {
+/* Acotado al rating de la tarjeta: sin el prefijo esta regla alcanzaba a
+   TODA estrella de Lucide del proyecto, incluidas las vacías de las reseñas
+   y las del formulario de valoración, que salían rellenas de ámbar. */
+.poi-card-rating .lucide-star {
   width: 1.2rem;
   height: 1.2rem;
   color: var(--color-amarillo);

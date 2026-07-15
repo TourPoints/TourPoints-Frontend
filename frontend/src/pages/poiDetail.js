@@ -1,5 +1,10 @@
 import { getPoiById } from "../services/poi.service.js";
-import { getPoiReviews } from "../services/review.service.js";
+import {
+  getPoiReviews,
+  getMyReviewFor,
+  createReview,
+  REVIEW_MAX_LENGTH,
+} from "../services/review.service.js";
 import { isFavorite, toggleFavorite } from "../services/favorite.service.js";
 import { hasVisited, registerVisit } from "../services/visit.service.js";
 import { poiGallery, initPoiGallery } from "../components/molecules/poiGallery.js";
@@ -13,7 +18,10 @@ import { loadIcons } from "../utils/icons.js";
 import "/src/styles/pages/poiDetail.css";
 
 let detailMapInstance = null;
-let currentPoi = null;
+
+// Estado de la sección de comentarios. Vive aquí porque la página es quien
+// orquesta los servicios y repinta la sección, igual que en challenges.js.
+let reviewsExpanded = false;
 
 function getCategoryClass(category) {
   return category.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -23,7 +31,7 @@ function formatReviewCount(count) {
   return count.toLocaleString("es-ES");
 }
 
-function buildDetailHTML(poi, reviews, favorite, visited) {
+function buildDetailHTML(poi, reviews, favorite, visited, myReview) {
   const images = poi.images || [poi.image];
   const categoryClass = getCategoryClass(poi.category);
 
@@ -79,7 +87,13 @@ function buildDetailHTML(poi, reviews, favorite, visited) {
             <div id="poi-detail-map" class="poi-detail-map"></div>
           </section>
 
-          ${reviewsList({ reviews, totalCount: poi.reviewCount || reviews.length })}
+          <div id="reviews-root">
+            ${reviewsList({
+              reviews,
+              isLoggedIn: isAuthenticated(),
+              hasReviewed: Boolean(myReview),
+            })}
+          </div>
         </div>
 
         ${poiSidebar({ isFavorite: favorite, hasVisited: visited })}
@@ -137,10 +151,106 @@ function bindBackButton() {
   });
 }
 
+// ── Comentarios ───────────────────────────────────────────────
+
+/**
+ * Repinta la sección de comentarios con el estado vigente y vuelve a
+ * enganchar sus eventos. Se llama tras publicar o al desplegar la lista.
+ * @param {Object} poi - POI en pantalla.
+ * @param {string} [error] - Error del último intento de publicar.
+ */
+async function renderReviews(poi, error = "") {
+  const root = document.getElementById("reviews-root");
+  if (!root) return;
+
+  const [reviews, myReview] = await Promise.all([
+    getPoiReviews(poi.id),
+    getMyReviewFor(poi.id),
+  ]);
+
+  root.innerHTML = reviewsList({
+    reviews,
+    isLoggedIn: isAuthenticated(),
+    hasReviewed: Boolean(myReview),
+    expanded: reviewsExpanded,
+    error,
+  });
+
+  bindReviews(poi);
+  loadIcons();
+}
+
+/**
+ * Engancha el formulario y el desplegable de la sección de comentarios.
+ * @param {Object} poi - POI en pantalla.
+ */
+function bindReviews(poi) {
+  document.getElementById("reviews-see-all")?.addEventListener("click", () => {
+    reviewsExpanded = !reviewsExpanded;
+    renderReviews(poi);
+  });
+
+  const form = document.getElementById("review-form");
+  if (!form) return;
+
+  const textarea = document.getElementById("review-text");
+  const counter = document.getElementById("review-counter");
+
+  textarea?.addEventListener("input", () => {
+    const { length } = textarea.value;
+    if (counter) {
+      counter.textContent = `${length} / ${REVIEW_MAX_LENGTH}`;
+      counter.classList.toggle("review-form-counter--limit", length >= REVIEW_MAX_LENGTH);
+    }
+  });
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const rating = form.querySelector("input[name=review-rating]:checked")?.value;
+    const submit = form.querySelector(".review-form-submit");
+
+    // Bloquear el botón evita el doble envío: la regla de una reseña por
+    // usuario lo rechazaría, pero con un error confuso en vez de silencio.
+    if (submit) {
+      submit.disabled = true;
+      submit.textContent = "Publicando...";
+    }
+
+    const result = await createReview(poi.id, { rating, text: textarea?.value });
+
+    if (!result.ok) {
+      showReviewError(result.error);
+      if (submit) {
+        submit.disabled = false;
+        submit.textContent = "Publicar comentario";
+      }
+      return;
+    }
+
+    // El comentario recién publicado va el primero: si la lista estaba
+    // plegada se ve igualmente, así que no hace falta desplegarla.
+    await renderReviews(poi);
+    document.getElementById("reviews-section")?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  });
+}
+
+/**
+ * Muestra un error de validación sin repintar el formulario, para no
+ * perder lo que el usuario ya había escrito.
+ * @param {string} message
+ */
+function showReviewError(message) {
+  const error = document.getElementById("review-error");
+  if (!error) return;
+
+  error.textContent = message;
+  error.hidden = false;
+}
+
 function bindSidebarActions(poi) {
   const visitBtn = document.getElementById("btn-register-visit");
   const favoriteBtn = document.getElementById("btn-add-favorite");
-  const reviewsSeeAll = document.getElementById("reviews-see-all");
 
   if (visitBtn && !visitBtn.disabled) {
     visitBtn.addEventListener("click", async () => {
@@ -187,12 +297,6 @@ function bindSidebarActions(poi) {
       loadIcons();
     });
   }
-
-  if (reviewsSeeAll) {
-    reviewsSeeAll.addEventListener("click", () => {
-      alert(`Mostrando las ${poi.reviewCount || 0} reseñas. Se conectará al backend para paginación completa.`);
-    });
-  }
 }
 
 function getUserCoords() {
@@ -229,12 +333,17 @@ export async function initPoiDetail({ id } = {}) {
     return;
   }
 
+  // La lista arranca plegada en cada visita: el estado es del módulo y sin
+  // esto un POI heredaría el desplegado del anterior.
+  reviewsExpanded = false;
+
   try {
-    const [poi, reviews, favorite, visited] = await Promise.all([
+    const [poi, reviews, favorite, visited, myReview] = await Promise.all([
       getPoiById(id),
       getPoiReviews(id),
       isFavorite(id),
       hasVisited(id),
+      getMyReviewFor(id),
     ]);
 
     if (!poi) {
@@ -248,16 +357,16 @@ export async function initPoiDetail({ id } = {}) {
       return;
     }
 
-    currentPoi = poi;
     const images = [...(poi.images || [poi.image])];
 
-    root.parentElement.innerHTML = buildDetailHTML(poi, reviews, favorite, visited);
+    root.parentElement.innerHTML = buildDetailHTML(poi, reviews, favorite, visited, myReview);
     loadIcons();
 
     initPoiGallery(images);
     initDetailMap(poi);
     bindBackButton();
     bindSidebarActions(poi);
+    bindReviews(poi);
 
     window.scrollTo({ top: 0, behavior: "instant" });
   } catch (error) {

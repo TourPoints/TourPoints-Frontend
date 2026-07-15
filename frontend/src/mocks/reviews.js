@@ -5,10 +5,12 @@
 // Madrid, así que "Ventana al Mundo" mostraba comentarios sobre el Real Jardín
 // Botánico. Al tocar los POIs hay que tocar también estas reseñas.
 //
-// Las fechas se calculan al cargar el módulo en vez de fijarse a mano: así el
-// "Hace 2 días" sigue siendo cierto mañana. Se guardan en ISO, el mismo formato
-// que escribe review.service para los comentarios de usuario, para que semilla
-// y contenido real compartan modelo.
+// Las fechas se calculan en vez de fijarse a mano para que la semilla nazca
+// reciente en cualquier momento, en lugar de mostrar "Hace 2 años" a quien
+// abra la app dentro de un tiempo. Quedan ancladas cuando review.service
+// siembra la colección en localStorage, y envejecen desde ahí como cualquier
+// comentario real. Se guardan en ISO, el mismo formato que escribe el servicio
+// para los comentarios de usuario: semilla y contenido real comparten modelo.
 
 /**
  * Instante ISO de hace N días, para las fechas de la semilla.

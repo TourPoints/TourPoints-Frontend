@@ -16,17 +16,8 @@
   box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
 }
 
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
+/* .sr-only vivía aquí, pero la usan más vistas que el buscador y solo
+   existía si este CSS estaba cargado. Ahora está en global.css. */
 
 .search-input {
   margin: 0.5rem;
