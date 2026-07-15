@@ -10,9 +10,10 @@ import {
 } from "../utils/poiFilter.js";
 import "/src/styles/pages/map.css";
 
-// Centro por defecto cuando el usuario no concede geolocalización: Puerta del Sol, Madrid.
-const DEFAULT_COORDS = { lat: 40.416775, lng: -3.70379 };
-const DEFAULT_ZOOM = 14;
+// Centro por defecto cuando no hay geolocalización: Barranquilla, Colombia.
+// ⚠️ Coordenada aproximada, pendiente de verificar como el resto de los POIs.
+const DEFAULT_COORDS = { lat: 10.9878, lng: -74.7889 };
+const DEFAULT_ZOOM = 13;
 const FOCUS_ZOOM = 16;
 
 // Estado interno de la vista del mapa.
@@ -23,6 +24,7 @@ let markersGroup = null;
 let userMarker = null;
 let markersByPoiId = new Map();
 let userCoords = { ...DEFAULT_COORDS };
+let hasUserLocation = false;
 let currentCategory = ALL_CATEGORIES;
 let searchQuery = "";
 
@@ -78,7 +80,7 @@ export function map() {
 
         <!-- Sección Cerca de ti -->
         <div class="sidebar-list-section">
-          <h4>CERCA DE TI</h4>
+          <h4 id="sidebar-list-heading">LUGARES DESTACADOS</h4>
           <div class="sidebar-pois-list" id="sidebar-pois-list">
             <div class="sidebar-loading">Cargando lugares cercanos...</div>
           </div>
@@ -88,6 +90,18 @@ export function map() {
       <!-- Área del Mapa -->
       <main class="map-area-wrapper">
         <div id="map" class="map-leaflet-element"></div>
+
+        <!-- Aviso de geolocalización: sin esto el fallo era invisible -->
+        <div class="map-notice" id="map-notice" role="status" hidden>
+          <span class="map-notice-icon" aria-hidden="true">📍</span>
+          <p class="map-notice-text" id="map-notice-text"></p>
+          <button type="button" class="map-notice-retry" id="map-notice-retry">Reintentar</button>
+          <button type="button" class="map-notice-close" id="map-notice-close" aria-label="Cerrar aviso">&times;</button>
+        </div>
+
+        <button class="map-locate-btn" id="btn-locate" type="button" aria-label="Centrar en mi ubicación">
+          <i data-lucide="locate-fixed"></i>
+        </button>
 
         <button class="btn btn--primary btn-route-float" id="btn-route-start">
           <i data-lucide="compass"></i>
@@ -118,6 +132,7 @@ function resetState() {
   currentCategory = ALL_CATEGORIES;
   searchQuery = "";
   userCoords = { ...DEFAULT_COORDS };
+  hasUserLocation = false;
   markersByPoiId = new Map();
 
   if (mapInstance) {
@@ -168,6 +183,7 @@ async function setupMapAndData() {
   renderCategoryPills();
   bindSearchInputs();
   bindRouteButton();
+  bindLocationControls();
 
   applyFilters();
 
@@ -176,10 +192,44 @@ async function setupMapAndData() {
 }
 
 /**
- * Pide la geolocalización real del usuario y recentra el mapa si la concede.
+ * Traduce el error de geolocalización a algo que el usuario pueda accionar.
+ * @param {GeolocationPositionError} error
+ * @returns {string} Mensaje para mostrar en el aviso.
+ */
+function geolocationMessage(error) {
+  switch (error?.code) {
+    case 1: // PERMISSION_DENIED
+      return "Bloqueaste el acceso a tu ubicación. Actívala en el candado de la barra de direcciones para ver qué tienes cerca.";
+    case 2: // POSITION_UNAVAILABLE
+      return "No pudimos determinar tu ubicación. Mostramos el centro de Barranquilla.";
+    case 3: // TIMEOUT
+      return "Tu ubicación tardó demasiado en responder. Mostramos el centro de Barranquilla.";
+    default:
+      return "No pudimos acceder a tu ubicación. Mostramos el centro de Barranquilla.";
+  }
+}
+
+/**
+ * Pide la geolocalización y recentra el mapa si se concede.
+ * Si falla, avisa en pantalla: antes solo quedaba constancia en la consola y
+ * el usuario no tenía forma de saber por qué el mapa no le seguía.
  */
 function requestUserLocation() {
-  if (!navigator.geolocation) return;
+  if (!navigator.geolocation) {
+    showLocationNotice("Tu navegador no permite compartir la ubicación.");
+    return;
+  }
+
+  // Sin contexto seguro el navegador deniega la petición sin preguntar.
+  // Pasa al abrir la app por IP de red local en vez de localhost.
+  if (!window.isSecureContext) {
+    showLocationNotice(
+      "La ubicación necesita una conexión segura (https o localhost). Mostramos el centro de Barranquilla."
+    );
+    return;
+  }
+
+  setLocationButtonState("locating");
 
   navigator.geolocation.getCurrentPosition(
     (position) => {
@@ -187,12 +237,20 @@ function requestUserLocation() {
         lat: position.coords.latitude,
         lng: position.coords.longitude,
       };
+      hasUserLocation = true;
+      setLocationButtonState("idle");
+      hideLocationNotice();
       updateUserLocationOnMap();
     },
     (error) => {
-      console.warn("Geolocalización no disponible. Se mantiene Madrid centro.", error.message);
+      console.warn("Geolocalización no disponible:", error.message);
+      hasUserLocation = false;
+      setLocationButtonState("idle");
+      showLocationNotice(geolocationMessage(error));
     },
-    { enableHighAccuracy: true, timeout: 4000, maximumAge: 0 }
+    // Precisión alta no aporta en escritorio y agota el tiempo con facilidad,
+    // así que se da margen y se acepta una lectura reciente de la caché.
+    { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
   );
 }
 
@@ -267,6 +325,63 @@ function bindRouteButton() {
 }
 
 /**
+ * Botón de centrar en mi ubicación y controles del aviso.
+ */
+function bindLocationControls() {
+  document.getElementById("btn-locate")?.addEventListener("click", () => {
+    if (hasUserLocation) {
+      mapInstance?.setView([userCoords.lat, userCoords.lng], FOCUS_ZOOM, { animate: true });
+      userMarker?.openPopup();
+      return;
+    }
+    // Aún no la tenemos: volver a pedirla en vez de no hacer nada.
+    requestUserLocation();
+  });
+
+  document.getElementById("map-notice-retry")?.addEventListener("click", () => {
+    hideLocationNotice();
+    requestUserLocation();
+  });
+
+  document.getElementById("map-notice-close")?.addEventListener("click", hideLocationNotice);
+}
+
+/**
+ * Muestra el aviso de ubicación con un mensaje accionable.
+ * @param {string} message
+ */
+function showLocationNotice(message) {
+  const notice = document.getElementById("map-notice");
+  const text = document.getElementById("map-notice-text");
+  if (!notice || !text) return;
+
+  text.textContent = message;
+  notice.hidden = false;
+}
+
+function hideLocationNotice() {
+  const notice = document.getElementById("map-notice");
+  if (notice) notice.hidden = true;
+}
+
+/**
+ * Refleja en el botón que se está buscando la ubicación.
+ * @param {"idle"|"locating"} state
+ */
+function setLocationButtonState(state) {
+  const btn = document.getElementById("btn-locate");
+  if (!btn) return;
+
+  const locating = state === "locating";
+  btn.classList.toggle("is-locating", locating);
+  btn.disabled = locating;
+  btn.setAttribute(
+    "aria-label",
+    locating ? "Buscando tu ubicación" : "Centrar en mi ubicación"
+  );
+}
+
+/**
  * Redibuja el marcador del usuario, recentra el mapa y recalcula distancias.
  */
 function updateUserLocationOnMap() {
@@ -278,12 +393,19 @@ function updateUserLocationOnMap() {
 }
 
 /**
- * Pinta o mueve el marcador de posición del usuario en el mapa.
+ * Pinta o mueve el marcador de posición del usuario.
+ * Solo se dibuja si la geolocalización se resolvió: pintarlo sobre el centro
+ * por defecto afirmaría que el usuario está donde no está.
  */
 function drawUserMarker() {
   if (!mapInstance) return;
 
-  if (userMarker) mapInstance.removeLayer(userMarker);
+  if (userMarker) {
+    mapInstance.removeLayer(userMarker);
+    userMarker = null;
+  }
+
+  if (!hasUserLocation) return;
 
   const userIcon = L.divIcon({
     className: "user-location-marker",
@@ -307,10 +429,25 @@ function applyFilters() {
     query: searchQuery,
   });
 
-  filteredPois = sortPois(withDistanceFrom(matches, userCoords), "Distancia");
+  // Sin ubicación real, ordenar por cercanía no significa nada: se ordena por
+  // valoración y no se muestran distancias inventadas desde el centro.
+  filteredPois = hasUserLocation
+    ? sortPois(withDistanceFrom(matches, userCoords), "Distancia")
+    : sortPois(matches, "Recomendados");
 
   updateMarkers();
   updateSidebarList();
+  updateSidebarHeading();
+}
+
+/**
+ * El encabezado solo promete cercanía cuando sabemos dónde está el usuario.
+ */
+function updateSidebarHeading() {
+  const heading = document.getElementById("sidebar-list-heading");
+  if (heading) {
+    heading.textContent = hasUserLocation ? "CERCA DE TI" : "LUGARES DESTACADOS";
+  }
 }
 
 /**
@@ -390,10 +527,13 @@ function updateSidebarList() {
 }
 
 function renderSidebarItem(poi) {
-  const formattedDistance =
-    poi.distance < 1
-      ? `A ${Math.round(poi.distance * 1000)}m de distancia`
-      : `A ${poi.distance.toFixed(1)}km de distancia`;
+  // La distancia solo existe si conocemos la ubicación del usuario.
+  const distanceLabel =
+    poi.distance === undefined
+      ? ""
+      : poi.distance < 1
+        ? `A ${Math.round(poi.distance * 1000)} m de distancia`
+        : `A ${poi.distance.toFixed(1)} km de distancia`;
 
   return `
     <div class="sidebar-poi-item" data-poi-id="${poi.id}">
@@ -405,7 +545,7 @@ function renderSidebarItem(poi) {
           <span class="item-rating">${poi.rating.toFixed(1)}</span>
           <span class="item-category">${poi.category}</span>
         </div>
-        <span class="item-distance">${formattedDistance}</span>
+        ${distanceLabel ? `<span class="item-distance">${distanceLabel}</span>` : ""}
       </div>
     </div>
   `;
