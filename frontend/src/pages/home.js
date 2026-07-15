@@ -6,6 +6,7 @@ import { challengeGrid } from "../components/organism/challengeGrid.js";
 import { buttonLinks } from "../components/atoms/buttonLinks.js";
 import { getPois } from "../services/poi.service.js";
 import { getChallenges } from "../services/challenge.service.js";
+import { navigate } from "../router/router.js";
 import { loadIcons } from "../utils/icons.js";
 
 // Nº de destinos y retos destacados en la portada. El primer POI se pinta grande.
@@ -125,9 +126,34 @@ export async function initHome() {
   const poisContainer = document.getElementById("home-pois");
   const challengesContainer = document.getElementById("home-challenges");
 
+  bindHeroSearch();
+
   await Promise.all([loadFeaturedPois(poisContainer), loadFeaturedChallenges(challengesContainer)]);
 
   loadIcons();
+}
+
+/**
+ * El buscador de la portada lleva a Explora con la búsqueda ya aplicada.
+ *
+ * Antes nadie lo enganchaba: el formulario hacía submit nativo, recargaba la
+ * página entera contra "/?" —tirando la SPA abajo— y encima perdía el texto,
+ * porque el input no tiene atributo name. Era un buscador decorativo.
+ *
+ * La portada no tiene dónde mostrar resultados, así que la búsqueda no se
+ * resuelve aquí: se delega en Explora, que ya tiene grid, filtros y paginación.
+ */
+function bindHeroSearch() {
+  const form = document.querySelector(".search-bar");
+  const input = document.getElementById("search-poi");
+  if (!form || !input) return;
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    const query = input.value.trim();
+    navigate(query ? `/explore?q=${encodeURIComponent(query)}` : "/explore");
+  });
 }
 
 async function loadFeaturedPois(container) {

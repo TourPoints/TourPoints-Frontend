@@ -96,9 +96,28 @@ export async function initExplore() {
 
 function resetState() {
   currentCategory = ALL_CATEGORIES;
-  searchQuery = "";
+  // La búsqueda puede venir en la URL: es como llega quien busca desde la
+  // portada, y también permite compartir o recargar unos resultados.
+  searchQuery = new URLSearchParams(location.search).get("q") ?? "";
   sortBy = "Recomendados";
   currentPage = 1;
+}
+
+/**
+ * Mantiene ?q= al día con lo que hay escrito, sin ensuciar el historial:
+ * con pushState cada tecla dejaría una entrada y el botón atrás se volvería
+ * inútil. Así recargar o compartir la URL devuelve los mismos resultados.
+ */
+function syncQueryParam() {
+  const url = new URL(location.href);
+
+  if (searchQuery.trim()) {
+    url.searchParams.set("q", searchQuery.trim());
+  } else {
+    url.searchParams.delete("q");
+  }
+
+  history.replaceState({}, "", url);
 }
 
 /**
@@ -143,6 +162,10 @@ function bindSearch() {
   const searchInput = document.getElementById("search-poi");
   if (!searchInput) return;
 
+  // Si la búsqueda llegó por la URL (p. ej. desde la portada), el campo tiene
+  // que enseñarla: si no, el usuario ve la lista filtrada sin saber por qué.
+  if (searchQuery) searchInput.value = searchQuery;
+
   const runSearch = debounce(() => {
     currentPage = 1;
     applyFiltersAndRender();
@@ -173,6 +196,8 @@ function bindSort() {
  * Filtra, ordena y renderiza la lista de POIs junto con su paginación.
  */
 function applyFiltersAndRender() {
+  syncQueryParam();
+
   filteredPois = sortPois(
     filterPois(allPois, { category: currentCategory, query: searchQuery }),
     sortBy
