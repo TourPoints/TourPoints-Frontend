@@ -31,6 +31,26 @@ export function includesNormalized(haystack, needle) {
 }
 
 /**
+ * Indica si un texto contiene TODAS las palabras buscadas, en cualquier orden
+ * y sin exigir que vayan seguidas.
+ *
+ * Buscar por subcadena obliga a escribir el nombre literal: "museo caribe" no
+ * encontraba "Museo del Caribe" por culpa del "del", ni "malecon rio" el
+ * "Gran Malecón del Río". Nadie escribe los artículos al buscar.
+ *
+ * @param {string} haystack - Texto donde buscar.
+ * @param {string} query - Búsqueda tal cual la escribió el usuario.
+ * @returns {boolean} true si están todas las palabras (o si no se buscó nada).
+ */
+export function matchesAllTerms(haystack, query) {
+  const terms = normalizeText(query).split(/\s+/).filter(Boolean);
+  if (terms.length === 0) return true;
+
+  const text = normalizeText(haystack);
+  return terms.every((term) => text.includes(term));
+}
+
+/**
  * Retrasa la ejecución de una función hasta que dejan de llegar llamadas.
  * Se usa para no filtrar en cada pulsación de tecla.
  * @param {Function} fn - Función a ejecutar.

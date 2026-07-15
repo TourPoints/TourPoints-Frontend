@@ -1,4 +1,4 @@
-import { normalizeText, includesNormalized } from "./text.js";
+import { matchesAllTerms } from "./text.js";
 
 // Lógica de filtrado y ordenación de POIs compartida por las vistas
 // de exploración y de mapa, para que ambas se comporten igual.
@@ -6,7 +6,11 @@ import { normalizeText, includesNormalized } from "./text.js";
 export const ALL_CATEGORIES = "Todas";
 
 // Campos sobre los que actúa la búsqueda por texto libre.
-const SEARCHABLE_FIELDS = ["name", "description", "location", "category"];
+//
+// `address` faltaba, así que buscar "calle 84" no encontraba nada aunque un POI
+// esté literalmente en esa calle. `location` se queda porque distingue
+// Barranquilla de Puerto Colombia, aunque casi todos compartan valor.
+const SEARCHABLE_FIELDS = ["name", "description", "location", "address", "category"];
 
 /**
  * Extrae las categorías disponibles a partir de los datos reales.
@@ -30,13 +34,14 @@ export function getCategories(pois = []) {
  * @returns {Array<Object>} POIs que cumplen ambos criterios.
  */
 export function filterPois(pois = [], { category = ALL_CATEGORIES, query = "" } = {}) {
-  const normalizedQuery = normalizeText(query);
-
   return pois.filter((poi) => {
     const matchesCategory = category === ALL_CATEGORIES || poi.category === category;
     if (!matchesCategory) return false;
 
-    return SEARCHABLE_FIELDS.some((field) => includesNormalized(poi[field], normalizedQuery));
+    // Todos los campos van a un mismo texto: así "cultura museo" puede casar
+    // la categoría con una palabra y el nombre con la otra. Antes se exigía
+    // que un único campo contuviera la búsqueda entera como subcadena.
+    return matchesAllTerms(SEARCHABLE_FIELDS.map((field) => poi[field]).join(" "), query);
   });
 }
 
