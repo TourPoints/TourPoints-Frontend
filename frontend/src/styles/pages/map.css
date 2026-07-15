@@ -85,12 +85,21 @@ body:has(.map-page-container) footer {
 /* Categorías en Sidebar */
 .sidebar-categories {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
 }
 
 .sidebar-categories .pill-btn {
-  padding: 0.4rem 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.85rem;
   font-size: 0.8rem;
+}
+
+.sidebar-categories .pill-btn svg {
+  width: 0.9rem;
+  height: 0.9rem;
 }
 
 /* Sección Lista Cerca de ti */

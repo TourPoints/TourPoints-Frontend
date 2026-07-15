@@ -16,7 +16,8 @@ import {
   Clock,
   LayoutGrid,
   ExternalLink,
-  MapPinCheck
+  MapPinCheck,
+  Globe
 } from "lucide";
 
 export const loadIcons = () => {
@@ -38,7 +39,8 @@ export const loadIcons = () => {
       Clock,
       LayoutGrid,
       ExternalLink,
-      MapPinCheck
+      MapPinCheck,
+      Globe
     },
   });
 };

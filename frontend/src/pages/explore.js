@@ -1,60 +1,50 @@
 import { getPois } from "../services/poi.service.js";
 import { poiCard } from "../components/molecules/poisCard.js";
 import { searchBar } from "../components/molecules/searchBar.js";
+import { loadIcons } from "../utils/icons.js";
+import { debounce } from "../utils/text.js";
+import { ALL_CATEGORIES, getCategories, filterPois, sortPois } from "../utils/poiFilter.js";
 import "/src/styles/pages/explore.css";
 
-// Estado interno para filtros, ordenación y paginación
+// Estado interno para filtros, ordenación y paginación.
 let allPois = [];
 let filteredPois = [];
-let currentCategory = "Todas";
+let currentCategory = ALL_CATEGORIES;
 let searchQuery = "";
 let sortBy = "Recomendados";
 let currentPage = 1;
-const itemsPerPage = 8; // En Figma se ven filas de 4. 8 permite mostrar 2 filas en desktop.
+
+// En Figma se ven filas de 4; 8 permite mostrar 2 filas completas en desktop.
+const ITEMS_PER_PAGE = 8;
+
+// Icono de Lucide asociado a cada categoría.
+const CATEGORY_ICONS = {
+  Naturaleza: "leaf",
+  Cultura: "landmark",
+  Gastronomía: "utensils",
+  Religiosa: "church",
+  Compras: "shopping-bag",
+  [ALL_CATEGORIES]: "compass",
+};
 
 /**
  * Retorna la estructura HTML básica de la página de exploración.
+ * Las píldoras de categoría se inyectan en initExplore() desde los datos reales.
  */
 export function explore() {
   return `
     <div class="explore-page">
       <div class="explore-header-section">
-        <!-- Contenedor del buscador -->
         <div class="search-container-wrapper">
           ${searchBar()}
         </div>
-        
+
         <!-- Píldoras de Categorías (scrollable en mobile, centrado en desktop) -->
         <div class="category-pills-container">
-          <div class="category-pills-scroll">
-            <button class="pill-btn active" data-category="Todas">
-              <i data-lucide="compass"></i>
-              <span>Todas</span>
-            </button>
-            <button class="pill-btn" data-category="Cultura">
-              <i data-lucide="landmark"></i>
-              <span>Cultura</span>
-            </button>
-            <button class="pill-btn" data-category="Naturaleza">
-              <i data-lucide="leaf"></i>
-              <span>Naturaleza</span>
-            </button>
-            <button class="pill-btn" data-category="Gastronomía">
-              <i data-lucide="utensils"></i>
-              <span>Gastronomía</span>
-            </button>
-            <button class="pill-btn" data-category="Religiosa">
-              <i data-lucide="church"></i>
-              <span>Religiosa</span>
-            </button>
-            <button class="pill-btn" data-category="Compras">
-              <i data-lucide="shopping-bag"></i>
-              <span>Compras</span>
-            </button>
-          </div>
+          <div class="category-pills-scroll" id="category-pills-scroll"></div>
         </div>
       </div>
-      
+
       <!-- Fila de cabecera de resultados y filtros de ordenación -->
       <div class="explore-title-row">
         <div class="explore-title-left">
@@ -71,140 +61,146 @@ export function explore() {
           </select>
         </div>
       </div>
-      
+
       <!-- Grid de tarjetas de Puntos de Interés -->
       <div class="explore-grid" id="pois-grid-container">
         <div class="loading-state">Cargando puntos de interés...</div>
       </div>
-      
-      <!-- Paginación -->
-      <div class="pagination-container" id="pagination-container">
-        <!-- Renderizado dinámico de la paginación -->
-      </div>
+
+      <div class="pagination-container" id="pagination-container"></div>
     </div>
   `;
 }
 
 /**
- * Inicializa los eventos, búsquedas, filtros y carga los datos de los POIs.
- * Se ejecuta automáticamente después de que el enrutador inserta el HTML en el DOM.
+ * Inicializa eventos, filtros y carga de datos.
+ * Lo ejecuta el enrutador tras insertar el HTML en el DOM.
  */
 export async function initExplore() {
-  // Reiniciar estado cada vez que se carga la página
-  currentCategory = "Todas";
+  resetState();
+
+  try {
+    allPois = await getPois();
+  } catch (error) {
+    console.error("Error al cargar los POIs en el frontend:", error);
+    showErrorState();
+    return;
+  }
+
+  renderCategoryPills();
+  bindSearch();
+  bindSort();
+  applyFiltersAndRender();
+}
+
+function resetState() {
+  currentCategory = ALL_CATEGORIES;
   searchQuery = "";
   sortBy = "Recomendados";
   currentPage = 1;
-  
-  // Capturar elementos del DOM
-  const searchForm = document.querySelector(".search-bar");
-  const searchInput = document.getElementById("search-poi");
-  const sortSelect = document.getElementById("sort-select");
-  const pills = document.querySelectorAll(".pill-btn");
-  
-  // Cargar datos del servicio
-  try {
-    allPois = await getPois();
-    applyFiltersAndRender();
-  } catch (error) {
-    console.error("Error al cargar los POIs en el frontend:", error);
-    const container = document.getElementById("pois-grid-container");
-    if (container) {
-      container.innerHTML = `
-        <div class="error-state">
-          <p>Hubo un error al cargar los lugares. Por favor, intenta de nuevo.</p>
-        </div>
-      `;
-    }
-  }
-  
-  // Evento de búsqueda por formulario
-  if (searchForm) {
-    searchForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      if (searchInput) {
-        searchQuery = searchInput.value.trim().toLowerCase();
-        currentPage = 1;
-        applyFiltersAndRender();
-      }
-    });
-  }
-  
-  // Limpieza rápida del input de búsqueda
-  if (searchInput) {
-    searchInput.addEventListener("input", (e) => {
-      if (e.target.value === "") {
-        searchQuery = "";
-        currentPage = 1;
-        applyFiltersAndRender();
-      }
-    });
-  }
-  
-  // Evento en píldoras de categorías
-  pills.forEach((pill) => {
+}
+
+/**
+ * Genera las píldoras de categoría a partir de los datos cargados.
+ */
+function renderCategoryPills() {
+  const container = document.getElementById("category-pills-scroll");
+  if (!container) return;
+
+  container.innerHTML = getCategories(allPois)
+    .map(
+      (category) => `
+      <button class="pill-btn ${category === currentCategory ? "active" : ""}"
+              data-category="${category}">
+        <i data-lucide="${CATEGORY_ICONS[category] ?? "compass"}"></i>
+        <span>${category}</span>
+      </button>
+    `
+    )
+    .join("");
+
+  container.querySelectorAll(".pill-btn").forEach((pill) => {
     pill.addEventListener("click", () => {
-      pills.forEach((p) => p.classList.remove("active"));
-      pill.classList.add("active");
-      currentCategory = pill.getAttribute("data-category");
+      currentCategory = pill.dataset.category;
+      container.querySelectorAll(".pill-btn").forEach((p) => {
+        p.classList.toggle("active", p.dataset.category === currentCategory);
+      });
       currentPage = 1;
       applyFiltersAndRender();
     });
   });
-  
-  // Evento de ordenación
-  if (sortSelect) {
-    sortSelect.addEventListener("change", (e) => {
-      sortBy = e.target.value;
-      applyFiltersAndRender();
-    });
-  }
+
+  loadIcons();
 }
 
 /**
- * Filtra, ordena y renderiza de forma reactiva la lista de POIs y la paginación.
+ * Enlaza el buscador. Filtra mientras se escribe (igual que el mapa) y
+ * mantiene el submit del formulario para quien pulse Enter o el botón.
+ */
+function bindSearch() {
+  const searchForm = document.querySelector(".search-bar");
+  const searchInput = document.getElementById("search-poi");
+  if (!searchInput) return;
+
+  const runSearch = debounce(() => {
+    currentPage = 1;
+    applyFiltersAndRender();
+  }, 250);
+
+  searchInput.addEventListener("input", (event) => {
+    searchQuery = event.target.value;
+    runSearch();
+  });
+
+  searchForm?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    searchQuery = searchInput.value;
+    currentPage = 1;
+    applyFiltersAndRender();
+  });
+}
+
+function bindSort() {
+  const sortSelect = document.getElementById("sort-select");
+  sortSelect?.addEventListener("change", (event) => {
+    sortBy = event.target.value;
+    applyFiltersAndRender();
+  });
+}
+
+/**
+ * Filtra, ordena y renderiza la lista de POIs junto con su paginación.
  */
 function applyFiltersAndRender() {
-  // 1. Filtrar por categoría y texto de búsqueda
-  filteredPois = allPois.filter((poi) => {
-    const matchesCategory = currentCategory === "Todas" || poi.category === currentCategory;
-    const matchesSearch = 
-      poi.name.toLowerCase().includes(searchQuery) ||
-      poi.description.toLowerCase().includes(searchQuery) ||
-      poi.location.toLowerCase().includes(searchQuery);
-    return matchesCategory && matchesSearch;
-  });
-  
-  // 2. Ordenar
-  if (sortBy === "Recomendados") {
-    filteredPois.sort((a, b) => b.rating - a.rating);
-  } else if (sortBy === "PuntosDesc") {
-    filteredPois.sort((a, b) => b.points - a.points);
-  } else if (sortBy === "PuntosAsc") {
-    filteredPois.sort((a, b) => a.points - b.points);
-  } else if (sortBy === "Nombre") {
-    filteredPois.sort((a, b) => a.name.localeCompare(b.name));
-  }
-  
-  // Actualizar el contador de resultados
-  const countEl = document.getElementById("results-count");
-  if (countEl) {
-    countEl.textContent = `${filteredPois.length} ${
-      filteredPois.length === 1 ? "lugar encontrado" : "lugares encontrados"
-    } cerca de ti`;
-  }
-  
+  filteredPois = sortPois(
+    filterPois(allPois, { category: currentCategory, query: searchQuery }),
+    sortBy
+  );
+
+  // Tras filtrar, la página actual puede quedar fuera de rango.
+  const totalPages = Math.max(1, Math.ceil(filteredPois.length / ITEMS_PER_PAGE));
+  if (currentPage > totalPages) currentPage = totalPages;
+
+  updateResultsCount();
   renderGrid();
-  renderPagination();
+  renderPagination(totalPages);
+}
+
+function updateResultsCount() {
+  const countEl = document.getElementById("results-count");
+  if (!countEl) return;
+
+  const noun = filteredPois.length === 1 ? "lugar encontrado" : "lugares encontrados";
+  countEl.textContent = `${filteredPois.length} ${noun} cerca de ti`;
 }
 
 /**
- * Renderiza el grid de tarjetas de POIs correspondientes a la página actual.
+ * Renderiza las tarjetas de la página actual.
  */
 function renderGrid() {
   const container = document.getElementById("pois-grid-container");
   if (!container) return;
-  
+
   if (filteredPois.length === 0) {
     container.innerHTML = `
       <div class="empty-state">
@@ -214,92 +210,70 @@ function renderGrid() {
     `;
     return;
   }
-  
-  // Obtener subconjunto según paginación
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedPois = filteredPois.slice(startIndex, startIndex + itemsPerPage);
-  
-  // Generar HTML y asignar al contenedor
-  container.innerHTML = paginatedPois
-    .map((poi) => {
-      // Usamos el poiCard existente garantizando que no sea destacada en la cuadrícula general de exploración
-      return poiCard({ ...poi, isFeatured: false });
-    })
-    .join("");
-  
-  // Recargar los iconos de Lucide dinámicos
-  import("../utils/icons.js").then(({ loadIcons }) => loadIcons());
+
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const pagePois = filteredPois.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  container.innerHTML = pagePois.map((poi) => poiCard({ ...poi, isFeatured: false })).join("");
+
+  loadIcons();
 }
 
 /**
  * Renderiza la fila de paginación interactiva.
+ * @param {number} totalPages - Total de páginas ya calculado.
  */
-function renderPagination() {
+function renderPagination(totalPages) {
   const container = document.getElementById("pagination-container");
   if (!container) return;
-  
-  const totalPages = Math.ceil(filteredPois.length / itemsPerPage);
+
   if (totalPages <= 1) {
     container.innerHTML = "";
     return;
   }
-  
-  let html = "";
-  
-  // Botón Anterior
-  html += `
-    <button class="pagination-btn arrow-btn" ${currentPage === 1 ? "disabled" : ""} id="prev-page-btn" aria-label="Página anterior">
+
+  const pageButtons = Array.from(
+    { length: totalPages },
+    (_, index) => `
+      <button class="pagination-btn ${index + 1 === currentPage ? "active" : ""}"
+              data-page="${index + 1}">
+        ${index + 1}
+      </button>
+    `
+  ).join("");
+
+  container.innerHTML = `
+    <button class="pagination-btn arrow-btn" ${currentPage === 1 ? "disabled" : ""}
+            data-page="${currentPage - 1}" aria-label="Página anterior">
       <i data-lucide="chevron-left"></i>
     </button>
-  `;
-  
-  // Números de páginas
-  for (let i = 1; i <= totalPages; i++) {
-    html += `
-      <button class="pagination-btn ${i === currentPage ? "active" : ""}" data-page="${i}">
-        ${i}
-      </button>
-    `;
-  }
-  
-  // Botón Siguiente
-  html += `
-    <button class="pagination-btn arrow-btn" ${currentPage === totalPages ? "disabled" : ""} id="next-page-btn" aria-label="Página siguiente">
+    ${pageButtons}
+    <button class="pagination-btn arrow-btn" ${currentPage === totalPages ? "disabled" : ""}
+            data-page="${currentPage + 1}" aria-label="Página siguiente">
       <i data-lucide="chevron-right"></i>
     </button>
   `;
-  
-  container.innerHTML = html;
-  
-  // Vincular eventos de clics a los botones de paginación
-  const prevBtn = document.getElementById("prev-page-btn");
-  const nextBtn = document.getElementById("next-page-btn");
-  const pageBtns = container.querySelectorAll(".pagination-btn[data-page]");
-  
-  if (prevBtn && currentPage > 1) {
-    prevBtn.addEventListener("click", () => {
-      currentPage--;
-      applyFiltersAndRender();
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    });
-  }
-  
-  if (nextBtn && currentPage < totalPages) {
-    nextBtn.addEventListener("click", () => {
-      currentPage++;
-      applyFiltersAndRender();
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    });
-  }
-  
-  pageBtns.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      currentPage = Number(btn.getAttribute("data-page"));
-      applyFiltersAndRender();
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    });
+
+  container.querySelectorAll(".pagination-btn[data-page]:not([disabled])").forEach((btn) => {
+    btn.addEventListener("click", () => goToPage(Number(btn.dataset.page), totalPages));
   });
-  
-  // Recargar los iconos de las flechas
-  import("../utils/icons.js").then(({ loadIcons }) => loadIcons());
+
+  loadIcons();
+}
+
+function goToPage(page, totalPages) {
+  if (page < 1 || page > totalPages || page === currentPage) return;
+  currentPage = page;
+  applyFiltersAndRender();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function showErrorState() {
+  const container = document.getElementById("pois-grid-container");
+  if (!container) return;
+  container.innerHTML = `
+    <div class="error-state">
+      <p>Hubo un error al cargar los lugares. Por favor, intenta de nuevo.</p>
+    </div>
+  `;
 }
