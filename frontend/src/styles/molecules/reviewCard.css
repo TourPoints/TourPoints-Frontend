@@ -32,11 +32,32 @@
   flex-direction: column;
 }
 
+/* La reseña propia se distingue con un borde de marca, para que el usuario
+   localice la suya de un vistazo entre las demás. */
+.review-card--mine {
+  border-color: var(--color-principal);
+  background-color: #f8faff;
+}
+
 .review-author {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-family: var(--font-base);
   font-size: 0.95rem;
   font-weight: 600;
   color: var(--color-gris-oscuro);
+}
+
+.review-badge-mine {
+  background-color: var(--color-principal);
+  color: var(--color-blanco);
+  border-radius: 50px;
+  padding: 0.1rem 0.5rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
 }
 
 .review-date {
