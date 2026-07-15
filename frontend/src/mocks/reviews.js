@@ -3,6 +3,15 @@ export const mockReviews = {
     { id: 1, author: "Ana Martínez", initials: "AM", rating: 5, text: "Un lugar increíble para desconectar del bullicio de la ciudad. Las plantas están muy bien cuidadas y el personal es muy amable.", date: "Hace 2 días" },
     { id: 2, author: "Juan López", initials: "JL", rating: 4, text: "Muy bonito y tranquilo. Recomiendo ir temprano para evitar aglomeraciones en fin de semana.", date: "Hace 1 semana" },
     { id: 3, author: "Laura García", initials: "LG", rating: 5, text: "Perfecto para una tarde de paseo. La entrada es gratuita y hay muchas zonas de sombra.", date: "Hace 2 semanas" },
+    { id: 4, author: "Carlos Ruiz", initials: "CR", rating: 5, text: "Me encantó el estanque, lleno de tortugas y peces. Un lugar relajante.", date: "Hace 3 semanas" },
+    { id: 5, author: "María Sánchez", initials: "MS", rating: 3, text: "Está bien, pero algunas zonas están un poco descuidadas. Necesita mantenimiento.", date: "Hace 1 mes" },
+    { id: 6, author: "Pedro Fernández", initials: "PF", rating: 4, text: "El invernadero es espectacular. Traigan agua porque hace calor dentro.", date: "Hace 1 mes" },
+    { id: 7, author: "Elena Torres", initials: "ET", rating: 5, text: "Simplemente mágico. Pasé horas leyendo en uno de los bancos.", date: "Hace 2 meses" },
+    { id: 8, author: "Roberto Díaz", initials: "RD", rating: 5, text: "Las exposiciones botánicas temporales son una pasada. Siempre hay algo nuevo que ver.", date: "Hace 2 meses" },
+    { id: 9, author: "Isabel Moreno", initials: "IM", rating: 4, text: "Buen sitio para hacer fotos, pero no hay cafetería cerca, recomiendo llevar un snack.", date: "Hace 3 meses" },
+    { id: 10, author: "David Herrera", initials: "DH", rating: 5, text: "He ido con niños y les ha encantado. Hay mucho espacio para que corran.", date: "Hace 3 meses" },
+    { id: 11, author: "Carmen Vega", initials: "CV", rating: 5, text: "Un oasis en medio del caos. Volveré seguro.", date: "Hace 4 meses" },
+    { id: 12, author: "Sofía Navarro", initials: "SN", rating: 4, text: "Me gustó mucho la variedad de plantas exóticas. Recomendado 100%.", date: "Hace 5 meses" }
   ],
   2: [
     { id: 1, author: "Carlos Ruiz", initials: "CR", rating: 5, text: "Arquitectura impresionante. Las vistas desde la cúpula son espectaculares.", date: "Hace 3 días" },

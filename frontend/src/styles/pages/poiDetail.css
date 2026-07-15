@@ -52,11 +52,25 @@
   font-size: 0.85rem;
 }
 
-.poi-detail-category.naturaleza { background-color: #10b981; }
-.poi-detail-category.cultura { background-color: #6366f1; }
-.poi-detail-category.gastronomia { background-color: #f97316; }
-.poi-detail-category.religiosa { background-color: #a855f7; }
-.poi-detail-category.compras { background-color: #ec4899; }
+.poi-detail-category.naturaleza {
+  background-color: #10b981;
+}
+
+.poi-detail-category.cultura {
+  background-color: #6366f1;
+}
+
+.poi-detail-category.gastronomia {
+  background-color: #f97316;
+}
+
+.poi-detail-category.religiosa {
+  background-color: #a855f7;
+}
+
+.poi-detail-category.compras {
+  background-color: #ec4899;
+}
 
 .poi-detail-rating {
   display: flex;
@@ -149,7 +163,7 @@
 }
 
 .poi-detail-map-link {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 0.4rem;
   font-size: 0.85rem;
@@ -193,11 +207,25 @@
   color: white;
 }
 
-.poi-detail-marker.naturaleza { background-color: #10b981; }
-.poi-detail-marker.cultura { background-color: #6366f1; }
-.poi-detail-marker.gastronomia { background-color: #f97316; }
-.poi-detail-marker.religiosa { background-color: #a855f7; }
-.poi-detail-marker.compras { background-color: #ec4899; }
+.poi-detail-marker.naturaleza {
+  background-color: #10b981;
+}
+
+.poi-detail-marker.cultura {
+  background-color: #6366f1;
+}
+
+.poi-detail-marker.gastronomia {
+  background-color: #f97316;
+}
+
+.poi-detail-marker.religiosa {
+  background-color: #a855f7;
+}
+
+.poi-detail-marker.compras {
+  background-color: #ec4899;
+}
 
 /* Comentarios */
 .reviews-section {
@@ -243,4 +271,136 @@
   color: #94a3b8;
   text-align: center;
   padding: 2rem;
+}
+
+/* Review Form */
+.review-form-container {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.review-form-container h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-gris-oscuro);
+  margin-bottom: 1rem;
+}
+
+.review-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  background: #f8fafc;
+  padding: 1.5rem;
+  border-radius: 12px;
+}
+
+.review-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.review-form label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-gris-oscuro);
+}
+
+.rating-input {
+  display: flex;
+  gap: 0.25rem;
+  cursor: pointer;
+}
+
+.rating-input .star-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: #cbd5e1;
+  fill: transparent;
+  transition: all 0.2s;
+}
+
+.rating-input .star-icon:hover,
+.rating-input .star-icon.active {
+  color: var(--color-amarillo);
+  fill: var(--color-amarillo);
+}
+
+.review-form textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-family: var(--font-texto);
+  font-size: 0.95rem;
+  resize: vertical;
+  transition: border-color 0.3s;
+}
+
+.review-form textarea:focus {
+  outline: none;
+  border-color: var(--color-principal);
+}
+
+.review-form-login-prompt {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: #f1f5f9;
+  border-radius: 12px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.review-form-login-prompt p {
+  color: #475569;
+  font-family: var(--font-texto);
+}
+
+/* Pagination */
+.reviews-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+.pagination-btn {
+  background: white;
+  border: 1px solid #cbd5e1;
+  color: var(--color-gris-oscuro);
+  font-family: var(--font-base);
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pagination-btn:hover:not(.disabled):not(.active) {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.pagination-btn.active {
+  background: var(--color-principal);
+  color: white;
+  border-color: var(--color-principal);
+  cursor: default;
+}
+
+.pagination-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-prev,
+.pagination-next {
+  font-weight: 600;
 }

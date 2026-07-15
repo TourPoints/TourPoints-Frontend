@@ -111,25 +111,36 @@ export async function initMap() {
   userCoords = { lat: 40.416775, lng: -3.703790 };
 
   // 1. Inicializar el mapa de inmediato con coordenadas por defecto para evitar pantallas en blanco
-  setupMapAndData();
+  await setupMapAndData();
 
-  // 2. Intentar obtener geolocalización real de forma asíncrona (con timeout de 4s)
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        userCoords.lat = position.coords.latitude;
-        userCoords.lng = position.coords.longitude;
-        updateUserLocationOnMap();
-      },
-      (error) => {
-        console.warn("Geolocalización no disponible. Se mantiene Madrid centro.", error.message);
-      },
-      { 
-        enableHighAccuracy: true,
-        timeout: 4000, 
-        maximumAge: 0 
-      }
-    );
+  const urlParams = new URLSearchParams(window.location.search);
+  const targetPoiId = urlParams.get("id");
+
+  if (targetPoiId) {
+    const poi = filteredPois.find(p => p.id === Number(targetPoiId));
+    if (poi && poi.markerInstance) {
+      mapInstance.setView([poi.lat, poi.lng], 16);
+      poi.markerInstance.openPopup();
+    }
+  } else {
+    // 2. Intentar obtener geolocalización real de forma asíncrona (con timeout de 4s)
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          userCoords.lat = position.coords.latitude;
+          userCoords.lng = position.coords.longitude;
+          updateUserLocationOnMap();
+        },
+        (error) => {
+          console.warn("Geolocalización no disponible. Se mantiene Madrid centro.", error.message);
+        },
+        { 
+          enableHighAccuracy: true,
+          timeout: 4000, 
+          maximumAge: 0 
+        }
+      );
+    }
   }
 }
 
