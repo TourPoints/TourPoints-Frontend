@@ -1,8 +1,9 @@
 # TourPoints — Estado completo del proyecto
 
-> **Snapshot verificado contra el repo el 2026-07-14.** Documento portable: pensado para
+> **Snapshot verificado contra el repo el 2026-07-15.** Documento portable: pensado para
 > migrar el contexto a otra IA o a otro desarrollador sin historia previa. Todo lo que
-> aparece aquí fue comprobado ejecutando comandos sobre el repositorio, no recordado.
+> aparece aquí fue comprobado leyendo los archivos y ejecutando comandos sobre el
+> repositorio, no recordado.
 >
 > Las reglas de trabajo y el rol viven en `CLAUDE.md` (raíz). Este archivo es solo **estado**.
 
@@ -131,34 +132,29 @@ integración con el backend. Solo entonces se abre el PR a `develop`.
 lo contiene TODO. Las ramas `feature/*` antiguas son punteros muertos, ya fusionados y
 muy atrasados — no guardan nada exclusivo y pueden borrarse sin pérdida.
 
-La brecha `develop` → `test/full-integration` es de solo **6 commits**, y `develop` es
-ancestro directo (no ha divergido, no habría conflictos):
+La tabla se midió cuando `feature/TOUR-35-challenges` estaba a la par de
+`test/full-integration`; desde entonces la rama actual va por delante (ver abajo). La
+lectura de fondo no cambia: `develop` es **ancestro directo** de la rama de integración,
+no ha divergido y no habría conflictos al fusionar.
+
+### Trabajo en `feature/TOUR-35-challenges` sin integrar todavía
 
 ```
-c3ee45b feat: home and rewards consume the service layer
-3432f48 refactor(TOUR-40): rebuild poisManagement on the shared CRUD factory
-929950b fix: route guards read the real session
-ddd5da1 refactor: centralise environment config
-5686549 feat(TOUR-4): surface geolocation status and add a locate control
-496b9b3 feat: land seed POIs in Barranquilla and version the local seeds
+3020e13 feat(TOUR-2): let users write comments on a POI
+0462a8b feat: make favourites usable and scope them to each user
+a8aa3c0 fix: land the seed reviews in Barranquilla and give them real dates
+d2c3cd6 feat(TOUR-2): add back navigation to the POI detail page
+c099dc4 feat(admin): add a back-to-site control in the sidebar
+59721bc docs: add project context and verified state snapshot
+278fbe3 feat(TOUR-35): add public challenges page with per-user progress
 ```
 
-### Trabajo sin commitear (rama actual, TOUR-35 Retos)
+Todo verificado en el navegador contra el servidor de desarrollo, no solo compilado.
+Pendiente de fusionar a `test/full-integration`.
 
-Modificados:
-- `components/molecules/challengeCard.js` (+57/-8)
-- `layouts/public.js` (+2)
-- `router/routes.js` (+8)
-- `services/auth.service.js` (+16)
-- `styles/molecules/challengeCard.css` (+94)
-- `utils/icons.js` (+6)
-
-Nuevos sin trackear:
-- `pages/challenges.js` — página pública de retos, completa
-- `services/challengeProgress.service.js` — progreso por usuario
-- `components/organism/bottomNav.js` + `styles/organism/bottomNav.css`
-- `styles/pages/challenges.css`
-- `CLAUDE.md`, `.claude/` (config del asistente)
+`.claude/` y `frontend/src/.claude/` quedan **sin trackear** a propósito: son
+configuración local de herramientas. Conviene una regla en `.gitignore` para que no
+reaparezcan en cada `git add`.
 
 > Avisos de Git: `LF will be replaced by CRLF` en varios archivos. No hay `.gitattributes`
 > que fije los finales de línea — fricción latente si entra alguien en Linux/WSL.
@@ -168,8 +164,8 @@ Nuevos sin trackear:
 ## 5. Funcionalidad implementada
 
 ### Rutas públicas
-`/` home · `/explore` · `/challenges` · `/map` · `/rewards` · `/login` · `/register` ·
-`/poi/:id` (dinámica) · 404
+`/` home · `/explore` · `/challenges` · `/favorites` · `/map` · `/rewards` · `/login` ·
+`/register` · `/poi/:id` (dinámica) · 404
 
 ### Rutas admin (todas con `auth: true`)
 `/admin` dashboard · `/admin/users` · `/admin/pois` · `/admin/challenges` ·
@@ -199,6 +195,21 @@ se refleja también en el panel de admin. La página pública solo muestra retos
 Endpoints previstos: `GET /me/challenges`, `POST /me/challenges/:id/start`,
 `POST /me/challenges/:id/complete`, `DELETE /me/challenges/:id`.
 
+### Favoritos
+Por usuario, entradas `{userId, poiId, createdAt}` en `favorite.service`. El corazón de
+las tarjetas (inicio, explora, favoritos) y el botón del detalle comparten servicio, así
+que el estado es el mismo en todas las vistas. La vista `/favorites` los lista de lo más
+reciente a lo más antiguo y descarta los POIs que hayan dejado de publicarse.
+Endpoints previstos: `GET /me/favorites`, `POST /me/favorites/:poiId`,
+`DELETE /me/favorites/:poiId`.
+
+### Comentarios
+`review.service` persiste en localStorage y aplica **una reseña por usuario y POI**. El
+formulario del detalle valida valoración (1-5) y longitud (10-500) antes de publicar, y
+la sección se repinta en el sitio. El texto se escapa al pintarlo.
+Endpoints previstos: `GET /pois/:poiId/reviews`, `POST /pois/:poiId/reviews`,
+`DELETE /me/reviews/:id`.
+
 ---
 
 ## 6. GAPS — lo que falta implementar
@@ -227,6 +238,12 @@ patrón — `getPois` (32), `getAllPois` (46) y `getPoiById` (59) conmutan; `cre
 El día que se defina `VITE_API_URL`, las **lecturas irán al backend y las escrituras se
 quedarán en el navegador**, sin error visible. El admin creará un POI, lo verá aparecer, y
 al recargar habrá desaparecido. Es el primer trabajo antes de integrar backend.
+
+### 🔴 Servicios que ni siquiera intentan conmutar
+`favorite.service`, `visit.service`, `review.service` y `challengeProgress.service` son
+localStorage puro. Todos llevan sus endpoints previstos documentados en la cabecera, pero
+ninguno consulta `isApiEnabled()`. Es coherente con el estado del resto (no existe la
+escritura HTTP en absoluto), pero hay que contarlo al integrar el backend.
 
 ### 🔴 `guards.js` es código muerto — y el fix que lo tocó es inerte
 
@@ -277,34 +294,35 @@ comprueba `isAdmin()`, no `isAuthenticated()`. Hoy funciona porque todas las rut
 `auth: true` son `/admin/*`. En cuanto exista una ruta que solo requiera sesión (perfil,
 favoritos, "mis retos"), exigirá admin por error. El nombre miente.
 
-### 🟠 `escapeHtml` se usa en admin pero NO en las vistas públicas
+### 🟠 `escapeHtml` sigue faltando en las páginas públicas
 
-`escapeHtml` (definido en `modal.js:14`) se importa en las páginas admin, `challenges.js`,
-`userMenu`, `sidebar` y `login`. **No se usa** en `explore.js`, `map.js`, `poiDetail.js`,
-`home.js`, `rewards.js` ni en los componentes de POI.
+`escapeHtml` (definido en `modal.js:14`) se usa en las páginas admin, `challenges.js`,
+`userMenu`, `sidebar`, `login` y —ya— en `poisCard`, `reviewCard` y `reviewsList`.
 
-Ahí se interpolan sin escapar campos que vienen de los datos: `poi.name`,
-`poi.description`, `poi.category`, `poi.address`, `poi.image` (p.ej. `map.js:478-492` en
-el popup, `poiDetail.js:36-48`, `explore.js:113-117` en las píldoras de categoría).
+**Sigue sin usarse** en `explore.js`, `map.js`, `poiDetail.js`, `home.js` y `rewards.js`,
+que interpolan en crudo campos venidos de los datos: `poi.name`, `poi.description`,
+`poi.category`, `poi.address`, `poi.image` (p.ej. el popup de `map.js`, la cabecera de
+`poiDetail.js`, las píldoras de categoría de `explore.js`).
 
-Hoy el riesgo es bajo (los datos salen de mocks propios), pero está **exactamente al
-revés de lo deseable**: el admin, que es la superficie de confianza, escapa; las vistas
-públicas, que renderizarán datos venidos del backend, no. Cuando el POI lo sirva la API,
-esto es un XSS almacenado.
+Hoy el riesgo es bajo (los datos salen de mocks propios), pero está **al revés de lo
+deseable**: el admin, que es la superficie de confianza, escapa; las vistas públicas, que
+renderizarán datos venidos del backend, no. Cuando el POI lo sirva la API, esto es un XSS
+almacenado. El camino de comentarios, que es el único con texto de usuario real hoy, ya
+está escapado y cubierto con una prueba manual de payload.
 
 ### 🟠 Violaciones de las propias reglas de UI
 
-La regla dice: *no usar diálogos nativos* y *no dejar elementos no funcionales*. Hay
-**7 `alert()`** en el código, existiendo ya un sistema de modales (`openConfirmModal` /
-`openFormModal`):
+La regla dice: *no usar diálogos nativos* y *no dejar elementos no funcionales*. Quedan
+**5 `alert()`**, existiendo ya un sistema de modales (`openConfirmModal` / `openFormModal`):
 
 | Ubicación | Qué hace |
 |---|---|
 | `map.js:323` | Botón **"Iniciar Ruta"** → solo un `alert`. No calcula ninguna ruta. |
-| `poiDetail.js:176` | **"Ver todas las reseñas"** → `alert`. Sin paginación. |
-| `poiDetail.js:143,147` | Resultado de registrar visita → `alert`. |
+| `poiDetail.js:270,274` | Resultado de registrar visita → `alert`. |
 | `poiGallery.js:72` | **"Ver galería completa"** → `alert`. |
 | `settings.js:20` | Formulario entero → `onsubmit` inline con `alert('...(Mock)')`. |
+
+Eran 7. El "Ver todas las reseñas" ya despliega la lista de verdad.
 
 ### 🟠 `settings.js` es el outlier del proyecto
 Rompe varias convenciones a la vez: estilos **inline** en cada elemento (el resto usa CSS
@@ -322,22 +340,26 @@ protege barato — un fallo ahí rompe cuatro vistas a la vez.
 Los avisos CRLF/LF ya aparecen al hacer `git diff`. Generarán diffs ruidosos en cuanto
 colabore alguien en WSL/Linux.
 
-### 🟡 Gamificación incompleta en visitas
-`visit.service.registerVisit` devuelve siempre `points: 0` y el mensaje admite que "los
-puntos se acreditarán cuando el backend esté conectado". Registrar una visita **no suma
-puntos** todavía. Los retos sí acreditan (`challenges.js:301-312`).
+### 🟠 `visit.service` sigue sin dueño y sin puntos
+Dos cosas a la vez. `registerVisit` devuelve siempre `points: 0` y el propio mensaje
+admite que "los puntos se acreditarán cuando el backend esté conectado": registrar una
+visita **no suma puntos**, mientras que los retos sí acreditan.
 
-### 🟡 `review.service` no persiste nada
-Es el único servicio sin localStorage: lee `mockReviews` directamente y solo expone
-`getPoiReviews`. No se pueden crear reseñas. Efectivamente es un mock de solo lectura.
+Y las visitas se guardan como una **lista plana de ids sin userId**, exactamente el bug
+que tenían los favoritos: al cambiar de cuenta el nuevo usuario hereda las visitas del
+anterior. `favorite.service` y `challengeProgress.service` ya van por usuario; este no.
+Es el siguiente candidato obvio.
+
+### 🟡 `poi.reviewCount` no tiene que ver con los comentarios reales
+Los POIs semilla traen `reviewCount` de tres cifras (980, 1520…) que se muestra junto al
+rating, mientras la sección de comentarios lista los que existen de verdad (2 o 3). Al
+publicar un comentario el contador de la sección sube, pero el titular no. O se hace
+derivar de las reseñas reales, o se asume como número decorativo de la semilla.
 
 ### 🟡 Efectos secundarios en el nivel de módulo
 `localStore.js` borra localStorage **al ser importado** (línea 18) y `router.js` llama a
 `renderRoute()` y registra listeners al importarse (74-82). Funciona, pero hace el código
 difícil de testear de forma aislada — relevante en cuanto se añadan tests.
-
-### 🟡 Variable muerta
-`poiDetail.js:15` declara `currentPoi`, se asigna en la 234 y **no se lee nunca**.
 
 ### 🟡 Coordenadas sin verificar
 Los POIs semilla están anclados en Barranquilla con coordenadas **aproximadas**,
@@ -360,21 +382,24 @@ conviene consolidarlos o alinearlos.
 
 ## 7. Orden recomendado
 
-1. Cerrar y commitear TOUR-35 (retos) → `test/full-integration`.
+1. Fusionar `feature/TOUR-35-challenges` → `test/full-integration`.
 2. **Implementar `apiPost`/`apiPut`/`apiDelete` y hacer conmutar la escritura** en
    `createCrudService` *y* en `poi.service`. Sin esto la prueba con backend da falsos
    positivos: parecerá que guarda y no guardará.
-3. Resolver el trío de sesión/rol: prefijar la clave `role`, unificar la fuente de verdad,
-   y cablear o borrar `guards.js`. Hacerlo **antes** de JWT, no después.
-4. Escapar las vistas públicas (`explore`, `map`, `poiDetail`) antes de que los datos
-   vengan de la API.
-5. Conmutar `favorite`, `visit`, `review`, `challengeProgress`.
-6. Sustituir los 7 `alert()` por el sistema de modales; decidir qué hacer con los botones
-   no funcionales (implementar u ocultar).
-7. Verificar coordenadas de los POIs.
-8. Borrar las ramas `feature/*` muertas (ya fusionadas, 0 commits exclusivos).
-9. Probar integración backend/frontend.
-10. PR `test/full-integration` → `develop` (solo 6 commits de brecha, sin divergencia).
+3. Resolver el trío de sesión/rol: prefijar la clave `role`, unificar la fuente de verdad
+   (`localStorage['role']` vs `session.role`), y cablear o borrar `guards.js`. Hacerlo
+   **antes** de JWT, no después.
+4. Llevar `visit.service` a por-usuario, como ya están favoritos y progreso de retos, y
+   decidir si una visita acredita puntos.
+5. Escapar las vistas públicas (`explore`, `map`, `poiDetail`, `home`, `rewards`) antes de
+   que los datos vengan de la API.
+6. Conmutar `favorite`, `visit`, `review`, `challengeProgress`.
+7. Sustituir los 5 `alert()` restantes por el sistema de modales; decidir qué hacer con
+   los botones no funcionales (implementar u ocultar). Reescribir `settings.js`.
+8. Verificar coordenadas de los POIs y sustituir las imágenes de relleno.
+9. Borrar las ramas `feature/*` muertas (ya fusionadas, 0 commits exclusivos).
+10. Probar integración backend/frontend.
+11. PR `test/full-integration` → `develop` (sin divergencia: es un avance rápido).
 
 ---
 
