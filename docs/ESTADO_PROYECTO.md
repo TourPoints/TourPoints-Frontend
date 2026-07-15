@@ -1,0 +1,392 @@
+# TourPoints — Estado completo del proyecto
+
+> **Snapshot verificado contra el repo el 2026-07-14.** Documento portable: pensado para
+> migrar el contexto a otra IA o a otro desarrollador sin historia previa. Todo lo que
+> aparece aquí fue comprobado ejecutando comandos sobre el repositorio, no recordado.
+>
+> Las reglas de trabajo y el rol viven en `CLAUDE.md` (raíz). Este archivo es solo **estado**.
+
+---
+
+## 1. Qué es TourPoints
+
+SPA de turismo gamificado para **Barranquilla, Colombia**. El usuario explora puntos de
+interés (POIs), completa retos, gana puntos y canjea recompensas. Incluye un panel de
+administración para gestionar POIs, retos, recompensas y usuarios.
+
+**Equipo:** pequeño (Nicolás Guarín «Neko» + 2 o más colaboradores). Nicolás cubre
+explore, mapa y dashboard de admin. Tickets en Jira (prefijo `TOUR-`).
+
+---
+
+## 2. Stack real
+
+| Pieza | Versión / detalle |
+|---|---|
+| Frontend | Vite SPA, **JavaScript vanilla sin framework** |
+| Vite | `^8.1.1` (declarado); entorno 8.1.4 |
+| Node | `>=24.0.0` (engines); entorno v24.13.0 |
+| npm | 11.6.2 |
+| Única dependencia runtime | `lucide` `^1.24.0` (iconos) |
+| Mapa | **Leaflet 1.9.4 por CDN** (`unpkg`), NO por npm |
+| Backend | **No existe todavía** |
+| Persistencia actual | `localStorage` con seeds de `src/mocks/` |
+| Entorno | Windows 11, VS Code, Docker Desktop, WSL2 |
+
+**Scripts:** `dev`, `build`, `preview`. No hay `test` ni `lint`.
+
+> ⚠️ Leaflet entra por `<script>` en `frontend/index.html`, así que `L` es un **global**.
+> No figura en `package.json`: un `npm install` limpio no lo trae y el mapa depende de
+> que unpkg esté disponible. Decisión a revisar antes de producción.
+
+---
+
+## 3. Arquitectura
+
+### Estructura (`frontend/src/`)
+
+```
+components/     Atomic Design: atoms / molecules / organism
+config/         api.js, enviroment.js   ← lectura centralizada de VITE_*
+layouts/        public.js, adminLayout.js
+mocks/          seeds: pois, challenges, rewards, users, reviews
+pages/          públicas + pages/admin/ + pages/auth/
+router/         router.js, routes.js, guards.js, layouts.js
+services/       capa de servicio (ver abajo)
+styles/         CSS espejo de la estructura de componentes
+utils/          text, date, icons, role, poiFilter, activeMenu
+```
+
+100 archivos versionados. Router propio (no librería): rutas estáticas en `routes` +
+`dynamicRoutes` con regex (hoy solo `/poi/:id`).
+
+### Patrón de página
+
+Cada página exporta dos funciones: `nombre()` devuelve el HTML como string, e
+`initNombre()` engancha los listeners tras el montaje. El router llama a ambas.
+
+### Capa de servicio — el corazón del diseño
+
+El objetivo declarado: **unificar el modelo de datos entre admin, home y vistas
+públicas**, con fallback a localStorage y soporte HTTP futuro sin tocar las vistas.
+
+- `api.client.js` — cliente HTTP. Expone `isApiEnabled()`, `ApiError` y `apiGet()`.
+- `config/api.js` — `API_BASE_URL` (de `VITE_API_URL`), `API_TIMEOUT_MS` (8000),
+  `isApiConfigured()`.
+- `createCrudService.js` — **fábrica CRUD compartida**. Genera list/getById/create/
+  update/remove/toggleStatus sobre una colección. La usan retos, recompensas y usuarios.
+- `poi.service.js` — servicio propio (modelo más rico: coordenadas, galería, publicación).
+- `localStore.js` — `readCollection` / `writeCollection` / `nextPrefixedId`.
+- Otros: `auth`, `challenge`, `challengeProgress`, `favorite`, `review`, `reward`,
+  `user`, `visit`.
+
+**Contrato de conmutación:** si `VITE_API_URL` está definida → API real; si no → mocks.
+Ver `frontend/.env.example`.
+
+---
+
+## 4. Estado de Git — VERIFICADO, corrige suposiciones previas
+
+### Ramas
+
+```
+main
+develop                                    (protegida)
+test/full-integration        ← rama de integración activa (la "rama full")
+feature/TOUR-35-challenges   ← RAMA ACTUAL, trabajo en curso
+feature/TOUR-2-browse-pois
+feature/TOUR-4-interactive-map
+feature/TOUR-40-TOUR-39-admin-dashboard
+feature/US-0-visit-landing-page
+feature/US-2-view-point-of-interest-details
+feature/rewards
+```
+
+`feature/full` **no existe y nunca existió** (ni en ramas ni en reflog). Cuando se habla
+de «la rama full» se refiere a **`test/full-integration`**.
+
+### Flujo real
+
+`feature/TOUR-<ticket>-<slug>` → `test/full-integration` → `develop` → `release` → `main`
+
+`main` y `develop` están protegidas. Como no se puede tocar `develop`, **todo se acumula
+en `test/full-integration`** hasta que los features estén pulidos y se pruebe la
+integración con el backend. Solo entonces se abre el PR a `develop`.
+
+### Divergencia medida (`git rev-list --count`)
+
+| Rama | Commits SIN integrar en full | Commits que le faltan de full |
+|---|---|---|
+| `develop` | **0** | **6** |
+| `main` | 0 | 28 |
+| `feature/TOUR-2-browse-pois` | 0 | 25 |
+| `feature/TOUR-4-interactive-map` | 0 | 24 |
+| `feature/TOUR-40-TOUR-39-admin-dashboard` | 0 | 24 |
+| `feature/US-0-visit-landing-page` | 0 | 22 |
+| `feature/US-2-view-point-of-interest-details` | 0 | 23 |
+| `feature/rewards` | 0 | 24 |
+| `feature/TOUR-35-challenges` | 0 | 0 |
+
+**Lectura crítica:** ninguna rama tiene trabajo sin integrar. `test/full-integration` ya
+lo contiene TODO. Las ramas `feature/*` antiguas son punteros muertos, ya fusionados y
+muy atrasados — no guardan nada exclusivo y pueden borrarse sin pérdida.
+
+La brecha `develop` → `test/full-integration` es de solo **6 commits**, y `develop` es
+ancestro directo (no ha divergido, no habría conflictos):
+
+```
+c3ee45b feat: home and rewards consume the service layer
+3432f48 refactor(TOUR-40): rebuild poisManagement on the shared CRUD factory
+929950b fix: route guards read the real session
+ddd5da1 refactor: centralise environment config
+5686549 feat(TOUR-4): surface geolocation status and add a locate control
+496b9b3 feat: land seed POIs in Barranquilla and version the local seeds
+```
+
+### Trabajo sin commitear (rama actual, TOUR-35 Retos)
+
+Modificados:
+- `components/molecules/challengeCard.js` (+57/-8)
+- `layouts/public.js` (+2)
+- `router/routes.js` (+8)
+- `services/auth.service.js` (+16)
+- `styles/molecules/challengeCard.css` (+94)
+- `utils/icons.js` (+6)
+
+Nuevos sin trackear:
+- `pages/challenges.js` — página pública de retos, completa
+- `services/challengeProgress.service.js` — progreso por usuario
+- `components/organism/bottomNav.js` + `styles/organism/bottomNav.css`
+- `styles/pages/challenges.css`
+- `CLAUDE.md`, `.claude/` (config del asistente)
+
+> Avisos de Git: `LF will be replaced by CRLF` en varios archivos. No hay `.gitattributes`
+> que fije los finales de línea — fricción latente si entra alguien en Linux/WSL.
+
+---
+
+## 5. Funcionalidad implementada
+
+### Rutas públicas
+`/` home · `/explore` · `/challenges` · `/map` · `/rewards` · `/login` · `/register` ·
+`/poi/:id` (dinámica) · 404
+
+### Rutas admin (todas con `auth: true`)
+`/admin` dashboard · `/admin/users` · `/admin/pois` · `/admin/challenges` ·
+`/admin/rewards` · `/admin/settings`
+
+### Autenticación — MODO DEMO
+`auth.service.js` **no valida contraseñas a propósito**: solo comprueba que el email
+exista entre los usuarios registrados. La decisión está documentada en el archivo —
+guardar o validar contraseñas en el frontend no aporta garantía real. La sesión vive en
+`localStorage` bajo `tourpoints:session`. El rol también se guarda en localStorage y hoy
+**es la fuente de verdad** para el router: con backend dejará de serlo y la autorización
+pasará al servidor.
+
+Endpoints previstos (ya documentados en el código): `POST /auth/login`,
+`POST /auth/register`, `POST /auth/logout`.
+
+### Retos (TOUR-35, en curso)
+Separación deliberada y bien razonada de dos dimensiones que antes se mezclaban:
+- **Estado de publicación** (`Activo`/`Pendiente`/`Inactivo`) → lo gestiona el admin, vive
+  en `challenge.service`.
+- **Progreso del usuario** (`disponible`/`en-curso`/`completado`) → vive en
+  `challengeProgress.service`, por `{userId, challengeId, state, updatedAt}`.
+
+Completar un reto acredita puntos vía `updateUser` + `updateSessionUser`, así que el saldo
+se refleja también en el panel de admin. La página pública solo muestra retos `Activo`.
+
+Endpoints previstos: `GET /me/challenges`, `POST /me/challenges/:id/start`,
+`POST /me/challenges/:id/complete`, `DELETE /me/challenges/:id`.
+
+---
+
+## 6. GAPS — lo que falta implementar
+
+Ordenados por lo que bloquea el objetivo declarado (*probar el backend con el frontend*).
+Todo verificado leyendo los archivos, con rutas y líneas para poder comprobarlo.
+
+### 🔴 BLOQUEANTE — la escritura por HTTP no existe
+
+`api.client.js` implementa **únicamente `apiGet`**. No hay `apiPost`, `apiPut` ni
+`apiDelete` en todo el proyecto (verificado por grep).
+
+La consecuencia es silenciosa y grave. En `createCrudService.js`, solo `list()` (línea 47)
+y `getById()` (56) consultan `isApiEnabled()`. Los métodos `create()` (78), `update()` (90),
+`remove()` (105) y `toggleStatus()` (120) **escriben en localStorage incondicionalmente**:
+
+```js
+async list()       { if (isApiEnabled()) return apiGet(apiPath); ... }  // ✅ conmuta
+async create(data) { const items = readCollection(collection, seed); ... } // ❌ nunca
+```
+
+**No es solo la fábrica: es sistémico.** `poi.service.js` repite exactamente el mismo
+patrón — `getPois` (32), `getAllPois` (46) y `getPoiById` (59) conmutan; `createPoi` (80),
+`updatePoi` (104) y `deletePoi` (129) no consultan `isApiEnabled()` en ningún momento.
+
+El día que se defina `VITE_API_URL`, las **lecturas irán al backend y las escrituras se
+quedarán en el navegador**, sin error visible. El admin creará un POI, lo verá aparecer, y
+al recargar habrá desaparecido. Es el primer trabajo antes de integrar backend.
+
+### 🔴 `guards.js` es código muerto — y el fix que lo tocó es inerte
+
+**Nadie importa `router/guards.js`.** La única coincidencia de "guards" en el resto del
+código es una mención en el HTML de `pages/admin/settings.js:50`.
+
+El detalle importante: el commit `929950b "fix: route guards read the real session"`
+modificó `guards.js` (18 líneas) y `poiDetail.js`. Pero como nada importa `guards.js`,
+**ese arreglo no tiene efecto**. El guard real vive en `router/router.js:43`:
+
+```js
+if (route.auth && !isAdmin()) { ... }   // isAdmin() viene de utils/role.js
+```
+
+y sigue leyendo `localStorage.getItem('role')` — justo lo que el comentario de `guards.js`
+dice que estaba mal. Hay que decidir: o se cablea `guards.js` al router, o se borra.
+
+### 🔴 Desincronización sesión/rol por la clave sin prefijo
+
+`utils/role.js` usa la clave **`'role'` sin el prefijo `tourpoints:`**, a diferencia de
+todo lo demás:
+
+```js
+export const setRole = (role) => localStorage.setItem('role', role);  // ← sin prefijo
+```
+
+`localStore.js:18-23` borra, **al importarse**, todas las claves que empiezan por
+`tourpoints:` cuando cambia `SEED_VERSION`. Por tanto `tourpoints:session` se borra pero
+`role` **sobrevive**. Resultado: sesión nula + rol admin persistente. El header muestra
+"Iniciar sesión" mientras `/admin` sigue renderizando entero (`dashboard.js` solo consulta
+`isAdmin()`, nunca `getCurrentUser()`, así que ni siquiera falla: funciona sin sesión).
+
+No es hipotético: `SEED_VERSION` se introdujo ya en `"2-barranquilla"` (commit `496b9b3`),
+así que el borrado **se disparó para todos los que tenían datos previos**.
+
+Impacto de seguridad: bajo en sí mismo — el rol es de cliente y cualquiera puede escribir
+`localStorage.setItem('role','admin')`; el propio código dice que la autorización real la
+debe aplicar el backend. Pero es una inconsistencia de estado real y es exactamente la
+clase de cosa que estalla cuando entre JWT.
+
+**Dos fuentes de verdad para "es admin":** `localStorage['role']` (router, páginas admin)
+vs `session.role` (`userMenu.js:81`). Conviene unificarlas.
+
+### 🟠 `auth: true` en realidad significa "requiere admin"
+
+En `routes.js` las rutas se marcan con `auth: true`, pero el guard de `router.js:43`
+comprueba `isAdmin()`, no `isAuthenticated()`. Hoy funciona porque todas las rutas con
+`auth: true` son `/admin/*`. En cuanto exista una ruta que solo requiera sesión (perfil,
+favoritos, "mis retos"), exigirá admin por error. El nombre miente.
+
+### 🟠 `escapeHtml` se usa en admin pero NO en las vistas públicas
+
+`escapeHtml` (definido en `modal.js:14`) se importa en las páginas admin, `challenges.js`,
+`userMenu`, `sidebar` y `login`. **No se usa** en `explore.js`, `map.js`, `poiDetail.js`,
+`home.js`, `rewards.js` ni en los componentes de POI.
+
+Ahí se interpolan sin escapar campos que vienen de los datos: `poi.name`,
+`poi.description`, `poi.category`, `poi.address`, `poi.image` (p.ej. `map.js:478-492` en
+el popup, `poiDetail.js:36-48`, `explore.js:113-117` en las píldoras de categoría).
+
+Hoy el riesgo es bajo (los datos salen de mocks propios), pero está **exactamente al
+revés de lo deseable**: el admin, que es la superficie de confianza, escapa; las vistas
+públicas, que renderizarán datos venidos del backend, no. Cuando el POI lo sirva la API,
+esto es un XSS almacenado.
+
+### 🟠 Violaciones de las propias reglas de UI
+
+La regla dice: *no usar diálogos nativos* y *no dejar elementos no funcionales*. Hay
+**7 `alert()`** en el código, existiendo ya un sistema de modales (`openConfirmModal` /
+`openFormModal`):
+
+| Ubicación | Qué hace |
+|---|---|
+| `map.js:323` | Botón **"Iniciar Ruta"** → solo un `alert`. No calcula ninguna ruta. |
+| `poiDetail.js:176` | **"Ver todas las reseñas"** → `alert`. Sin paginación. |
+| `poiDetail.js:143,147` | Resultado de registrar visita → `alert`. |
+| `poiGallery.js:72` | **"Ver galería completa"** → `alert`. |
+| `settings.js:20` | Formulario entero → `onsubmit` inline con `alert('...(Mock)')`. |
+
+### 🟠 `settings.js` es el outlier del proyecto
+Rompe varias convenciones a la vez: estilos **inline** en cada elemento (el resto usa CSS
+en `styles/`), manejador `onsubmit=""` **inline en el HTML** (no se hace en ningún otro
+sitio), y un formulario completamente no funcional. Es claramente el archivo más antiguo
+y sin tocar. Candidato claro a reescritura.
+
+### 🟠 Sin tests ni linter
+No hay framework de test, ni ESLint, ni Prettier, ni CI. En un equipo de 3+ con una
+integración de backend por delante, esto es riesgo real: las dos fábricas compartidas
+(`createCrudService`, `createAdminCrudView`) son justo el tipo de código que un test
+protege barato — un fallo ahí rompe cuatro vistas a la vez.
+
+### 🟠 Sin `.gitattributes`
+Los avisos CRLF/LF ya aparecen al hacer `git diff`. Generarán diffs ruidosos en cuanto
+colabore alguien en WSL/Linux.
+
+### 🟡 Gamificación incompleta en visitas
+`visit.service.registerVisit` devuelve siempre `points: 0` y el mensaje admite que "los
+puntos se acreditarán cuando el backend esté conectado". Registrar una visita **no suma
+puntos** todavía. Los retos sí acreditan (`challenges.js:301-312`).
+
+### 🟡 `review.service` no persiste nada
+Es el único servicio sin localStorage: lee `mockReviews` directamente y solo expone
+`getPoiReviews`. No se pueden crear reseñas. Efectivamente es un mock de solo lectura.
+
+### 🟡 Efectos secundarios en el nivel de módulo
+`localStore.js` borra localStorage **al ser importado** (línea 18) y `router.js` llama a
+`renderRoute()` y registra listeners al importarse (74-82). Funciona, pero hace el código
+difícil de testear de forma aislada — relevante en cuanto se añadan tests.
+
+### 🟡 Variable muerta
+`poiDetail.js:15` declara `currentPoi`, se asigna en la 234 y **no se lee nunca**.
+
+### 🟡 Coordenadas sin verificar
+Los POIs semilla están anclados en Barranquilla con coordenadas **aproximadas**,
+pendientes de contrastar contra Google Maps. Marcado en `pages/map.js:14`.
+
+### 🟡 Leaflet por CDN
+Sin pinear en `package.json`, dependiente de unpkg, global `L`. Ver §2.
+
+### 🟡 Typo histórico `config/enviroment.js`
+(falta la `n`: debería ser `environment`). Conservado a propósito para no romper imports;
+el propio archivo documenta que conviene corregirlo en la próxima reorganización.
+
+### 🟡 Conflicto entre archivos de contexto
+`.agents/AGENTS.md` dice que el flujo es `develop → feature/* → PR → develop`. Es
+**incorrecto**: los features salen de `test/full-integration`, no de `develop`. `CLAUDE.md`
+ya tiene el flujo real. Los dos archivos se solapan mucho (Git Flow, Scrum, SOLID) y
+conviene consolidarlos o alinearlos.
+
+---
+
+## 7. Orden recomendado
+
+1. Cerrar y commitear TOUR-35 (retos) → `test/full-integration`.
+2. **Implementar `apiPost`/`apiPut`/`apiDelete` y hacer conmutar la escritura** en
+   `createCrudService` *y* en `poi.service`. Sin esto la prueba con backend da falsos
+   positivos: parecerá que guarda y no guardará.
+3. Resolver el trío de sesión/rol: prefijar la clave `role`, unificar la fuente de verdad,
+   y cablear o borrar `guards.js`. Hacerlo **antes** de JWT, no después.
+4. Escapar las vistas públicas (`explore`, `map`, `poiDetail`) antes de que los datos
+   vengan de la API.
+5. Conmutar `favorite`, `visit`, `review`, `challengeProgress`.
+6. Sustituir los 7 `alert()` por el sistema de modales; decidir qué hacer con los botones
+   no funcionales (implementar u ocultar).
+7. Verificar coordenadas de los POIs.
+8. Borrar las ramas `feature/*` muertas (ya fusionadas, 0 commits exclusivos).
+9. Probar integración backend/frontend.
+10. PR `test/full-integration` → `develop` (solo 6 commits de brecha, sin divergencia).
+
+---
+
+## 8. Convenciones
+
+- **Commits:** Conventional Commits, mensajes cortos **en inglés**, presente
+  (`feat`, `fix`, `docs`, `refactor`, `style`, `test`, `build`, `ci`, `chore`).
+  Con ticket cuando aplique: `feat(TOUR-4): ...`
+- **Scrum:** Épica → Historia de Usuario → Tarea → Subtarea. Nunca saltar niveles.
+- **Código:** SOLID, DRY, KISS, Clean Architecture, módulos reutilizables. Sin hacks
+  rápidos. Explicar trade-offs. Compatibilidad > novedad.
+- **UI:** prohibido `prompt()`/`confirm()` nativos. Nada de elementos no funcionales.
+- **Comentarios del código:** en español, explicando el *porqué* y las decisiones de
+  diseño (no el *qué*). Es un patrón consistente y valioso del proyecto — mantenerlo.
+- **Antes de proponer upgrades:** verificar Node, npm, Docker, WSL, Vite y `package.json`.
