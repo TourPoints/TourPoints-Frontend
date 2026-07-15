@@ -4,8 +4,10 @@
 // siguen usando los mocks locales. Cuando el backend esté disponible basta con
 // definir la variable en el .env: no hay que tocar las vistas.
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? "";
-const DEFAULT_TIMEOUT_MS = 8000;
+import { API_BASE_URL, API_TIMEOUT_MS, isApiConfigured } from "../config/api.js";
+
+const BASE_URL = API_BASE_URL;
+const DEFAULT_TIMEOUT_MS = API_TIMEOUT_MS;
 
 /**
  * Indica si hay un backend configurado.
@@ -13,7 +15,7 @@ const DEFAULT_TIMEOUT_MS = 8000;
  * @returns {boolean}
  */
 export function isApiEnabled() {
-  return Boolean(BASE_URL);
+  return isApiConfigured();
 }
 
 /**
