@@ -11,6 +11,7 @@ import { rewardsManagement, initRewardsManagement } from "../pages/admin/rewards
 import { adminSettings }        from "../pages/admin/settings.js";
 import { explore, initExplore } from "../pages/explore.js";
 import { challenges, initChallenges } from "../pages/challenges.js";
+import { favorites, initFavorites } from "../pages/favorites.js";
 import { map, initMap } from "../pages/map.js";
 import { poiDetail, initPoiDetail } from "../pages/poiDetail.js";
 
@@ -59,6 +60,16 @@ export const routes = {
     "/rewards": {
         component: rewards,
         init: initRewards,
+        layout: "public",
+        auth: false
+    },
+
+    // auth:false a propósito: la vista se muestra siempre e invita a entrar
+    // si no hay sesión. Marcarla auth:true la escondería tras el guard, que
+    // hoy exige rol de administrador, no una sesión cualquiera.
+    "/favorites": {
+        component: favorites,
+        init: initFavorites,
         layout: "public",
         auth: false
     },

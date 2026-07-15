@@ -116,6 +116,10 @@ function authenticatedItems(user) {
     }
 
     <div class="user-menu-section">
+      <a href="/favorites" class="user-menu-item" data-link role="menuitem">
+        <span class="user-menu-icon" aria-hidden="true">💙</span>
+        <span>Mis favoritos</span>
+      </a>
       <a href="/rewards" class="user-menu-item" data-link role="menuitem">
         <span class="user-menu-icon" aria-hidden="true">🎁</span>
         <span>Mis recompensas</span>

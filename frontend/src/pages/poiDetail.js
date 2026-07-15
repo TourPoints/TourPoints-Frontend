@@ -173,7 +173,7 @@ function bindSidebarActions(poi) {
         return;
       }
 
-      const nowFavorite = await toggleFavorite(poi.id);
+      const { isFavorite: nowFavorite } = await toggleFavorite(poi.id);
       const label = favoriteBtn.querySelector("span");
 
       if (nowFavorite) {

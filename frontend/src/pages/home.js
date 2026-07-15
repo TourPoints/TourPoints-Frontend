@@ -1,6 +1,7 @@
 import "../styles/pages/home.css";
 import { searchBar } from "../components/molecules/searchBar.js";
 import { poiGrid } from "../components/organism/poiGrid.js";
+import { initFavoriteButtons } from "../components/molecules/poisCard.js";
 import { challengeGrid } from "../components/organism/challengeGrid.js";
 import { buttonLinks } from "../components/atoms/buttonLinks.js";
 import { getPois } from "../services/poi.service.js";
@@ -135,6 +136,7 @@ async function loadFeaturedPois(container) {
   try {
     const pois = await getPois();
     container.innerHTML = poiGrid(pois.slice(0, FEATURED_COUNT));
+    initFavoriteButtons(container);
   } catch (error) {
     console.error("Error al cargar los destinos destacados:", error);
     container.innerHTML = `<p class="u-text-center">Hubo un error al cargar los destinos destacados.</p>`;

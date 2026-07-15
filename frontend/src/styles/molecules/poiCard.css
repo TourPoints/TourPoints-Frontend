@@ -104,6 +104,24 @@
   transform: scale(1.1);
 }
 
+.btn-heart .lucide-heart {
+  width: 1.1rem;
+  height: 1.1rem;
+  color: #64748b;
+  transition: color 0.2s, fill 0.2s;
+}
+
+/* Guardado: el corazón se rellena. El relleno, y no solo el color del trazo,
+   es lo que hace legible el estado de un vistazo sobre la foto. */
+.btn-heart--active {
+  background: #ffffff;
+}
+
+.btn-heart--active .lucide-heart {
+  color: #e11d48;
+  fill: #e11d48;
+}
+
 .poi-card-content {
   display: flex;
   flex-direction: column;

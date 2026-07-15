@@ -1,5 +1,6 @@
 import { getPois } from "../services/poi.service.js";
-import { poiCard } from "../components/molecules/poisCard.js";
+import { getMyFavoriteIds } from "../services/favorite.service.js";
+import { poiCard, initFavoriteButtons } from "../components/molecules/poisCard.js";
 import { searchBar } from "../components/molecules/searchBar.js";
 import { loadIcons } from "../utils/icons.js";
 import { debounce } from "../utils/text.js";
@@ -214,8 +215,17 @@ function renderGrid() {
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const pagePois = filteredPois.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
-  container.innerHTML = pagePois.map((poi) => poiCard({ ...poi, isFeatured: false })).join("");
+  // Se leen aquí y no en initExplore: al volver de un detalle donde se guardó
+  // el POI, el corazón debe aparecer ya marcado al repintar.
+  const favorites = getMyFavoriteIds();
 
+  container.innerHTML = pagePois
+    .map((poi) =>
+      poiCard({ ...poi, isFeatured: false, isFavorite: favorites.has(String(poi.id)) })
+    )
+    .join("");
+
+  initFavoriteButtons(container);
   loadIcons();
 }
 
