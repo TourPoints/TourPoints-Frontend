@@ -5,6 +5,15 @@
 >
 > **Si solo leéis una cosa:** la sección 3. Os ahorra construir cosas que no hay que construir.
 
+## Veredicto en una línea
+
+**El frontend adopta vuestro modelo de negocio.** Es viable, y vuestro diseño es mejor que el
+nuestro en casi todo. Os pedimos adecuar **solo tres cosas** (sección 5.B) y necesitamos **tres
+decisiones conjuntas** (5.C). Nada más.
+
+Lo que hace esto posible es una regla que el frontend ha respetado sin excepción: **ninguna vista
+habla HTTP**. Toda la traducción cabe en una carpeta.
+
 ---
 
 ## 1. Los 60 segundos que necesitáis
@@ -86,6 +95,10 @@ Lo mismo con el idioma y la forma: vosotros habláis **español, UUID y paginado
 dentro hablamos inglés, enteros y arrays pelados. **La traducción es problema nuestro**, y cabe
 en `services/`. No aplanéis `ubicacion` ni quitéis `items` por nosotros.
 
+Y lo mismo con la lógica de negocio: vuestra moderación, vuestro ledger, vuestro stock por
+triggers y vuestro PostGIS **mandan**. El frontend se adapta. Las tres únicas excepciones están
+en la sección 5.B, y son cosas que vuestro modelo no puede darnos, no cosas que hagáis mal.
+
 ---
 
 ## 4. El mapa de encendido: qué endpoint enciende qué pantalla
@@ -98,8 +111,8 @@ Ordenado por **retorno visible**, no por dificultad. Cada fila enciende algo que
 | **2** | `GET /poi/{id}` | Detalle del POI, con su mapa | ❌ no |
 | **3** | `POST /auth/register` · `POST /auth/login` · `GET /usuarios/me` | Sesión de verdad. Desbloquea **todo** lo de abajo | — |
 | **4** | `GET /favoritos/me` · `POST /favoritos` · `DELETE /favoritos/{poi_id}` | Corazones + vista Favoritos | ✅ |
-| **5** | `GET /poi/{id}/comentarios` · `POST` · `GET .../calificaciones/resumen` | Reseñas y escribir comentarios | ✅ |
-| **6** | `GET /retos` · `GET /retos/me` · `POST /retos/{id}/inscribirme` | Vista Retos con progreso | ✅ |
+| **5** | `PUT /poi/{id}/mi-calificacion` · `GET .../calificaciones/resumen` · `GET`+`POST /poi/{id}/comentarios` | Estrellas y comentarios, ya partidos como los tenéis. Requiere que construyamos la cola de moderación en admin | ✅ |
+| **6** | `GET /retos` · `GET /retos/me` · `POST /retos/{id}/inscribirme` | Vista Retos con progreso — **ver decisión C3: puede que la rediseñemos antes** | ✅ |
 | **7** | `POST /visitas` | Check-in con GPS. **El corazón del producto** | ✅ |
 | **8** | `GET /puntos/me/saldo` · `GET /puntos/me/movimientos` | Saldo real + historial (dashboard, en diseño) | ✅ |
 | **9** | `GET /recompensas` · `POST /recompensas/{id}/canjear` · `GET /canjes/me` | Recompensas y canjes | ✅ |
@@ -110,55 +123,133 @@ vuestro servidor y la portada muestra vuestros POIs, ya está integrado el 40% d
 
 ---
 
-## 5. Las 6 colisiones que hay que decidir (no son bugs, son decisiones)
+## 5. La regla: manda vuestro modelo
 
-Nuestro modelo y el vuestro no encajan en seis puntos. Cuatro los arreglamos nosotros. **Dos
-necesitan que decidáis vosotros.**
+**Decisión tomada (Nicolás, 2026-07-15):** el frontend **adopta vuestra lógica de negocio**.
+Vuestro modelo es más maduro que el nuestro —moderación real, ledger append-only, stock con
+triggers, PostGIS— y no tiene sentido que lo dobléis para encajar en unos mocks.
 
-### 🟢 Las que resolvemos nosotros, sin tocaros
+La excepción es corta y explícita: **cuando vuestro modelo dejaría sin datos a una funcionalidad
+muy marcada de la interfaz, sois vosotros quienes adecuáis.** Son tres casos, están en 5.B, y son
+los únicos.
 
-1. **Idioma.** `nombre`→`name`, `descripcion`→`description`, `ubicacion:{lat,lng}`→`lat`,`lng`.
-2. **IDs.** Vosotros UUID, nosotros enteros. Nos adaptamos; las rutas `/poi/:id` ya son texto.
-3. **Paginación.** Vosotros `{items,total,page,page_size}`, nosotros arrays. Lo desenvolvemos.
-4. **Estados.** Vuestro `APROBADO` es nuestro `Activo`. Mapeamos.
+### 5.A · Lo que adoptamos nosotros (no os cuesta nada)
 
-### 🔴 Las que necesitan vuestra decisión
+| Colisión | Qué hacemos | Por qué vuestro modelo gana |
+|---|---|---|
+| **Idioma** (`nombre`/`descripcion`/`ubicacion`) | Adaptador en `services/` | Da igual, es cosmético. La traducción es nuestra |
+| **Paginación** `{items,total,page,page_size}` | La desenvolvemos | Estándar y correcta |
+| **`calificacion_promedio` / `total_calificaciones`** | Mapeo directo a `rating`/`reviewCount` | Idéntico |
+| **Estados POI** (5 estados + moderación) | Rehacemos el panel admin: hoy tenemos un interruptor Activo/Inactivo, no una máquina de estados | El vuestro es un flujo de moderación real; el nuestro era un juguete |
+| **Categorías desde catálogo** | Consumimos `GET /categorias-poi` | **Nos mejora**: hoy el mapa de iconos está copiado a mano en *tres* archivos (`explore.js`, `map.js`, `rewards.js`). Vuestro catálogo trae `icono` y `color`, así que borramos las tres copias |
+| **Visitas / check-in** | Adoptamos `POST /visitas` entero | **Nos arregla un bug**: hoy registrar una visita otorga 0 puntos y no valida nada. Vosotros validáis por GPS contra `radio_validacion` y devolvéis `puntos_otorgados` |
+| **Comentarios + calificaciones separados** | Partimos la UI en dos gestos y construimos la cola de moderación en el panel admin | **Vuestro diseño es mejor y lo aceptamos.** El `UNIQUE(usuario_id, poi_id)` impide el spam de reseñas que hoy permitimos, y `PUT` idempotente es lo correcto |
+| **Auth JWT** | Contraseñas reales, token, header `Authorization`, manejo del 401 | Lo nuestro es un placeholder declarado: "modo demo, sin contraseñas a propósito" |
 
-**5. Un POI no tiene puntos en vuestro modelo — y nuestra UI los promete.**
+> **Sobre comentarios:** aceptamos que nazcan `PENDIENTE`. Implica que el usuario escriba y **no
+> vea su comentario** hasta que se apruebe — lo contaremos en la interfaz ("pendiente de
+> revisión") y construiremos la cola de moderación. Es trabajo nuestro, no vuestro.
 
-Cada tarjeta del frontend enseña un badge **"+250 puntos"**. En vuestro esquema `poi` **no tiene
-columna de puntos**: los puntos los decide `reglas_puntos` por evento, en el momento de validar
-la visita. Es mejor diseño que el nuestro, pero deja la UI sin número que enseñar.
+### 5.B · Lo que os pedimos adecuar (rompe algo muy marcado del frontend)
 
-Opciones, de menos a más trabajo para vosotros:
-- **(a)** Exponer en `GET /poi` un `puntos_visita` calculado resolviendo `reglas_puntos` para ese POI. La UI no cambia.
-- **(b)** Que el frontend deje de prometer un número y diga "gana puntos". Cero trabajo backend, pero pierde gancho.
+Solo tres. Cada uno deja una funcionalidad central sin dato que enseñar.
 
-Necesitamos saber cuál antes de tocar la tarjeta.
+---
 
-**6. Nuestras reseñas son una cosa; las vuestras son dos.**
+**🔴 B1 · Un POI necesita exponer sus puntos**
 
-Nosotros pintamos una tarjeta con **autor + estrellas + texto** juntos. Vosotros lo tenéis
-partido, y bien partido: `calificaciones` (1-5, una por usuario y POI) y `comentarios` (texto,
-con moderación). Son tablas distintas y endpoints distintos.
+Cada tarjeta de POI lleva un badge **"+250 puntos"**. Está en la portada, en Explora, en
+Favoritos y en el popup del mapa. **Es el gancho de gamificación de todo el producto**: es lo que
+convierte una lista de sitios en un juego.
 
-Además: **vuestros comentarios nacen `PENDIENTE`.** Hoy el usuario escribe y ve su comentario
-al instante. Con vosotros escribirá y **no verá nada** hasta que un admin lo apruebe. Eso hay
-que contarlo en la interfaz, y hay que construir la cola de moderación en el panel de admin.
+En vuestro esquema `poi` **no tiene columna de puntos** — los resuelve `reglas_puntos` por evento
+al validar la visita. Vuestro diseño es mejor (los puntos son configurables y con prioridad), pero
+deja la tarjeta muda: no podemos prometer un número que no existe hasta que el usuario ya visitó.
 
-Necesitamos decidir: ¿unimos calificación y comentario en un solo gesto de UI (dos llamadas
-por debajo), o los separamos como los tenéis vosotros?
+**Petición:** exponer en `GET /poi` y `GET /poi/{id}` un campo calculado, p. ej.
+`puntos_visita`, resolviendo `reglas_puntos` para ese POI. Es una lectura, no cambia vuestro
+modelo, y no toca la tabla.
 
-### 🟡 Y tres avisos, más pequeños pero traicioneros
+Si decís que no, la alternativa es que la tarjeta deje de prometer una cifra y diga "gana puntos".
+Se puede, pero pierde el gancho. **Preferimos (a) con diferencia.**
 
-- **`type` significa cosas distintas en cada lado.** Nuestro reto tiene `type: "Cultural"`; el
-  vuestro `tipo: "VISITA"`. **Mismo nombre, semánticas incompatibles.** Cuidado al leer código nuestro.
-- **`image`, `emoji`, `difficulty` y `category` de recompensa no existen en vuestro esquema.**
-  Son adornos que inventamos. O caben en algún `metadata`/`configuracion` JSONB, o los quitamos.
-- **Nuestro reto tiene `points` y `deadline`; el vuestro tiene `recurrencia`, `cantidad_requerida`
-  y `modo_recompensa`.** Vuestro modelo de retos es bastante más rico que nuestra UI. La vista de
-  Retos se va a quedar corta y habrá que rediseñarla — no es trabajo vuestro, pero conviene que
-  sepáis por qué os vamos a preguntar por `progreso` y `porcentaje`.
+---
+
+**🔴 B2 · `GET /poi` necesita un parámetro de ordenación**
+
+Explora ofrece cuatro ordenaciones: **Recomendados** (por calificación), **Más puntos**,
+**Menos puntos** y **Nombre (A-Z)**. El mapa añade **Distancia**.
+
+Vuestro contrato tiene `q`, `categoria_id`, `ciudad_id`, `lat/lng/radio_metros`, `page` y
+`page_size` — pero **ningún parámetro de orden**. Hoy ordenamos en cliente porque tenemos la lista
+entera; en cuanto pagináis en servidor, ordenar en cliente ordena *solo la página visible*, que es
+peor que no ordenar: parece que funciona y miente.
+
+**Petición:** un `orden` en `GET /poi` con al menos `calificacion`, `nombre` y `distancia`
+(este último ya lo tenéis resuelto: devolvéis `distancia_metros` cuando mandamos `lat`/`lng`).
+Si aceptáis B1, añadid `puntos`.
+
+**Alternativa temporal:** pedimos `page_size` alto y seguimos ordenando en cliente. Funciona
+mientras Barranquilla tenga decenas de POIs; se cae cuando sean cientos. Sirve para arrancar,
+no para producción.
+
+---
+
+**🔴 B3 · Retos y recompensas necesitan imagen**
+
+La tarjeta de reto y la de recompensa son **diseños centrados en la imagen** — la foto ocupa la
+mitad superior de la tarjeta. Vuestros `retos` y `recompensas` no tienen columna de imagen.
+
+**Petición:** o una columna `imagen_url`, o una clave acordada dentro del JSONB que ya existe
+(`retos.configuracion`, y algo equivalente en `recompensas`). Nos vale cualquiera de las dos, pero
+necesitamos que sea **una clave fija y documentada**, no libre.
+
+Lo demás de ese grupo lo cedemos nosotros: `difficulty` en retos y `emoji` en recompensas son
+adornos que inventamos, y los quitamos sin discusión.
+
+### 5.C · Decisiones conjuntas que no puede tomar ninguno solo
+
+**C1 · ¿Cuál es la taxonomía de categorías?**
+Nuestras categorías son **Cultura, Naturaleza, Gastronomía, Religiosa, Compras**. Vuestro
+`categorias_poi` no viene precargado en el DDL y los ejemplos del contrato dicen *Museo*,
+*Restaurante*. Son taxonomías distintas.
+
+Aviso importante: nuestro CSS tiene **colores cableados por nombre de categoría**
+(`.marker-pin-bubble.naturaleza`, `.gastronomia`, `.religiosa`...). Si la taxonomía cambia, los
+pines del mapa pierden el color **en silencio**, sin error. Si vuestro catálogo trae `color`, lo
+consumimos y el problema desaparece para siempre — pero hay que decidir el contenido del catálogo.
+
+**C2 · ¿Quién calcula "Abierto ahora"?**
+El detalle del POI muestra una insignia **"Abierto ahora"**. Hoy es mentira: viene cableada en el
+mock (`schedule.isOpenNow: true`). Vosotros dais `horarios` como JSONB **de forma libre**, sin
+validar por schema. Podemos calcularlo nosotros, pero solo si la forma está **fijada y
+documentada**; con JSONB libre no hay nada que parsear con garantías.
+
+Dos salidas: fijáis la forma de `horarios` y lo calculamos, o exponéis `abierto_ahora` ya resuelto.
+
+**C3 · ¿Adoptamos el modelo de retos entero, ahora o después?**
+Vuestro modelo de retos es **mucho más rico** que nuestra vista: `recurrencia`,
+`cantidad_requerida`, `modo_recompensa`, periodos, `numero_intento`, `progreso`, `porcentaje`,
+rachas, hitos. Nuestra página de Retos tiene tres estados (disponible / en curso / completado) y
+una fecha límite.
+
+Adoptarlo entero **no es adaptar: es rediseñar la vista**. No es trabajo vuestro, pero condiciona
+el orden: o retrasamos Retos hasta rediseñarla, o hacemos una versión reducida que ignore
+recurrencia y rachas y la ampliamos luego. **Es decisión de producto, no técnica.**
+
+> ⚠️ **Trampa al leer nuestro código:** nuestro reto tiene `type: "Cultural"` y el vuestro
+> `tipo: "VISITA"`. **Mismo nombre de campo, significados incompatibles.** Lo renombramos nosotros.
+
+### 5.D · Roturas duras nuestras (las arreglamos, pero sabedlas)
+
+Con vuestros UUID, dos cosas nuestras se rompen **hoy mismo**:
+
+1. **La ruta del detalle solo acepta dígitos:** `pattern: /^\/poi\/(\d+)$/`. Un UUID **no casa** y
+   el usuario recibe un 404. Es el bug más tonto y más seguro de esta integración.
+2. **`visit.service.js` hace `Number(poiId)`** dos veces: con un UUID da `NaN` y falla en silencio.
+
+Son nuestras y van en nuestra lista. Las decimos para que, si veis un 404 raro en un detalle de
+POI el primer día, sepáis que no sois vosotros.
 
 ---
 
@@ -255,5 +346,20 @@ Es lo primero de nuestra lista. **Hasta que esté, integrad solo lecturas** (pas
 3. Ponemos `VITE_API_URL` y adaptamos `poi.service.js`.
 4. Tres pantallas dejan de ser mentira el mismo día.
 
-Todo lo demás cuelga de ahí. El resto del estado del frontend, con sus huecos sin maquillar, está
-en `docs/ESTADO_PROYECTO.md`.
+Nada del paso 1 depende de las peticiones de 5.B: podéis arrancar hoy y decidirlas esta semana.
+Lo único que os pedimos **antes** de que toquéis `GET /poi` es tenerlas sobre la mesa, porque
+`puntos_visita` (B1) y `orden` (B2) viven justo en ese endpoint y es más barato meterlos ahora
+que volver.
+
+**Las tres respuestas que necesitamos de vosotros:**
+
+| | Pregunta | Bloquea |
+|---|---|---|
+| **B1** | ¿Podéis exponer `puntos_visita` calculado en `GET /poi`? | El badge de puntos de todas las tarjetas |
+| **B2** | ¿Podéis añadir `orden` a `GET /poi`? | Las 4 ordenaciones de Explora en cuanto paginéis |
+| **B3** | ¿Imagen de retos/recompensas: columna o clave fija en JSONB? | Las tarjetas de Retos y Recompensas |
+
+Y las tres conjuntas (5.C): taxonomía de categorías, quién calcula "Abierto ahora", y si adoptamos
+el modelo de retos entero ya o por fases.
+
+El resto del estado del frontend, con sus huecos sin maquillar, está en `docs/ESTADO_PROYECTO.md`.
