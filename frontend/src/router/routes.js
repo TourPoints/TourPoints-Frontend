@@ -1,6 +1,6 @@
 import { home } from "../pages/home.js";
-import { login } from "../pages/auth/login.js";
-import { register } from "../pages/auth/register.js";
+import { login, initLogin } from "../pages/auth/login.js";
+import { register, initRegister } from "../pages/auth/register.js";
 import { rewards } from "../pages/rewards.js";
 import { notFound } from "../pages/notFound.js";
 import { adminDashboard, initAdminDashboard } from "../pages/admin/dashboard.js";
@@ -36,12 +36,14 @@ export const routes = {
 
     "/login": {
         component: login,
+        init: initLogin,
         layout: "public",
         auth: false
     },
 
     "/register": {
         component: register,
+        init: initRegister,
         layout: "public",
         auth: false
     },

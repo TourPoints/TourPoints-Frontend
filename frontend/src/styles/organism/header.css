@@ -45,42 +45,32 @@
   border-bottom: 2px solid var(--color-principal);
 }
 
+/* El menú de perfil va siempre a la derecha, en cualquier tamaño: es el
+   acceso al panel de administración y no puede depender del ancho. */
+.header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1.25rem;
+  flex-shrink: 0;
+}
+
 .buttons-container {
-  width: 30%;
   justify-content: flex-end;
   display: flex;
   gap: 1.25rem;
 }
 
-.user-button {
-  display: none;
-}
 /*TABLETS GRANDES / LAPTOPS PEQUEÑAS (Horizontal)*/
 @media (max-width: 1024px) {
   .nav-container {
     gap: 2rem;
     width: 60%;
   }
-  .buttons-container {
-    width: 40%;
-    gap: 1.25rem;
-  }
+  /* En pantallas estrechas los botones de texto estorban; el menú de perfil
+     ya ofrece iniciar sesión y registrarse. */
   .buttons-container {
     display: none;
-  }
-  .user-button {
-    display: inline-flex;
-    align-items: center;
-    background: none;
-    border: none;
-    display: block;
-    color: var(--color-principal);
-  }
-  
-  .user-button svg {
-    display: block;
-    width: 2rem;
-    height: 2rem;
   }
 }
 

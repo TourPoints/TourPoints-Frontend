@@ -3,6 +3,8 @@ import { renderLayout } from "./layouts.js";
 import { loadIcons } from "../utils/icons.js";
 import { updateActiveMenu } from "../utils/activeMenu.js";
 import { isAdmin } from "../utils/role.js";
+import { initSidebar } from "../components/organism/sidebar.js";
+import { initHeader } from "../components/organism/header.js";
 
 const app = document.getElementById("app");
 
@@ -50,6 +52,14 @@ export function renderRoute(){
     updateActiveMenu();
 
     loadIcons();
+
+    // Los layouts traen sus propios controles (logout), que se enganchan aquí
+    // porque el HTML acaba de insertarse.
+    if (route.layout === "admin") {
+        initSidebar();
+    } else {
+        initHeader();
+    }
 
     if (route.init) {
         route.init(params);
