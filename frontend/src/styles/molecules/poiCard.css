@@ -41,8 +41,16 @@
   display: block;
 }
 
+/* El alto de la destacada salía del alto natural de la foto, así que dependía
+   de que Unsplash respondiera: sin imagen la tarjeta colapsaba a 0 y
+   desaparecía de la portada, y al cargar daba un salto. Las tarjetas normales
+   no sufren esto porque su contenedor mide 192px fijos.
+   Con aspect-ratio el hueco queda reservado desde el primer pintado. En
+   escritorio el grid ya fija el alto (grid-auto-rows: 333px) y ese manda:
+   aspect-ratio solo actúa cuando las filas son automáticas. */
 .poi-card-featured .poi-card-img-container {
   height: 100%;
+  aspect-ratio: 3 / 2;
 }
 
 /* CARD FEATURED */

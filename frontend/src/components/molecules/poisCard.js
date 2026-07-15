@@ -47,7 +47,6 @@ export function poiCard({
         >
           <i data-lucide="heart"></i>
         </button>
-        ${isFeatured ? `<span class="category">${escapeHtml(category)}</span>` : ""}
         ${
           isFeatured
             ? `
