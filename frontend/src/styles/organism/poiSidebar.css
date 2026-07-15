@@ -37,15 +37,19 @@
   height: 1.25rem;
 }
 
+/* Mismo rosa que el corazón de las tarjetas: antes este botón usaba #ef4444
+   y las tarjetas #e11d48, así que el estado "guardado" cambiaba de color
+   según la vista. */
 .poi-sidebar-fav--active {
-  background-color: #fef2f2;
-  border-color: #ef4444;
-  color: #ef4444;
+  background-color: #fff1f2;
+  border-color: var(--color-rosa);
+  color: var(--color-rosa);
 }
 
-.poi-sidebar-fav--active i {
-  fill: #ef4444;
-  color: #ef4444;
+.poi-sidebar-fav--active i,
+.poi-sidebar-fav--active svg {
+  fill: var(--color-rosa);
+  color: var(--color-rosa);
 }
 
 @media (max-width: 992px) {

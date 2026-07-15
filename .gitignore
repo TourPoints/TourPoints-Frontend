@@ -1,0 +1,5 @@
+# Configuración local de asistentes de IA (Claude Code y similares).
+# Es de cada máquina, no del proyecto: settings.local.json guarda permisos
+# concedidos y launch.json apunta a rutas locales. Sin esta regla se cuela
+# en cada `git add`.
+.claude/

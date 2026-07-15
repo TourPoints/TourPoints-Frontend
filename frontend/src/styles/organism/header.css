@@ -45,6 +45,44 @@
   border-bottom: 2px solid var(--color-principal);
 }
 
+/* ---- Acceso a favoritos ----
+   Solo el icono: al lado de cinco enlaces de texto, una palabra más los
+   emborrona; un corazón se reconoce sin leerlo. Reposa en rosa suave para
+   insinuarse sin competir con el azul de la navegación, y se rellena en el
+   rosa fuerte —el mismo de las tarjetas— cuando estás en la vista. */
+.nav-favorites {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  color: var(--color-rosa-suave);
+  text-decoration: none;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.nav-favorites svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  fill: none;
+  transition: fill 0.2s ease;
+}
+
+.nav-favorites:hover {
+  background-color: #fff1f2;
+  color: var(--color-rosa);
+  transform: scale(1.08);
+}
+
+.nav-favorites--active {
+  color: var(--color-rosa);
+}
+
+.nav-favorites--active svg {
+  fill: var(--color-rosa);
+}
+
 /* El menú de perfil va siempre a la derecha, en cualquier tamaño: es el
    acceso al panel de administración y no puede depender del ancho. */
 .header-actions {

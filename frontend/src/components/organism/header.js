@@ -15,6 +15,12 @@ export function header() {
   // todo (incluido el panel de administración) cuelga del menú de perfil.
   const showAuthButtons = !isAuthenticated();
 
+  // El corazón no lleva la clase .menu a propósito: updateActiveMenu pinta esa
+  // clase de azul con subrayado, y aquí el estado activo es el rosa relleno.
+  // El router repinta el layout en cada navegación, así que basta resolverlo
+  // al renderizar, igual que hace bottomNav.
+  const favoritesActive = location.pathname === "/favorites" ? " nav-favorites--active" : "";
+
   return `
     <header class="header-global">
       <div class="nav-container">
@@ -26,6 +32,15 @@ export function header() {
           <a class="menu" href="/challenges" data-link>Retos</a>
           <a class="menu" href="/rewards" data-link>Recompensas</a>
           <a class="menu" href="/map" data-link>Mapa</a>
+          <a
+            class="nav-favorites${favoritesActive}"
+            href="/favorites"
+            data-link
+            title="Mis favoritos"
+            aria-label="Mis favoritos"
+          >
+            <i data-lucide="heart" aria-hidden="true"></i>
+          </a>
         </nav>
       </div>
       <div class="header-actions">

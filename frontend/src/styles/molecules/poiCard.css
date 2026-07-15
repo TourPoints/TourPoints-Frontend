@@ -118,8 +118,8 @@
 }
 
 .btn-heart--active .lucide-heart {
-  color: #e11d48;
-  fill: #e11d48;
+  color: var(--color-rosa);
+  fill: var(--color-rosa);
 }
 
 .poi-card-content {
