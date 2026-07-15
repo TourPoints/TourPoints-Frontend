@@ -114,47 +114,39 @@ de «la rama full» se refiere a **`test/full-integration`**.
 en `test/full-integration`** hasta que los features estén pulidos y se pruebe la
 integración con el backend. Solo entonces se abre el PR a `develop`.
 
-### Divergencia medida (`git rev-list --count`)
+### Divergencia medida (`git rev-list --count`, tras fusionar TOUR-35 el 2026-07-15)
 
 | Rama | Commits SIN integrar en full | Commits que le faltan de full |
 |---|---|---|
-| `develop` | **0** | **6** |
-| `main` | 0 | 28 |
-| `feature/TOUR-2-browse-pois` | 0 | 25 |
-| `feature/TOUR-4-interactive-map` | 0 | 24 |
-| `feature/TOUR-40-TOUR-39-admin-dashboard` | 0 | 24 |
-| `feature/US-0-visit-landing-page` | 0 | 22 |
-| `feature/US-2-view-point-of-interest-details` | 0 | 23 |
-| `feature/rewards` | 0 | 24 |
+| `develop` | **0** | **16** |
+| `main` | 0 | 38 |
+| `feature/TOUR-2-browse-pois` | 0 | 35 |
+| `feature/TOUR-4-interactive-map` | 0 | 34 |
+| `feature/TOUR-40-TOUR-39-admin-dashboard` | 0 | 34 |
+| `feature/US-0-visit-landing-page` | 0 | 32 |
+| `feature/US-2-view-point-of-interest-details` | 0 | 33 |
+| `feature/rewards` | 0 | 34 |
 | `feature/TOUR-35-challenges` | 0 | 0 |
 
 **Lectura crítica:** ninguna rama tiene trabajo sin integrar. `test/full-integration` ya
 lo contiene TODO. Las ramas `feature/*` antiguas son punteros muertos, ya fusionados y
 muy atrasados — no guardan nada exclusivo y pueden borrarse sin pérdida.
 
-La tabla se midió cuando `feature/TOUR-35-challenges` estaba a la par de
-`test/full-integration`; desde entonces la rama actual va por delante (ver abajo). La
-lectura de fondo no cambia: `develop` es **ancestro directo** de la rama de integración,
-no ha divergido y no habría conflictos al fusionar.
+`develop` es **ancestro directo** de la rama de integración: no ha divergido y no habría
+conflictos al fusionar. La brecha son los 16 commits de esta tanda más los anteriores.
 
-### Trabajo en `feature/TOUR-35-challenges` sin integrar todavía
+Para saber en qué rama se construyó cada feature y cuáles son trampa, ver
+`docs/TRAZABILIDAD.md`.
 
-```
-3020e13 feat(TOUR-2): let users write comments on a POI
-0462a8b feat: make favourites usable and scope them to each user
-a8aa3c0 fix: land the seed reviews in Barranquilla and give them real dates
-d2c3cd6 feat(TOUR-2): add back navigation to the POI detail page
-c099dc4 feat(admin): add a back-to-site control in the sidebar
-59721bc docs: add project context and verified state snapshot
-278fbe3 feat(TOUR-35): add public challenges page with per-user progress
-```
+### Estado de la última tanda (2026-07-15)
 
-Todo verificado en el navegador contra el servidor de desarrollo, no solo compilado.
-Pendiente de fusionar a `test/full-integration`.
+Los 10 commits de `feature/TOUR-35-challenges` (retos, comentarios, favoritos, volver
+atrás, reseñas de Barranquilla, corazón de la nav) ya están **fusionados** en
+`test/full-integration` por fast-forward. Todo verificado en el navegador contra el
+servidor de desarrollo, no solo compilado.
 
-`.claude/` y `frontend/src/.claude/` quedan **sin trackear** a propósito: son
-configuración local de herramientas. Conviene una regla en `.gitignore` para que no
-reaparezcan en cada `git add`.
+`.claude/` está ignorado desde `32d1713`: es configuración local de herramientas y se
+colaba en cada `git add`.
 
 > Avisos de Git: `LF will be replaced by CRLF` en varios archivos. No hay `.gitattributes`
 > que fije los finales de línea — fricción latente si entra alguien en Linux/WSL.
