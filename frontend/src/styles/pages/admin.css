@@ -567,6 +567,58 @@
   color: #ef4444;
 }
 
+/* ---- Pie del sidebar ----
+   Agrupa las dos salidas del panel: volver al sitio y cerrar sesión. El
+   padding lateral iguala al de .sidebar-nav; sin él los botones quedaban
+   pegados a los bordes porque .sidebar no tiene padding horizontal. */
+.sidebar-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0 0.75rem;
+}
+
+/* ---- Volver al sitio público (sidebar) ----
+   Salida no destructiva, así que reposa en azul discreto y no compite con
+   el rojo del logout. La flecha apunta a la izquierda y se desplaza en ese
+   sentido al pasar el ratón: el espejo exacto del gesto de cerrar sesión. */
+.sidebar-back {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  color: #64748b;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.sidebar-back:hover {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #2563eb;
+}
+
+.sidebar-back-arrow {
+  font-size: 1rem;
+  line-height: 1;
+  transition: transform 0.18s ease;
+}
+
+/* El sidebar mide 200px y el pie tiene padding lateral: sin esto las
+   etiquetas de una sola palabra larga parten en dos líneas. */
+.sidebar-back-label,
+.sidebar-logout-label {
+  white-space: nowrap;
+}
+
+.sidebar-back:hover .sidebar-back-arrow {
+  transform: translateX(-3px);
+}
+
 /* ---- Botón de cerrar sesión (sidebar) ----
    Acción destructiva: reposa en gris para no competir con la navegación,
    y solo se tiñe de rojo al interactuar, cuando la intención ya es explícita. */
@@ -685,4 +737,13 @@
   .sidebar-brand-title { display: none; }
   .admin-main { margin-left: 60px; }
   .admin-stats { grid-template-columns: 1fr 1fr; }
+
+  /* Con el sidebar colapsado a 60px solo caben los iconos. Las etiquetas del
+     pie se ocultaban antes: "Cerrar sesión" se desbordaba del contenedor. */
+  .sidebar-footer { padding: 0 0.5rem; }
+  .sidebar-back-label,
+  .sidebar-logout-label,
+  .sidebar-logout-arrow { display: none; }
+  .sidebar-back,
+  .sidebar-logout { justify-content: center; padding: 0.65rem 0.25rem; }
 }

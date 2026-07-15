@@ -90,6 +90,13 @@ export function sidebar() {
       ${sidebarUser()}
 
       <div class="sidebar-footer">
+        <!-- Salir del panel sin cerrar sesión: antes la única forma de volver
+             al sitio era desloguearse o escribir la URL a mano. -->
+        <a class="sidebar-back" href="/" data-link title="Volver al sitio público">
+          <span class="sidebar-back-arrow" aria-hidden="true">←</span>
+          <span class="sidebar-back-label">Volver al sitio</span>
+        </a>
+
         <button class="sidebar-logout" id="sidebar-logout" type="button">
           <span class="sidebar-logout-icon" aria-hidden="true">🚪</span>
           <span class="sidebar-logout-label">Cerrar sesión</span>
