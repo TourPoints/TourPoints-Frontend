@@ -1,4 +1,4 @@
-const VISITS_KEY = "tourpoints_visits";
+const VISITS_KEY = "tourpoints:visits";
 
 function getStoredVisits() {
   try {

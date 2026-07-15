@@ -1,4 +1,4 @@
-const FAVORITES_KEY = "tourpoints_favorites";
+const FAVORITES_KEY = "tourpoints:favorites";
 
 function getStoredFavorites() {
   try {

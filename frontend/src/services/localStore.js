@@ -7,6 +7,21 @@
 
 const STORAGE_PREFIX = "tourpoints:";
 
+// Versión de los datos semilla. Al cambiarla se descartan las colecciones
+// guardadas y se vuelve a sembrar desde los mocks: sin esto, quien ya visitó
+// la app seguiría viendo los datos antiguos (p.ej. los POIs de Madrid) aunque
+// los mocks digan otra cosa. Solo aplica a la fase sin backend; con API real
+// este archivo desaparece entero.
+const SEED_VERSION = "2-barranquilla";
+const SEED_VERSION_KEY = STORAGE_PREFIX + "seed-version";
+
+if (localStorage.getItem(SEED_VERSION_KEY) !== SEED_VERSION) {
+  Object.keys(localStorage)
+    .filter((key) => key.startsWith(STORAGE_PREFIX))
+    .forEach((key) => localStorage.removeItem(key));
+  localStorage.setItem(SEED_VERSION_KEY, SEED_VERSION);
+}
+
 /**
  * Lee una colección de localStorage. Si no existe todavía, la inicializa
  * con los datos semilla para que la primera visita no vea una tabla vacía.
