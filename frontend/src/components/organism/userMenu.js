@@ -121,6 +121,10 @@ function authenticatedItems(user) {
     }
 
     <div class="user-menu-section">
+      <a href="/dashboard" class="user-menu-item" data-link role="menuitem">
+        <i class="user-menu-icon" data-lucide="layout-dashboard" aria-hidden="true"></i>
+        <span>Mi panel</span>
+      </a>
       <a href="/favorites" class="user-menu-item" data-link role="menuitem">
         <i class="user-menu-icon" data-lucide="heart" aria-hidden="true"></i>
         <span>Mis favoritos</span>

@@ -9,6 +9,7 @@ import { poisManagement, initPoisManagement } from "../pages/admin/poisManagemen
 import { challengesManagement, initChallengesManagement } from "../pages/admin/challengesManagement.js";
 import { rewardsManagement, initRewardsManagement } from "../pages/admin/rewardsManagement.js";
 import { adminSettings }        from "../pages/admin/settings.js";
+import { dashboard, initDashboard } from "../pages/dashboard.js";
 import { explore, initExplore } from "../pages/explore.js";
 import { challenges, initChallenges } from "../pages/challenges.js";
 import { favorites, initFavorites } from "../pages/favorites.js";
@@ -70,6 +71,14 @@ export const routes = {
     "/favorites": {
         component: favorites,
         init: initFavorites,
+        layout: "public",
+        auth: false
+    },
+
+    // Mismo caso que /favorites: la página gestiona su propia sesión.
+    "/dashboard": {
+        component: dashboard,
+        init: initDashboard,
         layout: "public",
         auth: false
     },

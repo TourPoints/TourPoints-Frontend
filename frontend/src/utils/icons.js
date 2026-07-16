@@ -46,7 +46,9 @@ import {
   // Estados y avisos
   Check,
   Lock,
-  ShieldAlert
+  ShieldAlert,
+  // Dashboard de usuario
+  LayoutDashboard
 } from "lucide";
 
 // Todo icono referenciado en el HTML vía data-lucide="..." debe estar aquí.
@@ -99,7 +101,8 @@ export const loadIcons = () => {
       UserPlus,
       Check,
       Lock,
-      ShieldAlert
+      ShieldAlert,
+      LayoutDashboard
     },
   });
 };
