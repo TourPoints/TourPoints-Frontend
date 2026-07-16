@@ -1,15 +1,18 @@
 // Acceso a TourPoints.
 //
-// ⚠️ MODO DEMO: sin backend, la sesión se abre comprobando que el email exista
-// entre los usuarios registrados. No se pide contraseña a propósito: validarla
-// en el navegador no aportaría ninguna seguridad real. Ver auth.service.js.
+// Dos modos, según haya backend cableado o no (docs/CABLEADO.md):
+// - API real: email + contraseña contra POST /auth/login.
+// - MODO DEMO: basta un email registrado; no se pide contraseña a propósito,
+//   validarla en el navegador no aportaría seguridad real. Ver auth.service.js.
 
 import { login as signIn, getDemoAccounts } from "../../services/auth.service.js";
+import { isApiEnabled } from "../../services/api.client.js";
 import { escapeHtml } from "../../components/organism/modal.js";
 import { navigate } from "../../router/router.js";
 import "../../styles/pages/auth.css";
 
 export function login() {
+  const apiMode = isApiEnabled("auth");
   const { admin, user } = getDemoAccounts();
 
   return `
@@ -31,12 +34,34 @@ export function login() {
               autocomplete="email"
               required
             >
-            <span class="auth-error" id="login-error"></span>
           </div>
 
+          ${
+            apiMode
+              ? `
+          <div class="auth-field">
+            <label for="login-password">Contraseña</label>
+            <input
+              type="password"
+              id="login-password"
+              name="password"
+              placeholder="Tu contraseña"
+              autocomplete="current-password"
+              required
+            >
+          </div>
+          `
+              : ""
+          }
+
+          <span class="auth-error" id="login-error"></span>
           <button type="submit" class="auth-submit">Entrar</button>
         </form>
 
+        ${
+          apiMode
+            ? ""
+            : `
         <div class="auth-demo">
           <span class="auth-demo-title">Modo demo · sin contraseña</span>
           <p class="auth-demo-text">
@@ -62,6 +87,8 @@ export function login() {
             }
           </div>
         </div>
+        `
+        }
 
         <p class="auth-alt">
           ¿No tienes cuenta? <a href="/register" data-link>Crear una</a>
@@ -72,12 +99,14 @@ export function login() {
 }
 
 export function initLogin() {
+  const apiMode = isApiEnabled("auth");
   const form = document.getElementById("login-form");
   const input = document.getElementById("login-email");
+  const passwordInput = document.getElementById("login-password");
   const error = document.getElementById("login-error");
   if (!form || !input) return;
 
-  // Los chips rellenan el email para poder entrar de un clic.
+  // Los chips rellenan el email para poder entrar de un clic (solo demo).
   document.querySelectorAll(".auth-demo-chip").forEach((chip) => {
     chip.addEventListener("click", () => {
       input.value = chip.dataset.email;
@@ -91,12 +120,26 @@ export function initLogin() {
     error.textContent = "";
 
     const email = input.value.trim();
+    const password = passwordInput?.value ?? "";
+
     if (!email) {
       error.textContent = "Escribe tu email para continuar.";
       return;
     }
+    if (apiMode && !password) {
+      error.textContent = "Escribe tu contraseña para continuar.";
+      return;
+    }
 
-    const result = await signIn(email);
+    const submit = form.querySelector(".auth-submit");
+    submit.disabled = true;
+    submit.textContent = "Entrando...";
+
+    const result = await signIn(email, password);
+
+    submit.disabled = false;
+    submit.textContent = "Entrar";
+
     if (!result.ok) {
       error.textContent = result.error;
       return;
