@@ -59,12 +59,16 @@
   color: var(--color-gris-oscuro);
 }
 
+/* padding vertical para que el objetivo llegue a 24px: el texto solo daba 20 y
+   estos "Ver todos" son la salida de cada sección hacia su listado completo. */
 .link {
   font-family: var(--font-texto);
   font-size: 1rem;
   font-weight: 400;
   color: var(--color-principal);
   text-decoration: none;
+  display: inline-block;
+  padding: 0.2rem 0;
 }
 
 .highlights-points {

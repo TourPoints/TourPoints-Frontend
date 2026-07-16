@@ -44,8 +44,12 @@
     color: var(--color-blanco);
   }
 
-  /* Que el contenido no quede oculto detrás de la barra */
-  .public-layout main {
+  /* Que el contenido no quede oculto detrás de la barra.
+     La reserva va en el pie, no en main: el pie es hermano de main y se pinta
+     después, así que el padding de main no lo alcanzaba y la barra le comía el
+     copyright. Ponerlo aquí además hace que el azul del pie corra por debajo
+     de la barra, sin dejar una franja blanca entre ambos. */
+  .public-layout .footer-global {
     padding-bottom: 5rem;
   }
 }

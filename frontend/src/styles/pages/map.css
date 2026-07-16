@@ -307,11 +307,20 @@ body:has(.map-page-container) footer {
   background: #fef3c7;
 }
 
+/* Medía 17x19: el objetivo más pequeño de la app, y encima flotando sobre un
+   mapa que responde al arrastre. Fallar el cierre y mover el mapa sin querer
+   era demasiado fácil. Ahora ocupa 28x28 sin cambiar el tamaño de la aspa. */
 .map-notice-close {
   flex-shrink: 0;
-  padding: 0 0.2rem;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
   background: none;
   border: none;
+  border-radius: 6px;
   color: #94a3b8;
   font-size: 1.2rem;
   line-height: 1;

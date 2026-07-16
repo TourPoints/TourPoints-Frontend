@@ -49,11 +49,16 @@
   margin-bottom: 1rem;
 }
 
+/* El hueco baja de 0.75rem a 0.25rem y esos milímetros pasan al padding del
+   enlace: la fila sigue midiendo lo mismo (31px de paso, el pie se ve igual)
+   pero el área que responde al dedo sube de 19px a 27px. Debajo de 24px el
+   objetivo es demasiado pequeño para tocarlo con seguridad (WCAG 2.2 AA), y
+   un pie enlazado que falla al primer toque es un pie que nadie usa. */
 .footer-links ul {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.25rem;
 }
 
 .footer-links a {
@@ -63,6 +68,8 @@
   text-decoration: none;
   opacity: 0.85;
   transition: opacity 0.3s ease;
+  display: inline-block;
+  padding: 0.25rem 0;
 }
 
 .footer-links a:hover {
@@ -87,15 +94,20 @@
 
 .footer-social {
   display: flex;
-  gap: 1rem;
+  gap: 0.5rem;
 }
 
+/* Mismo trato que los enlaces: el icono sigue midiendo 1.25rem, pero el área
+   táctil crece a 28px repartiendo el hueco en padding. Un icono de 20px es de
+   los objetivos más difíciles de acertar con el pulgar. */
 .footer-social a {
   color: var(--color-blanco);
   opacity: 0.8;
   transition: opacity 0.3s ease;
   display: flex;
   align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
 }
 
 .footer-social a:hover {
@@ -123,16 +135,23 @@
     gap: 1.5rem;
   }
 
+  /* La regla base dice `flex: 1 1 280px`, pensada para el contenedor en fila:
+     ahí 280px es un ancho base y flex-grow reparte el espacio sobrante a lo
+     ancho. Aquí el contenedor pasa a `column`, el eje principal se vuelve
+     vertical y ese mismo 280px se convierte en un ALTO base, con grow para
+     estirarse aún más: el bloque medía 280px para 121px de contenido y dejaba
+     un boquete azul de 159px sobre "Explora". */
   .footer-info {
     max-width: 100%;
+    flex: 0 0 auto;
   }
 
-  .footer-links {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 2rem;
-  }
-
+  /* Aquí había un `flex-direction: row` que apuntaba al elemento equivocado.
+     .footer-links no es el contenedor de las tres columnas, es CADA columna:
+     ponerla en fila no colocaba las secciones una al lado de otra, acostaba el
+     título junto a su propia lista, y "Explora" acababa a la izquierda de sus
+     enlaces. Cada sección vuelve a apilar título sobre lista, como dice la
+     regla base, y las tres se apilan entre sí: un pie de móvil normal. */
   .footer-links h4 {
     margin-bottom: 0.5rem;
   }
@@ -149,10 +168,6 @@
 @media (max-width: 480px) {
   .footer-container {
     padding: 1.5rem 1rem 1rem;
-  }
-
-  .footer-links {
-    gap: 1.5rem;
   }
 
   .footer-bottom {
