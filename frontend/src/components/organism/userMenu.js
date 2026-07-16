@@ -4,6 +4,11 @@
 // antes no existía ningún enlace y solo se llegaba escribiendo la URL.
 // El contenido se adapta a la sesión: sin sesión invita a entrar o registrarse;
 // con sesión muestra la cuenta y, si es admin, los accesos al panel.
+//
+// Los iconos repiten los del destino al que llevan: el corazón es el mismo de
+// favoritos en la barra de navegación, y gauge/users-round/ticket/log-out son
+// los mismos de la barra lateral del panel. Un mismo sitio no puede tener dos
+// iconos según desde dónde se mire.
 
 import { getCurrentUser, logout } from "../../services/auth.service.js";
 import { openConfirmModal, escapeHtml } from "./modal.js";
@@ -65,11 +70,11 @@ function anonymousItems() {
     </div>
     <div class="user-menu-section">
       <a href="/login" class="user-menu-item user-menu-item--primary" data-link role="menuitem">
-        <span class="user-menu-icon" aria-hidden="true">🔑</span>
+        <i class="user-menu-icon" data-lucide="log-in" aria-hidden="true"></i>
         <span>Iniciar sesión</span>
       </a>
       <a href="/register" class="user-menu-item" data-link role="menuitem">
-        <span class="user-menu-icon" aria-hidden="true">✨</span>
+        <i class="user-menu-icon" data-lucide="user-plus" aria-hidden="true"></i>
         <span>Crear cuenta</span>
       </a>
     </div>
@@ -103,11 +108,11 @@ function authenticatedItems(user) {
       <div class="user-menu-section">
         <span class="user-menu-section-title">Administración</span>
         <a href="/admin" class="user-menu-item user-menu-item--primary" data-link role="menuitem">
-          <span class="user-menu-icon" aria-hidden="true">⊞</span>
+          <i class="user-menu-icon" data-lucide="gauge" aria-hidden="true"></i>
           <span>Panel de administración</span>
         </a>
         <a href="/admin/users" class="user-menu-item" data-link role="menuitem">
-          <span class="user-menu-icon" aria-hidden="true">👥</span>
+          <i class="user-menu-icon" data-lucide="users-round" aria-hidden="true"></i>
           <span>Gestión de usuarios</span>
         </a>
       </div>
@@ -117,15 +122,15 @@ function authenticatedItems(user) {
 
     <div class="user-menu-section">
       <a href="/favorites" class="user-menu-item" data-link role="menuitem">
-        <span class="user-menu-icon" aria-hidden="true">💙</span>
+        <i class="user-menu-icon" data-lucide="heart" aria-hidden="true"></i>
         <span>Mis favoritos</span>
       </a>
       <a href="/rewards" class="user-menu-item" data-link role="menuitem">
-        <span class="user-menu-icon" aria-hidden="true">🎁</span>
+        <i class="user-menu-icon" data-lucide="ticket" aria-hidden="true"></i>
         <span>Mis recompensas</span>
       </a>
       <button class="user-menu-item user-menu-item--danger" id="user-menu-logout" type="button" role="menuitem">
-        <span class="user-menu-icon" aria-hidden="true">🚪</span>
+        <i class="user-menu-icon" data-lucide="log-out" aria-hidden="true"></i>
         <span>Cerrar sesión</span>
       </button>
     </div>

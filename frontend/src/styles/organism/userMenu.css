@@ -220,9 +220,13 @@
   background: #fef2f2;
 }
 
+/* Antes era un emoji: bastaba reservarle el ancho y centrarlo. Ahora es un SVG
+   de Lucide, que necesita alto explícito o se planta en sus 24px por defecto.
+   Hereda el color del item, así que el rojo de "Cerrar sesión" también tiñe su
+   icono — con 🚪 era imposible. */
 .user-menu-icon {
   width: 1.1rem;
-  text-align: center;
+  height: 1.1rem;
   flex-shrink: 0;
 }
 

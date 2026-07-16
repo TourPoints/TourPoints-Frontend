@@ -39,7 +39,10 @@ import {
   SquarePen,
   RefreshCw,
   Trash2,
-  ShieldCheck
+  ShieldCheck,
+  // Menú de perfil
+  LogIn,
+  UserPlus
 } from "lucide";
 
 // Todo icono referenciado en el HTML vía data-lucide="..." debe estar aquí.
@@ -87,7 +90,9 @@ export const loadIcons = () => {
       SquarePen,
       RefreshCw,
       Trash2,
-      ShieldCheck
+      ShieldCheck,
+      LogIn,
+      UserPlus
     },
   });
 };
