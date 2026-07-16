@@ -583,16 +583,22 @@
 }
 
 /* ---- Volver al sitio público (sidebar) ----
-   Salida no destructiva, así que reposa en azul discreto y no compite con
-   el rojo del logout. La flecha apunta a la izquierda y se desplaza en ese
-   sentido al pasar el ratón: el espejo exacto del gesto de cerrar sesión. */
+   Cierra la navegación, separado de los enlaces por un respiro. Los enlaces
+   del menú no tienen borde, así que el contorno propio basta para que se lea
+   como otra cosa: no navegas dentro del panel, te sales de él.
+
+   Salida no destructiva, así que reposa en gris y solo se tiñe de azul al
+   interactuar — no compite con el rojo del logout. La flecha apunta a la
+   izquierda y se desplaza en ese sentido al pasar el ratón: el espejo exacto
+   del gesto de cerrar sesión. */
 .sidebar-back {
   display: flex;
   align-items: center;
   gap: 0.6rem;
+  margin-top: 0.85rem;
   padding: 0.65rem 0.85rem;
   border-radius: 10px;
-  border: 1px solid transparent;
+  border: 1px solid #e2e8f0;
   color: #64748b;
   text-decoration: none;
   font-size: 0.875rem;
