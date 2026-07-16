@@ -17,7 +17,7 @@ export function home() {
   return `
     
     <section class="hero">
-    <h1>Descubre la ciudad,gana recompensas y comparte tu experiencia</h1>
+    <h1>Descubre la ciudad, gana recompensas y comparte tu experiencia</h1>
     <p>Explora los rincones más interesantes de tu ciudad, completa desafíos únicos y canjea tus puntos por recompensas.</p>
       
     ${searchBar()}

@@ -391,8 +391,13 @@
     gap: 1rem;
   }
 
+  /* Estaba en 1.85rem, por encima del 1.45rem que fija el corte de 768px: como
+     este bloque va después en el archivo, ganaba, y el titular CRECÍA al
+     estrechar la pantalla — 23px en una tablet de 600px, 29.6px en un móvil de
+     375px. Ahí ocupaba cinco líneas y un cuarto de la pantalla. La rampa ahora
+     baja de verdad: 3.1 → 2.75 → 1.45 → 1.35. */
   .hero h1 {
-    font-size: 1.85rem;
+    font-size: 1.35rem;
   }
 
   .hero p {
