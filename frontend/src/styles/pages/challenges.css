@@ -266,6 +266,9 @@
     color: var(--color-blanco);
   }
 
+  /* El span sigue siendo el círculo; el icono va dentro y se mide aparte. Con
+     el 🏆 bastaba un font-size, pero un SVG con la clase del círculo se comería
+     el círculo entero. */
   .progress-card-trophy {
     display: flex;
     align-items: center;
@@ -274,7 +277,12 @@
     height: 2.75rem;
     background: rgba(255, 255, 255, 0.18);
     border-radius: 50%;
-    font-size: 1.25rem;
+  }
+
+  .progress-card-trophy svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--color-amarillo);
   }
 
   .challenges-stats {

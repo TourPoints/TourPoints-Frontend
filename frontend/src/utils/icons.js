@@ -42,7 +42,11 @@ import {
   ShieldCheck,
   // Menú de perfil
   LogIn,
-  UserPlus
+  UserPlus,
+  // Estados y avisos
+  Check,
+  Lock,
+  ShieldAlert
 } from "lucide";
 
 // Todo icono referenciado en el HTML vía data-lucide="..." debe estar aquí.
@@ -92,7 +96,10 @@ export const loadIcons = () => {
       Trash2,
       ShieldCheck,
       LogIn,
-      UserPlus
+      UserPlus,
+      Check,
+      Lock,
+      ShieldAlert
     },
   });
 };

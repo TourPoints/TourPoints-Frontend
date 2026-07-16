@@ -10,7 +10,7 @@
 export function accessDenied() {
   return `
     <div class="access-denied">
-      <p class="access-denied-icon">⛔</p>
+      <i class="access-denied-icon" data-lucide="shield-alert" aria-hidden="true"></i>
       <p>Acceso denegado. Solo administradores.</p>
       <a href="/" class="btn-primary access-denied-link" data-link>Volver al inicio</a>
     </div>

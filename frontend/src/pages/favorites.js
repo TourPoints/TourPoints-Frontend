@@ -79,7 +79,7 @@ function render() {
   if (favoritePois.length === 0) {
     container.innerHTML = `
       <div class="favorites-empty">
-        <span class="favorites-empty-icon" aria-hidden="true">💙</span>
+        <i class="favorites-empty-icon" data-lucide="heart" aria-hidden="true"></i>
         <p>Todavía no has guardado ningún lugar.</p>
         <span class="favorites-empty-hint">Pulsa el corazón de cualquier destino para tenerlo a mano aquí.</span>
         <a href="/explore" class="btn btn--primary" data-link>Explorar destinos</a>
@@ -112,7 +112,7 @@ function renderSignedOut(container) {
 
   container.innerHTML = `
     <div class="favorites-empty">
-      <span class="favorites-empty-icon" aria-hidden="true">🔒</span>
+      <i class="favorites-empty-icon" data-lucide="lock" aria-hidden="true"></i>
       <p>Inicia sesión para ver tus lugares guardados.</p>
       <a href="/login" class="btn btn--primary" data-link>Iniciar sesión</a>
     </div>

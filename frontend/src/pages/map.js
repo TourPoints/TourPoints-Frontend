@@ -93,7 +93,7 @@ export function map() {
 
         <!-- Aviso de geolocalización: sin esto el fallo era invisible -->
         <div class="map-notice" id="map-notice" role="status" hidden>
-          <span class="map-notice-icon" aria-hidden="true">📍</span>
+          <i class="map-notice-icon" data-lucide="map-pin" aria-hidden="true"></i>
           <p class="map-notice-text" id="map-notice-text"></p>
           <button type="button" class="map-notice-retry" id="map-notice-retry">Reintentar</button>
           <button type="button" class="map-notice-close" id="map-notice-close" aria-label="Cerrar aviso">&times;</button>

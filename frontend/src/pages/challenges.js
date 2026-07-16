@@ -56,7 +56,9 @@ export function challenges() {
           <span class="progress-card-label">TU PROGRESO</span>
           <span class="progress-card-value" id="mobile-points">0 pts</span>
         </div>
-        <span class="progress-card-trophy" aria-hidden="true">🏆</span>
+        <span class="progress-card-trophy" aria-hidden="true">
+          <i data-lucide="trophy"></i>
+        </span>
       </div>
 
       <!-- Barra de métricas (desktop) -->

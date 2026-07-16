@@ -566,7 +566,12 @@
 }
 
 .access-denied p { font-size: 1.05rem; }
-.access-denied-icon { font-size: 2rem; }
+/* Era ⛔ a 2rem. En rojo, que es lo que un acceso denegado debe decir. */
+.access-denied-icon {
+  width: 32px;
+  height: 32px;
+  color: #dc2626;
+}
 .access-denied-link { margin-top: 1rem; }
 
 /* Miniatura de POI: acepta emoji o imagen real */

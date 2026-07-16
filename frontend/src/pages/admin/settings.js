@@ -14,8 +14,9 @@ export function adminSettings() {
     </div>
 
     <div class="admin-section" style="max-width: 600px; margin-bottom: 2rem;">
-      <h2 style="font-size: 1.1rem; color: #1e293b; margin-bottom: 1.5rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem;">
-        ⚙️ Parámetros de Gamificación
+      <h2 style="font-size: 1.1rem; color: #1e293b; margin-bottom: 1.5rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+        <i data-lucide="sliders-horizontal" aria-hidden="true" style="width: 1.1rem; height: 1.1rem; color: var(--color-principal);"></i>
+        Parámetros de Gamificación
       </h2>
       <form id="settings-gamification-form" onsubmit="event.preventDefault(); alert('Configuración guardada (Mock)');" style="display: flex; flex-direction: column; gap: 1.25rem;">
         
@@ -41,8 +42,9 @@ export function adminSettings() {
     </div>
 
     <div class="admin-section" style="max-width: 600px;">
-      <h2 style="font-size: 1.1rem; color: #1e293b; margin-bottom: 1.5rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem;">
-        🛡️ Seguridad y Roles
+      <h2 style="font-size: 1.1rem; color: #1e293b; margin-bottom: 1.5rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+        <i data-lucide="shield-check" aria-hidden="true" style="width: 1.1rem; height: 1.1rem; color: var(--color-principal);"></i>
+        Seguridad y Roles
       </h2>
       <div style="font-size: 0.85rem; color: #475569; display: flex; flex-direction: column; gap: 1rem;">
         <p>El backend configurará aquí la gestión de permisos por rol (RBAC), tokens de expiración de sesión y políticas de contraseñas.</p>

@@ -43,7 +43,7 @@ export function challengeCard({ id, name, description, image, points, state }) {
         <img src="${image}" alt="${name}" class="challenge-card-img" loading="lazy">
         ${
           isCompleted
-            ? `<span class="challenge-card-completed-badge">✓ COMPLETADO</span>`
+            ? `<span class="challenge-card-completed-badge"><i data-lucide="check" aria-hidden="true"></i> COMPLETADO</span>`
             : `<span class="challenge-card-points">+${points} pts</span>`
         }
       </div>
