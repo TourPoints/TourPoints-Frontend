@@ -79,6 +79,28 @@
 - El formulario pide "Nombre completo" y el backend separa nombre/apellido:
   primera palabra = nombre, resto = apellido.
 
+### 🐛 Bug reportado al backend (2026-07-16): el login crashea en el caso de éxito
+
+Reproducido contra el staging con la primera cuenta real registrada desde el
+frontend. La matriz lo acota sola:
+
+| Email | Contraseña | Respuesta |
+|---|---|---|
+| inexistente | cualquiera | `401 {"detail":"Credenciales inválidas"}` |
+| registrado | incorrecta | `401 {"detail":"Credenciales inválidas"}` |
+| registrado | **correcta** | **`500 Internal Server Error`** (texto plano de uvicorn) |
+
+Lectura: la fila existe y el hash verifica (los dos 401 lo prueban); el crash
+ocurre **después** de la verificación — al emitir el JWT o construir la
+respuesta. Sospechosos: `secret_key`/expiración mal configurados en el deploy,
+o un campo inesperado en la fila (¿`rol_id` nulo si el register no lo
+defaultea?). El traceback está en los logs de FastAPI del staging.
+
+Consecuencia lateral: probablemente nadie había completado un login real en
+ese despliegue. El registro sí persiste (por eso el frontend debe buscarse en
+el **branch de Neon** al que apunte el `DATABASE_URL` del backend, no
+necesariamente el que abre la consola por defecto).
+
 ### Preguntas abiertas para el equipo backend
 
 1. **`rol_id` en el register público.** Su esquema desplegado lo acepta y su
