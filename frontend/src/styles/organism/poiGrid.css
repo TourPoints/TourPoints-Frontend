@@ -1,7 +1,13 @@
 .o-poi-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr); /* 3 columnas en escritorio */
-  grid-auto-rows: 333px;
+  /* minmax en vez de 333px a secas: la fila mantiene esa altura de referencia
+     pero crece si el contenido pide más. Con el valor fijo, las tarjetas
+     necesitaban 381px (411px cuando el título ocupa dos líneas) y el
+     overflow:hidden de .poi-card recortaba el sobrante — el botón "Ver más"
+     desaparecía sin dejar rastro. Solo se veía en escritorio: de 1024px para
+     abajo el media query ya usaba filas automáticas. */
+  grid-auto-rows: minmax(333px, auto);
   gap: 24px;
   width: 100%;
   margin: 0 auto;
