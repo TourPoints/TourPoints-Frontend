@@ -58,6 +58,22 @@ export function getChallengeState(challengeId) {
 }
 
 /**
+ * Entradas de progreso del usuario con su fecha, de la más reciente a la más
+ * antigua. A diferencia de getMyProgress (que aplana a un Map para consultar
+ * estados), aquí se conserva updatedAt: es lo que necesita el historial de
+ * actividad del dashboard para ordenar los eventos.
+ * @returns {Array<Object>} Entradas { challengeId, state, updatedAt }.
+ */
+export function getMyProgressEntries() {
+  const user = getCurrentUser();
+  if (!user) return [];
+
+  return readAll()
+    .filter((entry) => entry.userId === user.id)
+    .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+}
+
+/**
  * Fija el estado de un reto para el usuario actual.
  * @param {string} challengeId
  * @param {string} state - Uno de PROGRESS.*.
