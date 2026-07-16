@@ -58,14 +58,18 @@ export function initSidebar() {
 export function sidebar() {
   const path = location.pathname;
 
+  // Iconos de Lucide, no emojis. Un emoji es un mapa de bits multicolor: sobre
+  // el azul del enlace activo se queda con sus propios colores y no puede
+  // volverse blanco como el texto que acompaña. Un SVG hereda currentColor y
+  // sí. De hecho el CSS ya traía una regla `.sidebar-link svg` sin usar: los
+  // estilos estaban escritos para iconos que nunca llegaron.
   const link = (href, icon, label) => {
-    const active = path === href || path.startsWith(href + "/") ? " active" : "";
     // Evitar que /admin/ active también /admin/pois etc. si href es exacto /admin
     const isExact = href === "/admin";
-    const isActiveExact = isExact ? (path === "/admin") : (path === href || path.startsWith(href + "/"));
-    const cls = isActiveExact ? " active" : "";
+    const isActive = isExact ? path === "/admin" : path === href || path.startsWith(href + "/");
+    const cls = isActive ? " active" : "";
     return `<a class="sidebar-link${cls}" href="${href}" data-link>
-      <span class="s-icon">${icon}</span>
+      <i class="s-icon" data-lucide="${icon}" aria-hidden="true"></i>
       <span>${label}</span>
     </a>`;
   };
@@ -79,19 +83,19 @@ export function sidebar() {
       </div>
 
       <div class="sidebar-nav">
-        ${link("/admin",             "⊞",  "Dashboard")}
-        ${link("/admin/users",       "👥", "Usuarios")}
-        ${link("/admin/pois",        "📍", "Puntos de Interés")}
-        ${link("/admin/challenges",  "🏆", "Retos")}
-        ${link("/admin/rewards",     "🎁", "Recompensas")}
-        ${link("/admin/settings",    "⚙️", "Configuración")}
+        ${link("/admin",             "gauge",              "Dashboard")}
+        ${link("/admin/users",       "users-round",        "Usuarios")}
+        ${link("/admin/pois",        "map-pinned",         "Puntos de Interés")}
+        ${link("/admin/challenges",  "target",             "Retos")}
+        ${link("/admin/rewards",     "ticket",             "Recompensas")}
+        ${link("/admin/settings",    "sliders-horizontal", "Configuración")}
 
         <!-- Salir del panel sin cerrar sesión. Va aquí, cerrando la navegación,
              y no en el pie junto al logout: son gestos distintos. Este te
              devuelve al sitio con la sesión intacta; el otro te echa. Con
              contorno propio para que no se lea como un séptimo enlace. -->
         <a class="sidebar-back" href="/" data-link title="Volver al sitio público">
-          <span class="sidebar-back-arrow" aria-hidden="true">←</span>
+          <i class="sidebar-back-arrow" data-lucide="arrow-left" aria-hidden="true"></i>
           <span class="sidebar-back-label">Volver al sitio</span>
         </a>
       </div>
@@ -100,9 +104,8 @@ export function sidebar() {
 
       <div class="sidebar-footer">
         <button class="sidebar-logout" id="sidebar-logout" type="button">
-          <span class="sidebar-logout-icon" aria-hidden="true">🚪</span>
+          <i class="sidebar-logout-icon" data-lucide="log-out" aria-hidden="true"></i>
           <span class="sidebar-logout-label">Cerrar sesión</span>
-          <span class="sidebar-logout-arrow" aria-hidden="true">→</span>
         </button>
       </div>
 

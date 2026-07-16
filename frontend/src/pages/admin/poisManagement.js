@@ -94,10 +94,10 @@ const { view, init } = createAdminCrudView({
       : "0.0";
 
     return [
-      { icon: "📍", label: "Total POIs", value: total, badge: `${total} en total`, cls: "info" },
-      { icon: "✅", label: "Publicados", value: active, badge: "Visibles al público", cls: "up" },
-      { icon: "🕒", label: "Pendientes", value: pending, badge: "Por revisar", cls: "new" },
-      { icon: "⭐", label: "Calificación Avg.", value: avgRating, badge: "Rating", cls: "info" },
+      { icon: "map-pinned", label: "Total POIs", value: total, badge: `${total} en total`, cls: "info" },
+      { icon: "circle-check", label: "Publicados", value: active, badge: "Visibles al público", cls: "up" },
+      { icon: "clock", label: "Pendientes", value: pending, badge: "Por revisar", cls: "new" },
+      { icon: "star", label: "Calificación Avg.", value: avgRating, badge: "Rating", cls: "info" },
     ];
   },
 });

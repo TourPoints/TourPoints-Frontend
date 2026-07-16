@@ -82,11 +82,11 @@ const { view, init } = createAdminCrudView({
     const lowStock = items.filter((r) => Number(r.stock) <= 10).length;
     const totalStock = items.reduce((sum, r) => sum + (Number(r.stock) || 0), 0);
     return [
-      { icon: "🎁", label: "Total Recompensas", value: items.length, badge: "En catálogo", cls: "info" },
-      { icon: "✅", label: "Activas", value: active, badge: "Canjeables", cls: "up" },
-      { icon: "⚠️", label: "Stock bajo", value: lowStock, badge: "10 o menos", cls: "new" },
+      { icon: "ticket", label: "Total Recompensas", value: items.length, badge: "En catálogo", cls: "info" },
+      { icon: "circle-check", label: "Activas", value: active, badge: "Canjeables", cls: "up" },
+      { icon: "triangle-alert", label: "Stock bajo", value: lowStock, badge: "10 o menos", cls: "new" },
       {
-        icon: "📦",
+        icon: "package",
         label: "Stock total",
         value: totalStock.toLocaleString("es-ES"),
         badge: "Unidades",

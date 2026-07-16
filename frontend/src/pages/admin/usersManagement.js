@@ -68,11 +68,11 @@ const { view, init } = createAdminCrudView({
     const admins = items.filter((u) => u.role === "admin").length;
     const totalPoints = items.reduce((sum, u) => sum + (Number(u.points) || 0), 0);
     return [
-      { icon: "👥", label: "Total Usuarios", value: items.length, badge: "Registrados", cls: "info" },
-      { icon: "✅", label: "Activos", value: active, badge: "Sin restricción", cls: "up" },
-      { icon: "🛡️", label: "Administradores", value: admins, badge: "Con panel", cls: "new" },
+      { icon: "users-round", label: "Total Usuarios", value: items.length, badge: "Registrados", cls: "info" },
+      { icon: "circle-check", label: "Activos", value: active, badge: "Sin restricción", cls: "up" },
+      { icon: "shield-check", label: "Administradores", value: admins, badge: "Con panel", cls: "new" },
       {
-        icon: "⭐",
+        icon: "star",
         label: "Puntos acumulados",
         value: totalPoints.toLocaleString("es-ES"),
         badge: "Total",

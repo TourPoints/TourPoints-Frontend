@@ -24,7 +24,22 @@ import {
   Trophy,
   Gift,
   Map,
-  Globe
+  Globe,
+  // Panel de administración
+  Gauge,
+  UsersRound,
+  MapPinned,
+  Target,
+  Ticket,
+  SlidersHorizontal,
+  LogOut,
+  CircleCheck,
+  TriangleAlert,
+  Package,
+  SquarePen,
+  RefreshCw,
+  Trash2,
+  ShieldCheck
 } from "lucide";
 
 // Todo icono referenciado en el HTML vía data-lucide="..." debe estar aquí.
@@ -58,7 +73,21 @@ export const loadIcons = () => {
       Trophy,
       Gift,
       Map,
-      Globe
+      Globe,
+      Gauge,
+      UsersRound,
+      MapPinned,
+      Target,
+      Ticket,
+      SlidersHorizontal,
+      LogOut,
+      CircleCheck,
+      TriangleAlert,
+      Package,
+      SquarePen,
+      RefreshCw,
+      Trash2,
+      ShieldCheck
     },
   });
 };

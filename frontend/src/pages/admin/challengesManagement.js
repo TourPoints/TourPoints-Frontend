@@ -38,7 +38,14 @@ const { view, init } = createAdminCrudView({
   columns: [
     {
       header: "Desafío",
-      render: (c) => titleCell({ thumb: "🏆", title: c.name, subtitle: `ID: ${c.id}` }),
+      // Icono fijo: un reto no tiene imagen propia, a diferencia de las
+      // recompensas, donde el emoji lo elige el admin y es dato suyo.
+      render: (c) =>
+        titleCell({
+          thumb: '<i class="thumb-icon" data-lucide="target" aria-hidden="true"></i>',
+          title: c.name,
+          subtitle: `ID: ${c.id}`,
+        }),
     },
     {
       header: "Tipo",
@@ -76,17 +83,17 @@ const { view, init } = createAdminCrudView({
     const active = items.filter((c) => c.status === "Activo").length;
     const totalPoints = items.reduce((sum, c) => sum + (Number(c.points) || 0), 0);
     return [
-      { icon: "🏆", label: "Total Desafíos", value: items.length, badge: "En catálogo", cls: "info" },
-      { icon: "✅", label: "Activos", value: active, badge: "En curso", cls: "up" },
+      { icon: "target", label: "Total Desafíos", value: items.length, badge: "En catálogo", cls: "info" },
+      { icon: "circle-check", label: "Activos", value: active, badge: "En curso", cls: "up" },
       {
-        icon: "🕒",
+        icon: "clock",
         label: "Pendientes",
         value: items.filter((c) => c.status === "Pendiente").length,
         badge: "Por revisar",
         cls: "new",
       },
       {
-        icon: "⭐",
+        icon: "star",
         label: "Puntos en juego",
         value: totalPoints.toLocaleString("es-ES"),
         badge: "Total",

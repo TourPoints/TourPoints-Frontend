@@ -4,6 +4,7 @@
 import { getAllPois, PUBLISHED_STATUS } from "../../services/poi.service.js";
 import { isAdmin } from "../../utils/role.js";
 import { escapeHtml } from "../../components/organism/modal.js";
+import { loadIcons } from "../../utils/icons.js";
 import { accessDenied } from "./accessDenied.js";
 
 /**
@@ -25,25 +26,27 @@ export function adminDashboard() {
         <div class="admin-empty">Calculando métricas...</div>
       </div>
 
-      <!-- Accesos rápidos: rutas reales del History API, sin hash -->
+      <!-- Accesos rápidos: rutas reales del History API, sin hash.
+           Los iconos repiten los de la barra lateral a propósito: son los
+           mismos cuatro destinos, así que deben verse igual en los dos sitios. -->
       <div class="admin-dash-cards">
         <a href="/admin/pois" class="admin-dash-card" data-link>
-          <span class="dash-card-icon">📍</span>
+          <i class="dash-card-icon" data-lucide="map-pinned" aria-hidden="true"></i>
           <span class="dash-card-title">Puntos de Interés</span>
           <span class="dash-card-desc">Crear, editar y gestionar POIs</span>
         </a>
         <a href="/admin/challenges" class="admin-dash-card" data-link>
-          <span class="dash-card-icon">🏆</span>
+          <i class="dash-card-icon" data-lucide="target" aria-hidden="true"></i>
           <span class="dash-card-title">Desafíos</span>
           <span class="dash-card-desc">Gestionar retos para turistas</span>
         </a>
         <a href="/admin/rewards" class="admin-dash-card" data-link>
-          <span class="dash-card-icon">🎁</span>
+          <i class="dash-card-icon" data-lucide="ticket" aria-hidden="true"></i>
           <span class="dash-card-title">Recompensas</span>
           <span class="dash-card-desc">Administrar el programa de puntos</span>
         </a>
         <a href="/admin/users" class="admin-dash-card" data-link>
-          <span class="dash-card-icon">👥</span>
+          <i class="dash-card-icon" data-lucide="users-round" aria-hidden="true"></i>
           <span class="dash-card-title">Usuarios</span>
           <span class="dash-card-desc">Consultar y moderar cuentas</span>
         </a>
@@ -75,11 +78,11 @@ export async function initAdminDashboard() {
   const totalPoints = pois.reduce((sum, poi) => sum + (Number(poi.points) || 0), 0);
 
   const cards = [
-    { icon: "📍", label: "Total POIs", value: pois.length, badge: "En catálogo", cls: "info" },
-    { icon: "✅", label: "Publicados", value: published, badge: "Visibles al público", cls: "up" },
-    { icon: "🕒", label: "Pendientes", value: pending, badge: "Por revisar", cls: "new" },
+    { icon: "map-pinned", label: "Total POIs", value: pois.length, badge: "En catálogo", cls: "info" },
+    { icon: "circle-check", label: "Publicados", value: published, badge: "Visibles al público", cls: "up" },
+    { icon: "clock", label: "Pendientes", value: pending, badge: "Por revisar", cls: "new" },
     {
-      icon: "⭐",
+      icon: "star",
       label: "Puntos en juego",
       value: totalPoints.toLocaleString("es-ES"),
       badge: "Total",
@@ -92,7 +95,7 @@ export async function initAdminDashboard() {
       (card) => `
       <div class="stat-card">
         <div class="stat-top">
-          <span class="stat-icon">${card.icon}</span>
+          <i class="stat-icon" data-lucide="${card.icon}" aria-hidden="true"></i>
           <span class="stat-badge ${card.cls}">${escapeHtml(card.badge)}</span>
         </div>
         <div class="stat-label">${escapeHtml(card.label)}</div>
@@ -101,4 +104,8 @@ export async function initAdminDashboard() {
     `
     )
     .join("");
+
+  // Las métricas se pintan después del render del router, así que su llamada a
+  // loadIcons ya pasó: sin esta, los <i data-lucide> se quedarían vacíos.
+  loadIcons();
 }

@@ -8,6 +8,7 @@
 import { openFormModal, openConfirmModal, escapeHtml } from "../../components/organism/modal.js";
 import { isAdmin } from "../../utils/role.js";
 import { normalizeText, debounce, includesNormalized } from "../../utils/text.js";
+import { loadIcons } from "../../utils/icons.js";
 import { accessDenied } from "./accessDenied.js";
 
 const ITEMS_PER_PAGE = 8;
@@ -74,7 +75,7 @@ export function createAdminCrudView(config) {
       <div class="admin-table-section">
         <div class="admin-table-toolbar">
           <div class="admin-search">
-            <span class="admin-search-icon">🔍</span>
+            <i class="admin-search-icon" data-lucide="search" aria-hidden="true"></i>
             <input type="text" id="${ids.search}" placeholder="Buscar..." autocomplete="off" />
           </div>
         </div>
@@ -143,6 +144,11 @@ export function createAdminCrudView(config) {
     renderStats();
     renderTable();
     renderPagination(totalPages);
+
+    // La tabla y las métricas se repintan en cada búsqueda y cada página, mucho
+    // después del loadIcons del router: sin esta llamada los <i data-lucide>
+    // recién insertados se quedarían vacíos, sin error en consola.
+    loadIcons();
   }
 
   function renderStats() {
@@ -154,7 +160,7 @@ export function createAdminCrudView(config) {
         (card) => `
         <div class="stat-card">
           <div class="stat-top">
-            <span class="stat-icon">${card.icon}</span>
+            <i class="stat-icon" data-lucide="${card.icon}" aria-hidden="true"></i>
             <span class="stat-badge ${card.cls ?? "info"}">${escapeHtml(card.badge)}</span>
           </div>
           <div class="stat-label">${escapeHtml(card.label)}</div>
@@ -186,9 +192,15 @@ export function createAdminCrudView(config) {
           ${columns.map((col) => `<td>${col.render(item)}</td>`).join("")}
           <td>
             <div class="actions-cell">
-              <button class="btn-icon edit" title="Editar" data-action="edit">✏️</button>
-              <button class="btn-icon" title="Cambiar estado" data-action="toggle">🔄</button>
-              <button class="btn-icon del" title="Eliminar" data-action="delete">🗑️</button>
+              <button class="btn-icon edit" title="Editar" aria-label="Editar" data-action="edit">
+                <i data-lucide="square-pen" aria-hidden="true"></i>
+              </button>
+              <button class="btn-icon" title="Cambiar estado" aria-label="Cambiar estado" data-action="toggle">
+                <i data-lucide="refresh-cw" aria-hidden="true"></i>
+              </button>
+              <button class="btn-icon del" title="Eliminar" aria-label="Eliminar" data-action="delete">
+                <i data-lucide="trash-2" aria-hidden="true"></i>
+              </button>
             </div>
           </td>
         </tr>
