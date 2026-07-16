@@ -44,7 +44,7 @@ export function createCrudService({
      * @returns {Promise<Array<Object>>}
      */
     async list() {
-      if (isApiEnabled()) return apiGet(apiPath);
+      if (isApiEnabled(collection)) return apiGet(apiPath);
       return readCollection(collection, seed);
     },
 
@@ -54,7 +54,7 @@ export function createCrudService({
      * @returns {Promise<Object|null>}
      */
     async getById(id) {
-      if (isApiEnabled()) {
+      if (isApiEnabled(collection)) {
         try {
           return await apiGet(`${apiPath}/${id}`);
         } catch (error) {

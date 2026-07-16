@@ -30,7 +30,10 @@ export const PUBLISHED_STATUS = "Activo";
  * @returns {Promise<Array>} POIs publicados.
  */
 export async function getPois(filters = {}) {
-  if (isApiEnabled()) {
+  // "pois" aún no está en API_MODULES: el backend no expone /poi todavía.
+  // Cuando lo haga, este servicio se adapta a su contrato y se añade el
+  // módulo a config/api.js — las vistas no cambian.
+  if (isApiEnabled("pois")) {
     return apiGet("/pois", { category: filters.category, q: filters.query });
   }
 
@@ -44,7 +47,7 @@ export async function getPois(filters = {}) {
  * @returns {Promise<Array>} Todos los POIs.
  */
 export async function getAllPois() {
-  if (isApiEnabled()) {
+  if (isApiEnabled("pois")) {
     return apiGet("/admin/pois");
   }
 
@@ -57,7 +60,7 @@ export async function getAllPois() {
  * @returns {Promise<Object|null>} El POI, o null si no existe.
  */
 export async function getPoiById(id) {
-  if (isApiEnabled()) {
+  if (isApiEnabled("pois")) {
     try {
       return await apiGet(`/pois/${id}`);
     } catch (error) {
