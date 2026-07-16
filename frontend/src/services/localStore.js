@@ -12,7 +12,7 @@ const STORAGE_PREFIX = "tourpoints:";
 // la app seguiría viendo los datos antiguos (p.ej. los POIs de Madrid) aunque
 // los mocks digan otra cosa. Solo aplica a la fase sin backend; con API real
 // este archivo desaparece entero.
-const SEED_VERSION = "2-barranquilla";
+const SEED_VERSION = "3-barranquilla-retos-recompensas";
 const SEED_VERSION_KEY = STORAGE_PREFIX + "seed-version";
 
 if (localStorage.getItem(SEED_VERSION_KEY) !== SEED_VERSION) {

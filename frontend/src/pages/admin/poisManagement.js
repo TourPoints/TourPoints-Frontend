@@ -42,8 +42,11 @@ function poiFields(items) {
     { name: "name", label: "Nombre del POI", required: true, wide: true },
     { name: "category", label: "Categoría", type: "select", options: categories, required: true },
     { name: "status", label: "Estado", type: "select", options: POI_STATUSES, required: true },
-    { name: "location", label: "Ubicación", placeholder: "Madrid, ES", required: true },
-    { name: "address", label: "Dirección", placeholder: "Calle, número, CP" },
+    // Los placeholders enseñan el formato que ya usan los datos reales. Decían
+    // "Madrid, ES" y "Calle, número, CP": ni la ciudad ni el código postal
+    // —convención española— tienen nada que ver con este proyecto.
+    { name: "location", label: "Ubicación", placeholder: "Barranquilla, CO", required: true },
+    { name: "address", label: "Dirección", placeholder: "Calle 84 con Circunvalar, Barranquilla" },
     { name: "lat", label: "Latitud", type: "number", step: "any", required: true },
     { name: "lng", label: "Longitud", type: "number", step: "any", required: true },
     { name: "points", label: "Puntos", type: "number", min: 0, required: true },

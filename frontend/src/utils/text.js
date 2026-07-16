@@ -5,8 +5,8 @@ const COMBINING_MARKS = /[\u0300-\u036f]/g;
 
 /**
  * Normaliza un texto para poder compararlo sin tildes ni mayúsculas.
- * Necesario porque los nombres reales llevan tilde ("Real Jardín Botánico")
- * pero los usuarios escriben sin ella ("jardin").
+ * Necesario porque los nombres reales llevan tilde ("Gran Malecón del Río")
+ * pero los usuarios escriben sin ella ("malecon").
  * @param {string} value - Texto de entrada.
  * @returns {string} Texto en minúsculas, sin diacríticos y sin espacios sobrantes.
  */
