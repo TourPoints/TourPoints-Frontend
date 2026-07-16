@@ -31,11 +31,17 @@
 }
 
 /* Fondo explícito: html y body eran transparentes y heredaban el color por
-   defecto del navegador, que cambia según el tema del sistema. */
+   defecto del navegador, que cambia según el tema del sistema.
+
+   La fuente iba en el mismo saco: nadie la declaraba aquí, así que todo lo que
+   no la pedía a mano caía en el serif por defecto del navegador (Times New
+   Roman). Se notaba sobre todo en el menú de perfil, donde el título llevaba
+   Poppins y los items de al lado salían en Times. Declarada aquí, se hereda. */
 html,
 body {
   background-color: var(--color-blanco);
   color: var(--color-gris-oscuro);
+  font-family: var(--font-base);
 }
 
 

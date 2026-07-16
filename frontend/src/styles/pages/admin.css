@@ -3,14 +3,18 @@
    Light theme: sidebar blanco, fondo gris suave, azul primario
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+/* Inter ya no se importa aquí: se carga en index.html junto a Poppins. Tenerlo
+   escondido en la hoja del admin hacía que el sitio público dependiera de ella
+   para su propio texto (--font-texto es Inter). */
 
 /* ---- Reset base para admin ---- */
 .admin-wrapper * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: 'Inter', 'Segoe UI', sans-serif;
+  /* Antes: 'Inter', 'Segoe UI', sans-serif cableado a mano. Mismo resultado,
+     pero ahora sale del token de diseño y se cambia en un solo sitio. */
+  font-family: var(--font-texto);
 }
 
 /* ---- Layout principal ---- */
