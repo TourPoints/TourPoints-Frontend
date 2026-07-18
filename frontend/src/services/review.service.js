@@ -1,21 +1,19 @@
 import { mockReviews } from "../mocks/reviews.js";
 import { readCollection, writeCollection, nextPrefixedId } from "./localStore.js";
 import { getCurrentUser } from "./auth.service.js";
+import { apiGetItems, apiPost, apiPut, apiDelete, isApiEnabled, ApiError } from "./api.client.js";
 
-// Servicio de reseñas.
+// Servicio de reseñas. Cableado al backend real (docs/CABLEADO.md).
 //
-// Antes era el único servicio sin persistencia: leía los mocks y punto, así
-// que no se podían escribir comentarios. Ahora usa localStore como el resto,
-// y las reseñas semilla son solo el contenido inicial de la colección.
+// El backend parte "la reseña" en dos entidades — y es mejor diseño, así que
+// se adopta: la calificación (PUT /poi/{id}/my-rating, única por usuario y
+// POI) y el comentario (POST /poi/{id}/comments, que nace PENDIENTE hasta que
+// un admin lo apruebe). El formulario sigue siendo un solo gesto: por debajo
+// se hacen las dos llamadas, y la vista avisa de que el comentario queda en
+// moderación en vez de aparecer al instante.
 //
-// Regla de negocio: una reseña por usuario y POI. Es lo que hace que
-// reviewCount signifique algo y evita que una cuenta llene el hilo.
-//
-// ── ENDPOINTS esperados (backend) ─────────────────────────────
-//   GET    /pois/:poiId/reviews      → reseñas del POI
-//   POST   /pois/:poiId/reviews      → publicar { rating, text }
-//   DELETE /me/reviews/:id           → borrar la propia
-// ──────────────────────────────────────────────────────────────
+// Sin backend, el modo local de siempre: una reseña por usuario y POI en
+// localStorage, con las semillas como contenido inicial.
 
 const COLLECTION = "reviews";
 
@@ -50,6 +48,22 @@ function initialsOf(name) {
     .join("");
 }
 
+/** ComentarioOut del backend → tarjeta de reseña del frontend. */
+function adaptComentario(c, userId) {
+  const author = c.usuario?.nombre ?? "Visitante";
+  return {
+    id: c.id,
+    author,
+    initials: initialsOf(author),
+    // La calificación vive en otra entidad (calificaciones); el comentario
+    // no trae estrellas. La tarjeta las omite cuando no hay valoración.
+    rating: null,
+    text: c.contenido,
+    createdAt: c.created_at,
+    isMine: Boolean(userId && c.usuario?.id === userId),
+  };
+}
+
 /**
  * Obtiene las reseñas de un POI, de la más reciente a la más antigua.
  * Marca con isMine la del usuario con sesión para que la vista la destaque.
@@ -59,6 +73,20 @@ function initialsOf(name) {
 export async function getPoiReviews(poiId) {
   const user = getCurrentUser();
   const id = String(poiId);
+
+  if (isApiEnabled("reviews")) {
+    try {
+      const items = await apiGetItems(`/poi/${id}/comments`);
+      return items
+        .map((c) => adaptComentario(c, user?.id))
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    } catch (error) {
+      // Sin sesión el backend puede negar la lista: la sección queda vacía
+      // en vez de romper el detalle entero.
+      if (error instanceof ApiError && (error.status === 401 || error.status === 403)) return [];
+      throw error;
+    }
+  }
 
   return readAll()
     .filter((review) => String(review.poiId) === id)
@@ -77,6 +105,11 @@ export async function getPoiReviews(poiId) {
 export async function getMyReviewFor(poiId) {
   const user = getCurrentUser();
   if (!user) return null;
+
+  // Contra el backend no hay forma barata de saberlo (la lista pública solo
+  // trae APROBADOS y el propio puede estar PENDIENTE), y además su modelo
+  // permite varios comentarios por usuario. El control de duplicados es suyo.
+  if (isApiEnabled("reviews")) return null;
 
   const id = String(poiId);
   const mine = readAll().find(
@@ -113,6 +146,26 @@ export async function createReview(poiId, { rating, text }) {
     return { ok: false, error: `El comentario no puede pasar de ${REVIEW_MAX_LENGTH} caracteres.` };
   }
 
+  if (isApiEnabled("reviews")) {
+    try {
+      // Un gesto del usuario, dos entidades del backend: la calificación es
+      // idempotente (repetirla actualiza) y el comentario entra a moderación.
+      await apiPut(`/poi/${poiId}/my-rating`, { calificacion: score });
+      const creado = await apiPost(`/poi/${poiId}/comments`, { contenido: body });
+      return {
+        ok: true,
+        review: { ...adaptComentario(creado, user.id), rating: score },
+        pendingModeration: creado.estado === "PENDIENTE",
+      };
+    } catch (error) {
+      if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
+        return { ok: false, error: "Tu sesión expiró. Vuelve a iniciar sesión para comentar." };
+      }
+      const detalle = typeof error.detail === "string" ? error.detail : null;
+      return { ok: false, error: detalle ?? "No pudimos publicar tu comentario. Inténtalo de nuevo." };
+    }
+  }
+
   const all = readAll();
   const id = String(poiId);
 
@@ -146,6 +199,16 @@ export async function createReview(poiId, { rating, text }) {
 export async function deleteMyReview(reviewId) {
   const user = getCurrentUser();
   if (!user) return { ok: false, error: "No hay sesión iniciada." };
+
+  if (isApiEnabled("reviews")) {
+    try {
+      await apiDelete(`/comments/${reviewId}`);
+      return { ok: true };
+    } catch (error) {
+      const detalle = typeof error.detail === "string" ? error.detail : null;
+      return { ok: false, error: detalle ?? "No pudimos borrar el comentario." };
+    }
+  }
 
   const all = readAll();
   const target = all.find((review) => review.id === reviewId);

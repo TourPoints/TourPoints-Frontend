@@ -5,6 +5,7 @@ import { searchBar } from "../components/molecules/searchBar.js";
 import { loadIcons } from "../utils/icons.js";
 import { debounce } from "../utils/text.js";
 import { ALL_CATEGORIES, getCategories, filterPois, sortPois } from "../utils/poiFilter.js";
+import { refreshMyFavorites } from "../services/favorite.service.js";
 import "/src/styles/pages/explore.css";
 
 // Estado interno para filtros, ordenación y paginación.
@@ -87,6 +88,10 @@ export async function initExplore() {
     showErrorState();
     return;
   }
+
+  // Precarga los favoritos del servidor para que los corazones ya salgan
+  // pintados en el primer render (la lectura en renderGrid es síncrona).
+  await refreshMyFavorites().catch(() => {});
 
   renderCategoryPills();
   bindSearch();

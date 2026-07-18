@@ -1,4 +1,5 @@
-import { getPois } from "../services/poi.service.js";
+import { getPois, getPoisNearby } from "../services/poi.service.js";
+import { isApiEnabled } from "../services/api.client.js";
 import { loadIcons } from "../utils/icons.js";
 import { debounce, normalizeText } from "../utils/text.js";
 import {
@@ -383,9 +384,22 @@ function setLocationButtonState(state) {
 
 /**
  * Redibuja el marcador del usuario, recentra el mapa y recalcula distancias.
+ *
+ * Con el backend cableado, la distancia deja de calcularse en el cliente:
+ * se vuelve a pedir la lista con las coordenadas del usuario y PostGIS
+ * responde cada POI con su distancia_metros real (el radio es amplio para
+ * cubrir el área metropolitana: Bocas de Ceniza queda a ~12 km del centro).
  */
-function updateUserLocationOnMap() {
+async function updateUserLocationOnMap() {
   if (!mapInstance) return;
+
+  if (isApiEnabled("pois")) {
+    try {
+      allPois = await getPoisNearby(userCoords, 30000);
+    } catch (error) {
+      console.warn("Búsqueda por cercanía falló; se mantiene la lista actual:", error);
+    }
+  }
 
   drawUserMarker();
   mapInstance.setView([userCoords.lat, userCoords.lng], DEFAULT_ZOOM);
@@ -431,8 +445,11 @@ function applyFilters() {
 
   // Sin ubicación real, ordenar por cercanía no significa nada: se ordena por
   // valoración y no se muestran distancias inventadas desde el centro.
+  // Si los POIs ya traen distancia (la puso PostGIS en el servidor), se
+  // respeta; el Haversine local queda como fallback del modo mocks.
+  const yaTraenDistancia = matches.some((p) => p.distance != null);
   filteredPois = hasUserLocation
-    ? sortPois(withDistanceFrom(matches, userCoords), "Distancia")
+    ? sortPois(yaTraenDistancia ? matches : withDistanceFrom(matches, userCoords), "Distancia")
     : sortPois(matches, "Recomendados");
 
   updateMarkers();

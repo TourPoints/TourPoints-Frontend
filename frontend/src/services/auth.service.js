@@ -3,7 +3,7 @@ import { readCollection } from "./localStore.js";
 import { createUser } from "./user.service.js";
 import { setRole, clearRole } from "../utils/role.js";
 import { normalizeText } from "../utils/text.js";
-import { apiGet, apiPost, isApiEnabled, saveToken, clearToken, ApiError } from "./api.client.js";
+import { apiGet, apiPost, apiPatch, isApiEnabled, saveToken, clearToken, ApiError } from "./api.client.js";
 
 // Servicio de sesión. Primer módulo cableado al backend real (docs/CABLEADO.md).
 //
@@ -26,8 +26,11 @@ const SESSION_KEY = "tourpoints:session";
 // este es el único número que hay que corregir.
 const ADMIN_ROL_ID = 1;
 
-/** Traduce el UsuarioResponse del backend al modelo de usuario del frontend. */
-function adaptUsuario(u) {
+/**
+ * Traduce el UsuarioResponse del backend al modelo de usuario del frontend.
+ * Lo comparte user.service para el CRUD del panel de administración.
+ */
+export function adaptUsuario(u) {
   return {
     id: u.id,
     name: [u.nombre, u.apellido].filter(Boolean).join(" "),
@@ -178,6 +181,36 @@ export async function register({ name, email, password = "" }) {
 
   startSession(user);
   return { ok: true, user };
+}
+
+/**
+ * Edita el perfil del usuario con sesión contra el backend (PATCH /users/me)
+ * y refresca la copia de la sesión. Solo en modo API: el dashboard lo usa en
+ * lugar del CRUD de admin, que exige otro rol.
+ * @param {{name?: string, email?: string}} changes
+ * @returns {Promise<{ok: boolean, user?: Object, error?: string}>}
+ */
+export async function updateMyProfile(changes) {
+  const user = getCurrentUser();
+  if (!user) return { ok: false, error: "No hay sesión iniciada." };
+
+  const body = {};
+  if (changes.name !== undefined) {
+    const parts = String(changes.name).trim().split(/\s+/);
+    body.nombre = parts[0];
+    body.apellido = parts.slice(1).join(" ") || parts[0];
+  }
+  if (changes.email !== undefined) body.email = changes.email;
+
+  try {
+    const actualizado = await apiPatch("/users/me", body);
+    const adaptado = adaptUsuario(actualizado);
+    // points es caché del ledger: se conserva el valor vigente de la sesión.
+    const merged = updateSessionUser({ name: adaptado.name, email: adaptado.email });
+    return { ok: true, user: merged };
+  } catch (error) {
+    return { ok: false, error: authErrorMessage(error, "No pudimos guardar los cambios. Inténtalo de nuevo.") };
+  }
 }
 
 /**

@@ -11,10 +11,10 @@
 // favoritos, que son los eventos con fecha que hoy se registran. El backend
 // lo sustituirá por un endpoint de actividad.
 
-import { getCurrentUser, updateSessionUser, logout } from "../services/auth.service.js";
+import { getCurrentUser, updateSessionUser, updateMyProfile, logout } from "../services/auth.service.js";
 import { getUsers, updateUser } from "../services/user.service.js";
 import { getChallenges } from "../services/challenge.service.js";
-import { PROGRESS, getMyProgress, getMyProgressEntries } from "../services/challengeProgress.service.js";
+import { PROGRESS, getMyProgress, getMyProgressEntries, refreshMyChallengeProgress } from "../services/challengeProgress.service.js";
 import { getRewards } from "../services/reward.service.js";
 import { getMyFavoriteEntries } from "../services/favorite.service.js";
 import { getPois } from "../services/poi.service.js";
@@ -22,6 +22,8 @@ import { challengeCard } from "../components/molecules/challengeCard.js";
 import { openFormModal, openConfirmModal, escapeHtml } from "../components/organism/modal.js";
 import { navigate } from "../router/router.js";
 import { formatRelativeDate } from "../utils/date.js";
+import { refreshSessionPoints, getMyMovements } from "../services/points.service.js";
+import { isApiEnabled } from "../services/api.client.js";
 import { normalizeText } from "../utils/text.js";
 import { loadIcons } from "../utils/icons.js";
 import "/src/styles/pages/dashboard.css";
@@ -171,13 +173,26 @@ export async function initDashboard() {
     console.error("Error al cargar los datos del dashboard:", error);
   }
 
+  // El saldo vive en el ledger del backend; user.points es solo caché.
+  const saldo = await refreshSessionPoints().catch(() => Number(user.points) || 0);
+  const pointsEl = document.getElementById("dashboard-points");
+  if (pointsEl) pointsEl.textContent = `${saldo.toLocaleString("es-ES")} pts`;
+
+  await refreshMyChallengeProgress().catch(() => {});
   const progressEntries = getMyProgressEntries();
-  const favoriteEntries = getMyFavoriteEntries();
+  const favoriteEntries = await getMyFavoriteEntries();
 
   renderStats(progressEntries, favoriteEntries);
   renderActiveChallenges(challenges);
-  renderRewards(rewards, user);
-  renderHistory(progressEntries, favoriteEntries, challenges, pois);
+  renderRewards(rewards, { ...user, points: saldo });
+
+  // Con backend, el historial es el ledger real (visitas, retos, canjes);
+  // sin él, se compone de los eventos locales como hasta ahora.
+  if (isApiEnabled("points")) {
+    renderHistoryFromMovements(await getMyMovements().catch(() => []));
+  } else {
+    renderHistory(progressEntries, favoriteEntries, challenges, pois);
+  }
 
   loadIcons();
 }
@@ -220,23 +235,35 @@ async function handleEditProfile() {
   });
   if (!data) return;
 
-  const users = await getUsers();
-  const target = normalizeText(data.email);
-  const taken = users.some(
-    (item) => item.id !== user.id && normalizeText(item.email) === target
-  );
-  if (taken) {
-    // El modal ya se cerró: se reabre con el aviso en vez de perder lo escrito.
-    await openConfirmModal({
-      title: "Email en uso",
-      message: "Ya existe otra cuenta con ese email. Elige uno distinto.",
-      confirmLabel: "Entendido",
-    });
-    return handleEditProfile();
-  }
+  let updated;
+  if (isApiEnabled("auth")) {
+    // Contra el backend el perfil propio va por PATCH /users/me (el CRUD de
+    // /users exige rol admin) y la unicidad del email la valida el servidor.
+    const result = await updateMyProfile({ name: data.name, email: data.email });
+    if (!result.ok) {
+      await openConfirmModal({ title: "No se pudo guardar", message: result.error, confirmLabel: "Entendido" });
+      return handleEditProfile();
+    }
+    updated = result.user;
+  } else {
+    const users = await getUsers();
+    const target = normalizeText(data.email);
+    const taken = users.some(
+      (item) => item.id !== user.id && normalizeText(item.email) === target
+    );
+    if (taken) {
+      // El modal ya se cerró: se reabre con el aviso en vez de perder lo escrito.
+      await openConfirmModal({
+        title: "Email en uso",
+        message: "Ya existe otra cuenta con ese email. Elige uno distinto.",
+        confirmLabel: "Entendido",
+      });
+      return handleEditProfile();
+    }
 
-  await updateUser(user.id, { name: data.name, email: data.email });
-  const updated = updateSessionUser({ name: data.name, email: data.email });
+    await updateUser(user.id, { name: data.name, email: data.email });
+    updated = updateSessionUser({ name: data.name, email: data.email });
+  }
 
   // Refrescar saludo y chip sin repintar la página entera.
   const nameEl = document.getElementById("dashboard-first-name");
@@ -362,6 +389,49 @@ function buildEvents(progressEntries, favoriteEntries, challenges, pois) {
     .filter((event) => event.when)
     .sort((a, b) => new Date(b.when) - new Date(a.when))
     .slice(0, 6);
+}
+
+// Cómo se cuenta cada tipo de movimiento del ledger en la línea de tiempo.
+const MOVEMENT_LABELS = {
+  VISITA: { icon: "map-pin-check", text: "Check-in validado" },
+  RETO: { icon: "trophy", text: "Reto completado" },
+  CANJE: { icon: "ticket", text: "Canje de recompensa" },
+  COMPRA: { icon: "package", text: "Compra en aliado" },
+};
+
+/** Pinta el historial desde los movimientos reales del ledger del backend. */
+function renderHistoryFromMovements(movements) {
+  const container = document.getElementById("dashboard-events");
+  if (!container) return;
+
+  if (movements.length === 0) {
+    container.innerHTML = `
+      <li class="dashboard-empty-hint">
+        Aquí aparecerá tu actividad: visitas, retos y canjes.
+      </li>
+    `;
+    return;
+  }
+
+  container.innerHTML = movements
+    .slice(0, 6)
+    .map((mov) => {
+      const meta = MOVEMENT_LABELS[mov.tipo_movimiento] ?? { icon: "star", text: "Movimiento de puntos" };
+      const pts = Number(mov.puntos) || 0;
+      return `
+      <li class="dash-event">
+        <span class="dash-event-icon dash-event-icon--${meta.icon === "trophy" ? "trophy" : meta.icon === "heart" ? "heart" : "target"}" aria-hidden="true">
+          <i data-lucide="${meta.icon}"></i>
+        </span>
+        <div class="dash-event-body">
+          <p>${escapeHtml(meta.text)}</p>
+          <span>${escapeHtml(formatRelativeDate(mov.created_at))}</span>
+        </div>
+        <span class="dash-event-points${pts < 0 ? " dash-event-points--negative" : ""}">${pts >= 0 ? "+" : "−"}${formatPoints(Math.abs(pts))} pts</span>
+      </li>
+    `;
+    })
+    .join("");
 }
 
 function renderHistory(progressEntries, favoriteEntries, challenges, pois) {

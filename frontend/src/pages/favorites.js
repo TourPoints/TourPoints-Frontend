@@ -57,7 +57,7 @@ export async function initFavorites() {
   // Un POI puede haber dejado de publicarse desde que se guardó: en ese caso
   // no aparece, en vez de pintar una tarjeta rota.
   const byId = new Map(pois.map((poi) => [String(poi.id), poi]));
-  favoritePois = getMyFavoriteEntries()
+  favoritePois = (await getMyFavoriteEntries())
     .map((entry) => byId.get(String(entry.poiId)))
     .filter(Boolean);
 

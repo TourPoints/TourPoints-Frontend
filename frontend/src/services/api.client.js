@@ -115,13 +115,39 @@ async function request(path, { method = "GET", params = {}, body, timeout = DEFA
 }
 
 /**
- * GET contra la API.
- * @param {string} path - Ruta relativa, por ejemplo "/pois".
+ * GET contra la API, con un único reintento ante fallo transitorio.
+ *
+ * El backend en Neon cierra conexiones ociosas y su pool aún no lo detecta
+ * (les está sugerido pool_pre_ping): la primera petición tras un rato de
+ * calma puede morir con un 500 de "SSL connection has been closed". Un solo
+ * reintento absorbe ese caso sin enmascarar errores reales, y solo en GET,
+ * que es idempotente — jamás reintentar un POST.
+ *
+ * @param {string} path - Ruta relativa, por ejemplo "/poi".
  * @param {Object} [params] - Parámetros de query.
  * @param {Object} [options] - Opciones extra ({ timeout }).
  */
-export function apiGet(path, params = {}, options = {}) {
-  return request(path, { ...options, params });
+export async function apiGet(path, params = {}, options = {}) {
+  try {
+    return await request(path, { ...options, params });
+  } catch (error) {
+    const transitorio =
+      error instanceof TypeError ||
+      (error instanceof ApiError && (error.status === 500 || error.status === 408));
+    if (!transitorio) throw error;
+    return request(path, { ...options, params });
+  }
+}
+
+/**
+ * GET de una lista paginada: desenvuelve el sobre {items, total, ...} del
+ * backend y devuelve directamente el array, que es lo que las vistas esperan.
+ * page_size va al máximo que aceptan (100): a la escala actual del catálogo
+ * trae todo, y el filtrado/paginación de las vistas sigue en cliente.
+ */
+export async function apiGetItems(path, params = {}, options = {}) {
+  const res = await apiGet(path, { page_size: 100, ...params }, options);
+  return Array.isArray(res) ? res : res?.items ?? [];
 }
 
 /** POST con cuerpo JSON. */

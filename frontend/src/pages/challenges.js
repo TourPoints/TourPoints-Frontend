@@ -10,8 +10,11 @@ import {
   PROGRESS,
   getMyProgress,
   setChallengeState,
+  refreshMyChallengeProgress,
 } from "../services/challengeProgress.service.js";
+import { isApiEnabled } from "../services/api.client.js";
 import { getCurrentUser, updateSessionUser } from "../services/auth.service.js";
+import { refreshSessionPoints } from "../services/points.service.js";
 import { updateUser } from "../services/user.service.js";
 import { challengeCard } from "../components/molecules/challengeCard.js";
 import { escapeHtml } from "../components/organism/modal.js";
@@ -85,6 +88,8 @@ export async function initChallenges() {
     return;
   }
 
+  await refreshSessionPoints().catch(() => {});
+  await refreshMyChallengeProgress().catch(() => {});
   progress = getMyProgress();
 
   const search = document.getElementById("challenges-search");
@@ -286,36 +291,69 @@ function openDetail(challengeId) {
 
   overlay.querySelector("[data-action=close]")?.addEventListener("click", close);
 
-  overlay.querySelector("[data-action=start]")?.addEventListener("click", () => {
-    setChallengeState(challenge.id, PROGRESS.IN_PROGRESS);
+  overlay.querySelector("[data-action=start]")?.addEventListener("click", async () => {
+    const result = await setChallengeState(challenge.id, PROGRESS.IN_PROGRESS);
+    if (!result.ok) {
+      showDetailFeedback(overlay, result.error);
+      return;
+    }
     progress = getMyProgress();
     close();
     render();
   });
 
-  overlay.querySelector("[data-action=abandon]")?.addEventListener("click", () => {
-    setChallengeState(challenge.id, PROGRESS.AVAILABLE);
+  overlay.querySelector("[data-action=abandon]")?.addEventListener("click", async () => {
+    const result = await setChallengeState(challenge.id, PROGRESS.AVAILABLE);
+    if (!result.ok) {
+      showDetailFeedback(overlay, result.error);
+      return;
+    }
     progress = getMyProgress();
     close();
     render();
   });
 
   overlay.querySelector("[data-action=complete]")?.addEventListener("click", async () => {
-    setChallengeState(challenge.id, PROGRESS.COMPLETED);
+    const result = await setChallengeState(challenge.id, PROGRESS.COMPLETED);
+    if (!result.ok) {
+      showDetailFeedback(overlay, result.error);
+      return;
+    }
     progress = getMyProgress();
 
-    // Acreditar los puntos del reto en la cuenta y en la sesión, para que
-    // el saldo cambie en la página y también en el panel de administración.
-    const current = getCurrentUser();
-    if (current) {
-      const newPoints = (Number(current.points) || 0) + (Number(challenge.points) || 0);
-      await updateUser(current.id, { points: newPoints });
-      updateSessionUser({ points: newPoints });
+    if (isApiEnabled("challenges")) {
+      // El backend registró el avance: si el intento quedó FINALIZADO, los
+      // puntos ya están en el ledger. Solo hay que refrescar la caché local.
+      await refreshSessionPoints().catch(() => {});
+      if (result.state !== PROGRESS.COMPLETED) {
+        // Aún faltan objetivos para completar el reto: se informa en el
+        // propio modal y se deja abierto.
+        showDetailFeedback(overlay, "¡Avance registrado! Aún te faltan objetivos para completar el reto.");
+        render();
+        return;
+      }
+    } else {
+      // Modo local: sin ledger, el crédito de puntos se hace a mano como
+      // siempre, para que el saldo cambie también en el panel admin.
+      const current = getCurrentUser();
+      if (current) {
+        const newPoints = (Number(current.points) || 0) + (Number(challenge.points) || 0);
+        await updateUser(current.id, { points: newPoints });
+        updateSessionUser({ points: newPoints });
+      }
     }
 
     close();
     render();
   });
+}
+
+/** Muestra un mensaje del servidor dentro del modal de detalle. */
+function showDetailFeedback(overlay, message) {
+  const el = overlay.querySelector("[data-feedback]");
+  if (!el) return;
+  el.textContent = message;
+  el.hidden = false;
 }
 
 /** Botones del modal según el estado del reto y la sesión. */
