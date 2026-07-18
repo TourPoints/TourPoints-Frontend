@@ -121,7 +121,9 @@ export const routes = {
 
 export const dynamicRoutes = [
     {
-        pattern: /^\/poi\/(\d+)$/,
+        // [\w-]+ y no \d+: los ids del backend son UUID. Con \d+ cualquier
+        // detalle real caía al 404 sin error visible.
+        pattern: /^\/poi\/([\w-]+)$/,
         component: poiDetail,
         init: initPoiDetail,
         layout: "public",
