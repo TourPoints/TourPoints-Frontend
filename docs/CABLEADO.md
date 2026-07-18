@@ -116,13 +116,99 @@ necesariamente el que abre la consola por defecto).
 
 ---
 
-## Próximos cables, en orden de encendido
+## Cables 2-9 · Conexión total (2026-07-18) — rama `feature/full-backend-connection`
 
-| # | Cable | Endpoints que esperamos | Qué enciende |
-|---|---|---|---|
-| 2 | `users` (panel admin) | `GET /users`, `PATCH /users/{id}`, `activate/suspend`, `DELETE` | Gestión de usuarios real |
-| 3 | `pois` | `GET /poi`, `GET /poi/{id}` (+ `puntos_visita` y `orden` pedidos) | Portada, Explora y Mapa con datos reales |
-| 4 | `favoritos`, `comentarios`, `calificaciones` | según su contrato | Detalle de POI completo |
-| 5 | `retos` + `visitas` + `puntos` | inscripción, check-in GPS, saldo | La gamificación de verdad |
+El backend desplegó el MVP completo (77 rutas) y **corrió el seed de
+`scripts/seed_data.sql`**: los POIs reales responden con los UUID sembrados.
+Todos los módulos quedaron cableados. Registro por servicio:
 
-Receta: los 7 pasos de arriba. Un módulo por rama, un enchufe por commit.
+### `poi.service` → `/poi` (+ `/poi-categories`)
+- Lecturas públicas: lista con filtro `nombre`, detalle con imágenes ordenadas.
+- **Geosearch del mapa**: `getPoisNearby()` manda `lat/lng/radio_metros` y cada
+  POI vuelve con `distancia_metros` medida por PostGIS (verificado: Museo del
+  Caribe a 0,21 km del centro). El Haversine local queda solo como fallback de
+  mocks. El mapa re-pide al servidor cuando la geolocalización aterriza.
+- "Abierto ahora" se calcula del JSONB `horarios` (cierra la decisión C2).
+- Puntos del badge: espejo de `reglas_puntos` del seed (B1 sigue pendiente).
+- Admin: crear encadena `submit-for-review` + moderación hasta el estado que
+  pidió el formulario; estado vía `PATCH /moderation`; DELETE directo. La
+  imagen del formulario no viaja (su endpoint recibe archivos, no URLs).
+- Fix crítico incluido: la ruta `/poi/:id` solo aceptaba dígitos; los UUID
+  reales caían al 404.
+
+### `review.service` → `/poi/{id}/comments` + `/poi/{id}/my-rating`
+- Un gesto del formulario = dos entidades suyas: `PUT my-rating` (idempotente)
+  y `POST comments` (nace PENDIENTE → la vista avisa de la moderación).
+- Los comentarios llegan sin estrellas (la calificación vive aparte): la
+  tarjeta omite la fila en vez de pintar cinco estrellas vacías.
+- Borrar → `DELETE /comments/{id}`. El control de duplicados es del servidor.
+
+### `favorite.service` → `/favorites`
+- `POST /favorites`, `DELETE /favorites/{poi_id}`, `GET /favorites/me`.
+- Patrón nuevo: **caché en memoria con lectura síncrona** — los corazones se
+  pintan en mitad de renders síncronos, así que las vistas llaman a
+  `refreshMyFavorites()` al inicializar y leen la caché después. La caché se
+  liga al usuario que la llenó (cambiar de cuenta la invalida sola).
+
+### `visit.service` + `points.service` → `/visits`, `/visits/me/balance`, `/points/me/movements`
+- Check-in GPS real: coordenadas + precisión → PostGIS valida contra el
+  `radio_validacion` → VALIDADA acredita en el ledger. Un rechazo dice a
+  cuántos metros estás (accionable). Los dos últimos `alert()` del flujo
+  murieron reemplazados por el modal de la casa.
+- El saldo **nunca** es columna: `user.points` pasa a ser caché de pintado que
+  `refreshSessionPoints()` refresca al entrar a dashboard/recompensas/retos.
+- El historial del dashboard usa el ledger real (canjes en rojo negativo).
+
+### `challengeProgress` + `challenge.service` → `/challenges`
+- Adaptador del modelo rico: `difficulty` deriva de `cantidad_requerida`
+  (1=Fácil, 2-3=Medio, 4+=Difícil), `points` de la recompensa asociada,
+  `deadline` del fin de vigencia, imagen fija por tipo (B3 pendiente).
+- Progreso: `usuario_retos` (un intento por periodo) se proyecta al estado
+  plano por reto — manda el intento más reciente. Misma caché síncrona.
+- Transiciones: en-curso→`join`, disponible→`abandon`, completar→`progress`
+  (el backend decide si con eso queda FINALIZADO **y acredita él los puntos**;
+  el crédito manual quedó solo en modo mocks). Avance parcial se informa en el
+  modal ("aún te faltan objetivos").
+- ⚠️ Editar/borrar retos no tiene endpoint: degradan con aviso (pendiente).
+
+### `reward.service` → `/rewards` + `/redemptions`
+- El botón "Canjear" de la tarjeta existía **sin manejador**; ahora confirma
+  contra el saldo real, `POST /redeem` (stock y puntos los descuentan sus
+  triggers) y muestra el código `TP-CANJE-…` con su vencimiento en un modal.
+- Los 409 de negocio (sin puntos / sin stock) salen con su mensaje literal.
+- Hasta el listado exige sesión: la página invita a entrar si no la hay.
+- Sin DELETE: la baja es `PATCH estado=INACTIVO`. Sin imagen/emoji/categoría
+  en su modelo (B3): emoji genérico y las tarjetas viven bajo "Todos".
+
+### `user.service` → `/users` (admin) + `PATCH /users/me` (perfil propio)
+- CRUD admin con sus endpoints dedicados (`activate`/`suspend`, soft delete).
+- "Editar perfil" del dashboard usa `PATCH /users/me`: el CRUD de `/users`
+  daría 403 a una cuenta normal. La unicidad de email la valida el servidor.
+- La columna de puntos del panel muestra 0: el saldo por usuario para admin
+  no existe aún (anotado abajo).
+
+### Infraestructura transversal
+- `apiGetItems()` desenvuelve el sobre `{items,…}` de todas sus listas.
+- Los GET reintentan **una** vez ante fallo transitorio: Neon cierra
+  conexiones ociosas y su pool aún no lo detecta.
+
+### Para el equipo backend (nuevo)
+1. **`pool_pre_ping=True`** en el `create_engine`: los 500 intermitentes de
+   "SSL connection has been closed unexpectedly" son conexiones zombis del
+   pool tras el autosuspend de Neon. (El retry del frontend lo tapa en GET,
+   pero los POST no se reintentan a propósito.)
+2. Faltan `PATCH /challenges/{id}` y `DELETE` (el panel admin de retos no
+   puede editar), la **imagen** de retos/recompensas (B3), y un saldo de
+   puntos **por usuario** consultable por admin para el panel.
+3. `GET /poi` sin `orden` sigue pendiente (B2): hoy el frontend ordena en
+   cliente sobre las ~decenas de POIs; se caerá con cientos.
+
+### Verificación pendiente de humano (flujos con sesión)
+Yo no creo cuentas ni tecleo contraseñas: el camino feliz autenticado lo
+cierra una persona con su cuenta real, en este orden (5 min):
+login → corazón en Explora → pestaña Favoritos → detalle de POI: comentar
+(aviso de moderación) → registrar visita (cerca/lejos del punto) → dashboard
+(saldo y ledger) → Retos: unirse/avanzar → Recompensas: canjear y ver el QR.
+
+Receta para lo que venga: los 7 pasos de arriba. Un módulo por rama, un
+enchufe por commit.
