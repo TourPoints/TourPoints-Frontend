@@ -17,7 +17,19 @@ export const API_TIMEOUT_MS = 8000;
 // Cada módulo se "cablea" añadiéndolo aquí en su propio commit, cuando su
 // servicio ya habla el contrato real (ver docs/CABLEADO.md). Los que no
 // están en la lista siguen usando los mocks de localStorage aunque haya URL.
-export const API_MODULES = new Set(["auth", "pois", "reviews", "favorites", "visits", "points"]);
+// Todos los módulos del MVP están cableados; el comentario histórico de
+// arriba queda como registro de por qué existe la puerta.
+export const API_MODULES = new Set([
+  "auth",
+  "pois",
+  "reviews",
+  "favorites",
+  "visits",
+  "points",
+  "challenges",
+  "rewards",
+  "users",
+]);
 
 /**
  * Indica si un módulo debe hablar con el backend real.

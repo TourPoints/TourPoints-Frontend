@@ -1,5 +1,8 @@
 import { rewardCard } from "../components/molecules/rewardCard.js";
-import { getRewards } from "../services/reward.service.js";
+import { getRewards, redeemReward } from "../services/reward.service.js";
+import { isApiEnabled } from "../services/api.client.js";
+import { openConfirmModal, escapeHtml } from "../components/organism/modal.js";
+import { formatDate } from "../utils/date.js";
 import { REWARD_CATEGORIES } from "../mocks/rewards.js";
 import { getCurrentUser } from "../services/auth.service.js";
 import { refreshSessionPoints } from "../services/points.service.js";
@@ -57,6 +60,22 @@ export function rewards() {
 
 export async function initRewards() {
   currentCategory = ALL_CATEGORIES_ID;
+
+  // Contra el backend hasta el listado de recompensas exige sesión: sin ella
+  // se invita a entrar en vez de enseñar una lista vacía inexplicable.
+  if (isApiEnabled("rewards") && !getCurrentUser()) {
+    renderUserPoints();
+    const grid = document.getElementById("rewards-grid");
+    if (grid) {
+      grid.innerHTML = `
+        <div class="empty-state">
+          <p>Inicia sesión para ver y canjear las recompensas.</p>
+          <a href="/login" class="btn btn--primary" data-link>Iniciar sesión</a>
+        </div>
+      `;
+    }
+    return;
+  }
 
   // El saldo vive en el ledger del backend; la sesión es solo caché.
   await refreshSessionPoints().catch(() => {});
@@ -150,6 +169,76 @@ function renderGrid() {
       })
     )
     .join("");
+
+  // El botón "Canjear" de cada tarjeta existía sin manejador: era decorativo.
+  // Ahora canjea de verdad contra el backend (con confirmación previa).
+  container.querySelectorAll("[data-reward-id]:not([disabled])").forEach((btn) => {
+    btn.addEventListener("click", () => handleRedeem(btn.dataset.rewardId));
+  });
+}
+
+/** Flujo de canje: confirmar → canjear en el backend → enseñar el código QR. */
+async function handleRedeem(rewardId) {
+  const reward = allRewards.find((r) => String(r.id) === String(rewardId));
+  if (!reward) return;
+
+  const user = getCurrentUser();
+  if (!user) return;
+
+  const saldo = Number(user.points) || 0;
+  const confirmed = await openConfirmModal({
+    title: `Canjear: ${reward.name}`,
+    message: `Este canje descuenta ${reward.pointsCost.toLocaleString("es-ES")} puntos de tu saldo (${saldo.toLocaleString("es-ES")} pts). ¿Continuar?`,
+    confirmLabel: "Canjear",
+  });
+  if (!confirmed) return;
+
+  const result = await redeemReward(rewardId);
+
+  if (!result.ok) {
+    await openConfirmModal({ title: "No se pudo canjear", message: result.error, confirmLabel: "Entendido" });
+    return;
+  }
+
+  // El backend ya descontó stock y puntos: se refresca todo antes de enseñar
+  // el código, para que el saldo y el stock de la página digan la verdad.
+  await refreshSessionPoints().catch(() => {});
+  try {
+    allRewards = await getRewards();
+  } catch { /* la lista vigente sigue sirviendo */ }
+  renderUserPoints();
+  renderGrid();
+  loadIcons();
+
+  showRedemptionCode(result.canje);
+}
+
+/** Modal con el código del canje: es lo que se presenta en el aliado. */
+function showRedemptionCode(canje) {
+  const overlay = document.createElement("div");
+  overlay.className = "modal-overlay";
+  overlay.innerHTML = `
+    <div class="modal-box modal-box--sm" role="dialog" aria-modal="true" aria-label="Canje realizado">
+      <div class="modal-header">
+        <h2 class="modal-title">¡Canje realizado!</h2>
+        <button type="button" class="modal-close" aria-label="Cerrar">&times;</button>
+      </div>
+      <p class="modal-message">
+        Presenta este código en <strong>${escapeHtml(canje.recompensa)}</strong> para redimir tu recompensa.
+        ${canje.expira ? `Vence el ${escapeHtml(formatDate(String(canje.expira).slice(0, 10)))}.` : ""}
+      </p>
+      <p class="rewards-redeem-code"><code>${escapeHtml(canje.codigoQr)}</code></p>
+      <div class="modal-actions">
+        <button type="button" class="btn-primary modal-confirm">Entendido</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+  const close = () => overlay.remove();
+  overlay.querySelector(".modal-close").addEventListener("click", close);
+  overlay.querySelector(".modal-confirm").addEventListener("click", close);
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
 }
 
 function showErrorState() {

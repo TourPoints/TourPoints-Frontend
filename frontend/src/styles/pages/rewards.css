@@ -5,6 +5,24 @@
   padding: 2rem 2rem 4rem;
 }
 
+/* Código de canje: es lo que el usuario presenta en el aliado, así que se
+   pinta grande, monoespaciado y seleccionable de un toque. */
+.rewards-redeem-code {
+  margin: 0.5rem 0 1rem;
+  text-align: center;
+}
+
+.rewards-redeem-code code {
+  display: inline-block;
+  padding: 0.6rem 0.9rem;
+  background: #f1f5f9;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  user-select: all;
+  word-break: break-all;
+}
+
 /* HERO */
 .rewards-hero {
   display: flex;

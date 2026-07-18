@@ -11,10 +11,10 @@
 // favoritos, que son los eventos con fecha que hoy se registran. El backend
 // lo sustituirá por un endpoint de actividad.
 
-import { getCurrentUser, updateSessionUser, logout } from "../services/auth.service.js";
+import { getCurrentUser, updateSessionUser, updateMyProfile, logout } from "../services/auth.service.js";
 import { getUsers, updateUser } from "../services/user.service.js";
 import { getChallenges } from "../services/challenge.service.js";
-import { PROGRESS, getMyProgress, getMyProgressEntries } from "../services/challengeProgress.service.js";
+import { PROGRESS, getMyProgress, getMyProgressEntries, refreshMyChallengeProgress } from "../services/challengeProgress.service.js";
 import { getRewards } from "../services/reward.service.js";
 import { getMyFavoriteEntries } from "../services/favorite.service.js";
 import { getPois } from "../services/poi.service.js";
@@ -178,6 +178,7 @@ export async function initDashboard() {
   const pointsEl = document.getElementById("dashboard-points");
   if (pointsEl) pointsEl.textContent = `${saldo.toLocaleString("es-ES")} pts`;
 
+  await refreshMyChallengeProgress().catch(() => {});
   const progressEntries = getMyProgressEntries();
   const favoriteEntries = await getMyFavoriteEntries();
 
@@ -234,23 +235,35 @@ async function handleEditProfile() {
   });
   if (!data) return;
 
-  const users = await getUsers();
-  const target = normalizeText(data.email);
-  const taken = users.some(
-    (item) => item.id !== user.id && normalizeText(item.email) === target
-  );
-  if (taken) {
-    // El modal ya se cerró: se reabre con el aviso en vez de perder lo escrito.
-    await openConfirmModal({
-      title: "Email en uso",
-      message: "Ya existe otra cuenta con ese email. Elige uno distinto.",
-      confirmLabel: "Entendido",
-    });
-    return handleEditProfile();
-  }
+  let updated;
+  if (isApiEnabled("auth")) {
+    // Contra el backend el perfil propio va por PATCH /users/me (el CRUD de
+    // /users exige rol admin) y la unicidad del email la valida el servidor.
+    const result = await updateMyProfile({ name: data.name, email: data.email });
+    if (!result.ok) {
+      await openConfirmModal({ title: "No se pudo guardar", message: result.error, confirmLabel: "Entendido" });
+      return handleEditProfile();
+    }
+    updated = result.user;
+  } else {
+    const users = await getUsers();
+    const target = normalizeText(data.email);
+    const taken = users.some(
+      (item) => item.id !== user.id && normalizeText(item.email) === target
+    );
+    if (taken) {
+      // El modal ya se cerró: se reabre con el aviso en vez de perder lo escrito.
+      await openConfirmModal({
+        title: "Email en uso",
+        message: "Ya existe otra cuenta con ese email. Elige uno distinto.",
+        confirmLabel: "Entendido",
+      });
+      return handleEditProfile();
+    }
 
-  await updateUser(user.id, { name: data.name, email: data.email });
-  const updated = updateSessionUser({ name: data.name, email: data.email });
+    await updateUser(user.id, { name: data.name, email: data.email });
+    updated = updateSessionUser({ name: data.name, email: data.email });
+  }
 
   // Refrescar saludo y chip sin repintar la página entera.
   const nameEl = document.getElementById("dashboard-first-name");
