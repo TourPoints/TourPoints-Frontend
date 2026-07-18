@@ -172,7 +172,7 @@ export async function initDashboard() {
   }
 
   const progressEntries = getMyProgressEntries();
-  const favoriteEntries = getMyFavoriteEntries();
+  const favoriteEntries = await getMyFavoriteEntries();
 
   renderStats(progressEntries, favoriteEntries);
   renderActiveChallenges(challenges);

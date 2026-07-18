@@ -7,6 +7,7 @@ import { buttonLinks } from "../components/atoms/buttonLinks.js";
 import { getPois } from "../services/poi.service.js";
 import { getChallenges } from "../services/challenge.service.js";
 import { navigate } from "../router/router.js";
+import { refreshMyFavorites } from "../services/favorite.service.js";
 import { loadIcons } from "../utils/icons.js";
 
 // Nº de destinos y retos destacados en la portada. El primer POI se pinta grande.
@@ -127,6 +128,9 @@ export async function initHome() {
   const challengesContainer = document.getElementById("home-challenges");
 
   bindHeroSearch();
+
+  // Los corazones del grid destacado leen la caché de favoritos en síncrono.
+  await refreshMyFavorites().catch(() => {});
 
   await Promise.all([loadFeaturedPois(poisContainer), loadFeaturedChallenges(challengesContainer)]);
 
