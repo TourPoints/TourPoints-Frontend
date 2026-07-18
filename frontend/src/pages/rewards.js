@@ -2,6 +2,7 @@ import { rewardCard } from "../components/molecules/rewardCard.js";
 import { getRewards } from "../services/reward.service.js";
 import { REWARD_CATEGORIES } from "../mocks/rewards.js";
 import { getCurrentUser } from "../services/auth.service.js";
+import { refreshSessionPoints } from "../services/points.service.js";
 import { loadIcons } from "../utils/icons.js";
 import "/src/styles/pages/rewards.css";
 
@@ -57,6 +58,8 @@ export function rewards() {
 export async function initRewards() {
   currentCategory = ALL_CATEGORIES_ID;
 
+  // El saldo vive en el ledger del backend; la sesión es solo caché.
+  await refreshSessionPoints().catch(() => {});
   renderUserPoints();
 
   try {

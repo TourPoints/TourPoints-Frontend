@@ -12,6 +12,7 @@ import {
   setChallengeState,
 } from "../services/challengeProgress.service.js";
 import { getCurrentUser, updateSessionUser } from "../services/auth.service.js";
+import { refreshSessionPoints } from "../services/points.service.js";
 import { updateUser } from "../services/user.service.js";
 import { challengeCard } from "../components/molecules/challengeCard.js";
 import { escapeHtml } from "../components/organism/modal.js";
@@ -85,6 +86,7 @@ export async function initChallenges() {
     return;
   }
 
+  await refreshSessionPoints().catch(() => {});
   progress = getMyProgress();
 
   const search = document.getElementById("challenges-search");

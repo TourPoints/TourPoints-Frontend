@@ -11,7 +11,9 @@ import { poiGallery, initPoiGallery } from "../components/molecules/poiGallery.j
 import { addressCard, scheduleCard } from "../components/molecules/infoCard.js";
 import { poiSidebar } from "../components/organism/poiSidebar.js";
 import { reviewsList } from "../components/organism/reviewsList.js";
+import { openConfirmModal } from "../components/organism/modal.js";
 import { isAuthenticated } from "../services/auth.service.js";
+import { refreshSessionPoints } from "../services/points.service.js";
 import { navigate } from "../router/router.js";
 import { goBackOr } from "../utils/navigation.js";
 import { loadIcons } from "../utils/icons.js";
@@ -274,12 +276,19 @@ function bindSidebarActions(poi) {
 
       if (result.success) {
         visitBtn.querySelector("span").textContent = "Visita Registrada";
-        alert(result.message);
+        // El backend acaba de acreditar puntos en el ledger: la copia de la
+        // sesión se refresca para que el header y el dashboard lo reflejen.
+        await refreshSessionPoints().catch(() => {});
       } else {
         visitBtn.disabled = false;
         visitBtn.querySelector("span").textContent = "Registrar Visita";
-        alert(result.message);
       }
+
+      await openConfirmModal({
+        title: result.success ? "Visita registrada" : "No se pudo validar",
+        message: result.message,
+        confirmLabel: "Entendido",
+      });
     });
   }
 
@@ -314,7 +323,13 @@ function getUserCoords() {
     }
 
     navigator.geolocation.getCurrentPosition(
-      (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      (pos) =>
+        resolve({
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+          // La precisión viaja al backend: le sirve para auditar la validación.
+          accuracy: pos.coords.accuracy ?? null,
+        }),
       () => resolve({ lat: 0, lng: 0 }),
       { timeout: 4000, maximumAge: 60000 }
     );

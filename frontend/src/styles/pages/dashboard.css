@@ -306,6 +306,11 @@
   color: #16a34a;
 }
 
+/* Un canje resta puntos: el ledger lo trae en negativo y se pinta en rojo. */
+.dash-event-points--negative {
+  color: #dc2626;
+}
+
 /* ── CTA de exploración ───────────────────────────────────────── */
 
 .dashboard-cta {
