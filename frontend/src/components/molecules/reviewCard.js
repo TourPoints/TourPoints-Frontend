@@ -21,11 +21,16 @@ import "/src/styles/molecules/reviewCard.css";
 export function reviewCard({ author, initials, rating, text, createdAt, isMine = false }) {
   const score = Math.max(0, Math.min(5, Number(rating) || 0));
 
-  const stars = Array.from({ length: 5 }, (_, i) =>
-    i < score
-      ? `<i data-lucide="star" class="review-star review-star--filled"></i>`
-      : `<i data-lucide="star" class="review-star"></i>`
-  ).join("");
+  // Contra el backend la calificación es una entidad aparte y el comentario
+  // llega sin estrellas: en ese caso la fila de valoración no se pinta, en
+  // vez de mentir con cinco estrellas vacías.
+  const stars = score === 0
+    ? ""
+    : Array.from({ length: 5 }, (_, i) =>
+        i < score
+          ? `<i data-lucide="star" class="review-star review-star--filled"></i>`
+          : `<i data-lucide="star" class="review-star"></i>`
+      ).join("");
 
   return `
     <article class="review-card${isMine ? " review-card--mine" : ""}">
@@ -39,7 +44,7 @@ export function reviewCard({ author, initials, rating, text, createdAt, isMine =
           <span class="review-date">${escapeHtml(formatRelativeDate(createdAt))}</span>
         </div>
       </div>
-      <div class="review-rating" aria-label="Valoración: ${score} de 5">${stars}</div>
+      ${stars ? `<div class="review-rating" aria-label="Valoración: ${score} de 5">${stars}</div>` : ""}
       <p class="review-text">${escapeHtml(text)}</p>
     </article>
   `;

@@ -230,7 +230,14 @@ function bindReviews(poi) {
 
     // El comentario recién publicado va el primero: si la lista estaba
     // plegada se ve igualmente, así que no hace falta desplegarla.
-    await renderReviews(poi);
+    // Contra el backend nace PENDIENTE y no aparecerá hasta que un admin lo
+    // apruebe: sin este aviso, publicar parecería no haber hecho nada.
+    await renderReviews(
+      poi,
+      result.pendingModeration
+        ? "¡Gracias! Tu comentario quedó pendiente de moderación y aparecerá cuando se apruebe."
+        : ""
+    );
     document.getElementById("reviews-section")?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   });
 }
