@@ -633,6 +633,20 @@ body:has(.map-page-container) footer {
     padding: 0.5rem 1rem;
   }
 
+  /* El aviso de ubicación nacía en top:1rem, exactamente la misma franja que la
+     búsqueda y las categorías, y se montaba encima de las dos. Encima, al ir
+     centrado con translateX y limitado por max-width, quedaba como una columna
+     estrecha y altísima con el texto partido en pedazos.
+     En móvil ocupa el ancho disponible y se coloca bajo los controles. */
+  .map-notice {
+    top: 7.75rem;
+    left: 1rem;
+    right: 1rem;
+    transform: none;
+    max-width: none;
+    flex-wrap: wrap;
+  }
+
   /* Los dos flotantes se montaban: ambos anclados a right:1rem y con bottom casi
      igual (ruta 5.5rem, ubicación 6rem), el círculo de ubicación caía justo
      encima del extremo derecho de la píldora "Iniciar Ruta". Ahora se apilan en
