@@ -24,7 +24,7 @@ export function header() {
   return `
     <header class="header-global">
       <div class="nav-container">
-        <img src="/public/icons/isotipo_tourPoints.svg" alt="TourPoints Logo" class="logo-footer">
+        <img src="/icons/isotipo_tourPoints.svg" alt="TourPoints Logo" class="logo-footer">
         <a href="/" class="logo">TourPoints</a>
         <nav class="navegation">
           <a class="menu" href="/" data-link>Inicio</a>
