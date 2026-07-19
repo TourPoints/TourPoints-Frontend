@@ -122,14 +122,32 @@
 
 /* TABLETS ESTÁNDAR (vertical) */
 @media (max-width: 768px) {
-  .nav-container {
-    gap: 2rem;
-    width: 60%;
+  /* 2rem de padding lateral (64px en 375px) apretaban el contenido; se baja. */
+  .header-global {
+    padding: 0.75rem 1rem;
   }
+
+  /* Con el nav oculto (en móvil vive en la bottom-nav), el contenedor no debe
+     seguir reservando el 60%: que ocupe solo lo que necesita el logo, para no
+     empujar el menú de perfil fuera del borde. */
+  .nav-container {
+    width: auto;
+    gap: 0.5rem;
+  }
+
   .navegation {
     display: none;
+  }
+
+  /* El logo a 2rem robaba ancho al menú de perfil; se ajusta para móvil. */
+  .logo {
+    font-size: 1.4rem;
+    margin-right: 0;
   }
 }
 
 @media (max-width: 480px) {
+  .logo {
+    font-size: 1.25rem;
+  }
 }
