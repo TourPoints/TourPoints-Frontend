@@ -242,6 +242,19 @@ body:has(.map-page-container) footer {
   transform: scale(1.05);
 }
 
+/* Con una ruta activa el botón pasa a "Quitar ruta": mismo sitio, otra acción.
+   Se tiñe de gris oscuro para leerse como un estado, no como el CTA azul. */
+.btn-route-float--active {
+  background-color: var(--color-gris-oscuro);
+  box-shadow: 0 4px 15px rgba(15, 23, 42, 0.3);
+}
+
+/* Leaflet Routing Machine inyecta su propio panel de indicaciones; aquí la ruta
+   se controla con el botón flotante, así que dejamos solo la línea en el mapa. */
+.leaflet-routing-container {
+  display: none;
+}
+
 /* ==========================================================
    CONTROLES MÓVILES (OCULTOS EN DESKTOP)
    ========================================================== */

@@ -28,6 +28,10 @@ let userCoords = { ...DEFAULT_COORDS };
 let hasUserLocation = false;
 let currentCategory = ALL_CATEGORIES;
 let searchQuery = "";
+// Control de ruta de Leaflet Routing Machine (null si no hay ruta pintada) y
+// el POI que el usuario tiene abierto/seleccionado como destino de la ruta.
+let routingControl = null;
+let selectedPoiId = null;
 
 // Icono de Lucide asociado a cada categoría.
 const CATEGORY_ICONS = {
@@ -135,6 +139,8 @@ function resetState() {
   userCoords = { ...DEFAULT_COORDS };
   hasUserLocation = false;
   markersByPoiId = new Map();
+  routingControl = null;
+  selectedPoiId = null;
 
   if (mapInstance) {
     try {
@@ -320,9 +326,100 @@ function bindSearchInputs() {
 
 function bindRouteButton() {
   const routeBtn = document.getElementById("btn-route-start");
-  routeBtn?.addEventListener("click", () => {
-    alert("Calculando la ruta turística óptima basada en tus intereses actuales...");
-  });
+  routeBtn?.addEventListener("click", toggleRoute);
+}
+
+/**
+ * Traza (o quita) la ruta a pie desde la ubicación del usuario hasta el POI
+ * destino, siguiendo las calles reales vía OSRM (Leaflet Routing Machine).
+ *
+ * Destino: el POI que el usuario tiene abierto/seleccionado; si no hay ninguno,
+ * el más cercano de la lista filtrada (ya ordenada por cercanía cuando conocemos
+ * la ubicación).
+ *
+ * ⚠️ Usa el servidor público de demostración de OSRM (router.project-osrm.org):
+ * es de cortesía, con límite de peticiones y sin garantías. Para producción hay
+ * que apuntar a una instancia propia de OSRM.
+ */
+async function toggleRoute() {
+  if (routingControl) {
+    clearRoute();
+    return;
+  }
+
+  if (!hasUserLocation) {
+    showLocationNotice("Necesitamos tu ubicación para trazar la ruta. Actívala y reintenta.");
+    requestUserLocation();
+    return;
+  }
+
+  if (typeof L.Routing?.control !== "function") {
+    showLocationNotice("El trazado de rutas no está disponible ahora mismo.");
+    return;
+  }
+
+  const target =
+    filteredPois.find((poi) => String(poi.id) === String(selectedPoiId)) ?? filteredPois[0];
+  if (!target) {
+    showLocationNotice("No hay ningún lugar al que trazar la ruta con el filtro actual.");
+    return;
+  }
+
+  setRouteButtonState("routing");
+
+  routingControl = L.Routing.control({
+    waypoints: [
+      L.latLng(userCoords.lat, userCoords.lng),
+      L.latLng(target.lat, target.lng),
+    ],
+    router: L.Routing.osrmv1({
+      serviceUrl: "https://router.project-osrm.org/route/v1",
+      profile: "foot",
+    }),
+    fitSelectedRoutes: true,
+    show: false, // el panel de indicaciones de LRM se oculta; gestionamos con nuestro botón
+    addWaypoints: false, // ruta fija origen→destino, sin puntos intermedios arrastrables
+    draggableWaypoints: false,
+    routeWhileDragging: false,
+    createMarker: () => null, // ya pintamos nuestros propios pines
+    lineOptions: {
+      styles: [{ color: "#004ac6", opacity: 0.85, weight: 6 }],
+    },
+  })
+    .on("routesfound", () => setRouteButtonState("active"))
+    .on("routingerror", () => {
+      // El servidor demo puede negar/limitar la petición: no dejamos el botón
+      // colgado en "Trazando..." ni una ruta a medias.
+      clearRoute();
+      showLocationNotice("No pudimos trazar la ruta ahora. Inténtalo de nuevo en un momento.");
+    })
+    .addTo(mapInstance);
+}
+
+/** Quita la ruta del mapa y devuelve el botón a su estado inicial. */
+function clearRoute() {
+  if (routingControl && mapInstance) {
+    mapInstance.removeControl(routingControl);
+  }
+  routingControl = null;
+  setRouteButtonState("idle");
+}
+
+/**
+ * Refleja el estado de la ruta en el botón flotante.
+ * @param {"idle"|"routing"|"active"} state
+ */
+function setRouteButtonState(state) {
+  const btn = document.getElementById("btn-route-start");
+  if (!btn) return;
+
+  const label = btn.querySelector("span");
+  btn.classList.toggle("btn-route-float--active", state === "active");
+
+  if (label) {
+    label.textContent =
+      state === "active" ? "Quitar ruta" : state === "routing" ? "Trazando…" : "Iniciar Ruta";
+  }
 }
 
 /**
@@ -512,7 +609,13 @@ function updateMarkers() {
       .addTo(markersGroup)
       .bindPopup(popupContent);
 
-    markersByPoiId.set(poi.id, marker);
+    // Abrir el popup marca ese POI como destino de la ruta.
+    marker.on("popupopen", () => {
+      selectedPoiId = String(poi.id);
+    });
+
+    // Clave como string: el id es UUID con el backend y número en los mocks.
+    markersByPoiId.set(String(poi.id), marker);
   });
 
   loadIcons();
@@ -537,7 +640,7 @@ function updateSidebarList() {
   listContainer.innerHTML = filteredPois.map(renderSidebarItem).join("");
 
   listContainer.querySelectorAll(".sidebar-poi-item").forEach((item) => {
-    item.addEventListener("click", () => focusPoi(Number(item.dataset.poiId)));
+    item.addEventListener("click", () => focusPoi(item.dataset.poiId));
   });
 
   loadIcons();
@@ -570,12 +673,17 @@ function renderSidebarItem(poi) {
 
 /**
  * Centra el mapa en un POI concreto y abre su popup.
+ * El id llega como string desde el dataset; se compara como string porque con
+ * el backend es UUID (antes se forzaba a Number y daba NaN: el clic no hacía
+ * nada) y en los mocks es número.
  */
 function focusPoi(poiId) {
-  const poi = filteredPois.find((item) => item.id === poiId);
-  const marker = markersByPoiId.get(poiId);
+  const id = String(poiId);
+  const poi = filteredPois.find((item) => String(item.id) === id);
+  const marker = markersByPoiId.get(id);
   if (!poi || !marker || !mapInstance) return;
 
+  selectedPoiId = id;
   mapInstance.setView([poi.lat, poi.lng], FOCUS_ZOOM, { animate: true });
   marker.openPopup();
 }
