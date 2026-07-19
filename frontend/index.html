@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/x-icon" href="./public/favicon.ico" >
+    <!-- Rutas absolutas, no relativas: en una ruta anidada como /poi/<id> un
+         ./ resuelve contra /poi/ y el recurso da 404. Y el favicon vive en la
+         raíz del sitio tras el build (Vite copia public/ ahí), no en /public. -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" >
     <!-- Las dos fuentes de la identidad, juntas y a la vista: Poppins para la
          interfaz (--font-base) e Inter para el cuerpo de texto (--font-texto).
          Inter entraba por un @import escondido dentro de styles/pages/admin.css,
@@ -14,7 +17,7 @@
       href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="./src/styles/global.css" />
+    <link rel="stylesheet" href="/src/styles/global.css" />
     <!-- Leaflet Map CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <!-- Leaflet Routing Machine CSS (trazado de rutas OSRM en el mapa) -->
