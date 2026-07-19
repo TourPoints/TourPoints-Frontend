@@ -24,6 +24,16 @@
   --font-base: "Poppins", sans-serif;
   --font-texto: "inter", sans-serif;
 
+  /* Medidas del armazón. Estaban repetidas a mano en cada vista que necesitaba
+     restar el header (el mapa usaba 56px cuando el real mide 65) y nadie
+     descontaba la barra inferior, que es fixed y tapaba el contenido. Una sola
+     fuente de verdad para las dos.
+     La barra inferior suma el área segura: en un iPhone con barra de gestos
+     crece por debajo y, sin este env(), volvería a comerse el contenido. */
+  --header-h: 80px;
+  --header-h-mobile: 65px;
+  --bottom-nav-h: calc(3.95rem + env(safe-area-inset-bottom));
+
   /* La interfaz está diseñada solo en claro. Sin esto, un navegador en modo
      oscuro pinta el lienzo de negro por defecto y los textos, que sí están
      fijados en tonos oscuros, se vuelven ilegibles. */

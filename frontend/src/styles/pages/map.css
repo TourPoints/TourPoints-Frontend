@@ -14,7 +14,10 @@ body:has(.map-page-container) footer {
   display: flex;
   flex-direction: row;
   width: 100%;
-  height: calc(100vh - 72px); /* Se ajusta dinámicamente restando el header */
+  /* El header mide 80px, no 72: con el valor viejo el mapa sobresalía 8px por
+     debajo del viewport y aparecía una barra de scroll en una vista que no
+     debe desplazarse. */
+  height: calc(100dvh - var(--header-h));
   overflow: hidden;
   position: relative;
   font-family: var(--font-base);
@@ -572,8 +575,13 @@ body:has(.map-page-container) footer {
     display: none; /* Ocultar sidebar en móviles */
   }
 
+  /* Antes: calc(100vh - 56px). Dos errores medidos en pantalla: el header real
+     mide 65px (no 56), y la barra inferior es fixed, así que el mapa se metía
+     63px por debajo de ella y esa franja quedaba tapada. Ahora se descuentan
+     las dos. dvh en vez de vh: en móvil la barra del navegador aparece y
+     desaparece, y vh se queda con la altura grande dejando el mapa cortado. */
   .map-page-container {
-    height: calc(100vh - 56px); /* Header más bajo en mobile */
+    height: calc(100dvh - var(--header-h-mobile) - var(--bottom-nav-h));
   }
 
   /* Mostrar y estilizar controles flotantes móviles */
@@ -625,9 +633,19 @@ body:has(.map-page-container) footer {
     padding: 0.5rem 1rem;
   }
 
-  /* Ajustar botón flotante en mobile */
+  /* Los dos flotantes se montaban: ambos anclados a right:1rem y con bottom casi
+     igual (ruta 5.5rem, ubicación 6rem), el círculo de ubicación caía justo
+     encima del extremo derecho de la píldora "Iniciar Ruta". Ahora se apilan en
+     la misma columna con separación real: ubicación arriba, ruta abajo.
+     Ya no hace falta reservar hueco para la barra inferior: el contenedor deja
+     de meterse por debajo de ella. */
+  .map-locate-btn {
+    bottom: 5rem;
+    right: 1rem;
+  }
+
   .btn-route-float {
-    bottom: 5.5rem; /* Deja espacio para la barra de navegación inferior del layout mobile */
+    bottom: 1rem;
     right: 1rem;
     padding: 0.7rem 1.25rem;
     font-size: 0.85rem;
