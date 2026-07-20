@@ -9,18 +9,14 @@ import {
   toggleRewardStatus,
   REWARD_STATUSES,
 } from "../../services/reward.service.js";
-import { REWARD_CATEGORIES } from "../../mocks/rewards.js";
 import { createAdminCrudView, statusDot, titleCell } from "./createAdminCrudView.js";
 import { escapeHtml } from "../../components/organism/modal.js";
 
-// Reutiliza los colores de badge ya definidos en admin.css.
-const CATEGORY_CLASS = {
-  "Restauración": "gastronomia",
-  "Alojamiento": "cultura",
-  "Cultura": "historico",
-  "Souvenirs": "default",
-  "Actividades": "naturaleza",
-};
+// El campo/columna "Categoría" se quitó: el modelo real de `recompensas` no
+// tiene esa columna y reward.service.js nunca la envía al guardar (ver su
+// toBackendReward), así que el admin la llenaba —incluso era obligatoria—
+// creyendo que hacía algo, y se perdía en silencio. Mismo problema de raíz
+// que los filtros de la vista pública (pages/rewards.js), del lado del admin.
 
 /** El stock bajo se resalta para que el admin lo detecte de un vistazo. */
 function stockCell(stock) {
@@ -32,7 +28,7 @@ const { view, init } = createAdminCrudView({
   title: "Gestión de Recompensas",
   entityLabel: "Recompensa",
   tableId: "reward",
-  searchFields: ["name", "category", "status"],
+  searchFields: ["name", "status"],
 
   service: {
     list: getRewards,
@@ -48,11 +44,6 @@ const { view, init } = createAdminCrudView({
       render: (r) => titleCell({ thumb: r.emoji ?? "🎁", title: r.name, subtitle: `ID: ${r.id}` }),
     },
     {
-      header: "Categoría",
-      render: (r) =>
-        `<span class="badge badge-${CATEGORY_CLASS[r.category] ?? "default"}">${escapeHtml(r.category)}</span>`,
-    },
-    {
       header: "Coste",
       render: (r) => `<span class="points-val">${escapeHtml(r.pointsCost)} pts</span>`,
     },
@@ -62,13 +53,6 @@ const { view, init } = createAdminCrudView({
 
   fields: () => [
     { name: "name", label: "Nombre de la recompensa", required: true, wide: true },
-    {
-      name: "category",
-      label: "Categoría",
-      type: "select",
-      options: REWARD_CATEGORIES,
-      required: true,
-    },
     { name: "status", label: "Estado", type: "select", options: REWARD_STATUSES, required: true },
     { name: "pointsCost", label: "Coste en puntos", type: "number", min: 0, required: true },
     { name: "stock", label: "Stock disponible", type: "number", min: 0, required: true },

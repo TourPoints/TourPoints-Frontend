@@ -19,7 +19,6 @@ export const mockRewards = [
     description:
       "Un café de especialidad cortesía de una cafetería aliada del centro histórico.",
     image: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600&h=400&fit=crop",
-    category: "Restauración",
     pointsCost: 150,
     stock: 45,
     status: "Activo",
@@ -31,7 +30,6 @@ export const mockRewards = [
     description:
       "Descuento del 10% en tu próxima estadía en un hotel aliado del barrio El Prado, válido todo el año.",
     image: "https://images.unsplash.com/photo-1445019980597-93fa8acb246c?w=600&h=400&fit=crop",
-    category: "Alojamiento",
     pointsCost: 500,
     stock: 20,
     status: "Activo",
@@ -43,7 +41,6 @@ export const mockRewards = [
     description:
       "Acceso a la colección permanente del Parque Cultural del Caribe para ti y un acompañante.",
     image: "https://images.unsplash.com/photo-1544967082-d9d25d867d66?w=600&h=400&fit=crop",
-    category: "Cultura",
     pointsCost: 300,
     stock: 15,
     status: "Pendiente",
@@ -55,7 +52,6 @@ export const mockRewards = [
     description:
       "Guía impresa con los rincones imprescindibles de Barranquilla, edición limitada.",
     image: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=600&h=400&fit=crop",
-    category: "Souvenirs",
     pointsCost: 100,
     stock: 120,
     status: "Activo",
@@ -67,18 +63,9 @@ export const mockRewards = [
     description:
       "Recorrido guiado por el Gran Malecón del Río con las historias del Magdalena y del Carnaval.",
     image: "https://images.unsplash.com/photo-1519677100203-a0e668c92439?w=600&h=400&fit=crop",
-    category: "Actividades",
     pointsCost: 600,
     stock: 8,
     status: "Inactivo",
     emoji: "🌙",
   },
-];
-
-export const REWARD_CATEGORIES = [
-  "Restauración",
-  "Alojamiento",
-  "Cultura",
-  "Souvenirs",
-  "Actividades",
 ];
