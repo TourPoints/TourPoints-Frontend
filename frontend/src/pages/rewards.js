@@ -3,32 +3,30 @@ import { getRewards, redeemReward } from "../services/reward.service.js";
 import { isApiEnabled } from "../services/api.client.js";
 import { openConfirmModal, escapeHtml } from "../components/organism/modal.js";
 import { formatDate } from "../utils/date.js";
-import { REWARD_CATEGORIES } from "../mocks/rewards.js";
 import { getCurrentUser } from "../services/auth.service.js";
 import { refreshSessionPoints } from "../services/points.service.js";
 import { loadIcons } from "../utils/icons.js";
 import "/src/styles/pages/rewards.css";
 
-// Antes esta página usaba REWARDS_DATA/CATEGORIES hardcodeados que no
-// tenían relación con lo que gestiona el panel admin (services/reward.service.js),
-// así que lo que un admin creaba o desactivaba nunca se veía aquí. Ahora se
-// lee del mismo servicio, con la categoría/estado reales del modelo.
+// Antes esta página filtraba por categoría (Restauración/Alojamiento/...),
+// una taxonomía que solo existía en los datos de ejemplo: el modelo real de
+// `recompensas` en el backend no tiene columna de categoría ni la hereda de
+// ningún POI asociado (recompensas.poi_id es apenas un id suelto, sin
+// nombre ni categoría en la respuesta). Contra la API, toda recompensa real
+// llegaba con category=undefined y cualquier filtro que no fuera "Todas"
+// mostraba la lista vacía. Los filtros ahora usan datos que sí existen para
+// cualquier recompensa: si tiene stock, y si el usuario tiene puntos para
+// pagarla.
 
-const ALL_CATEGORIES_ID = "todos";
-
-// Icono de Lucide por categoría de recompensa. No comparte taxonomía con las
-// categorías de POI (Naturaleza/Cultura/...), así que tiene su propio mapa.
-const CATEGORY_ICONS = {
-  "Restauración": "utensils-crossed",
-  "Alojamiento": "landmark",
-  "Cultura": "landmark",
-  "Souvenirs": "shopping-bag",
-  "Actividades": "compass",
-  [ALL_CATEGORIES_ID]: "layout-grid",
+const FILTERS = {
+  todas: { label: "Todas", icon: "layout-grid" },
+  disponibles: { label: "Disponibles", icon: "package-check" },
+  alAlcance: { label: "A mi alcance", icon: "wallet" },
 };
+const DEFAULT_FILTER = "todas";
 
 let allRewards = [];
-let currentCategory = ALL_CATEGORIES_ID;
+let currentFilter = DEFAULT_FILTER;
 
 export function rewards() {
   return `
@@ -59,7 +57,7 @@ export function rewards() {
 }
 
 export async function initRewards() {
-  currentCategory = ALL_CATEGORIES_ID;
+  currentFilter = DEFAULT_FILTER;
 
   // Contra el backend hasta el listado de recompensas exige sesión: sin ella
   // se invita a entrar en vez de enseñar una lista vacía inexplicable.
@@ -106,14 +104,12 @@ function renderFilters() {
   const container = document.getElementById("rewards-filters");
   if (!container) return;
 
-  const categories = [ALL_CATEGORIES_ID, ...REWARD_CATEGORIES];
-
-  container.innerHTML = categories
+  container.innerHTML = Object.entries(FILTERS)
     .map(
-      (category) => `
-      <button class="filter-btn ${category === currentCategory ? "filter-btn--active" : ""}" data-category="${category}">
-        <i data-lucide="${CATEGORY_ICONS[category] ?? "layout-grid"}"></i>
-        ${category === ALL_CATEGORIES_ID ? "Todos" : category}
+      ([key, { label, icon }]) => `
+      <button class="filter-btn ${key === currentFilter ? "filter-btn--active" : ""}" data-filter="${key}">
+        <i data-lucide="${icon}"></i>
+        ${label}
       </button>
     `
     )
@@ -121,9 +117,9 @@ function renderFilters() {
 
   container.querySelectorAll(".filter-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
-      currentCategory = btn.dataset.category;
+      currentFilter = btn.dataset.filter;
       container.querySelectorAll(".filter-btn").forEach((b) => {
-        b.classList.toggle("filter-btn--active", b.dataset.category === currentCategory);
+        b.classList.toggle("filter-btn--active", b.dataset.filter === currentFilter);
       });
       renderGrid();
       loadIcons();
@@ -134,9 +130,12 @@ function renderFilters() {
 }
 
 function getVisibleRewards() {
+  const balance = Number(getCurrentUser()?.points) || 0;
+
   return allRewards.filter((reward) => {
     if (reward.status !== "Activo") return false;
-    if (currentCategory !== ALL_CATEGORIES_ID && reward.category !== currentCategory) return false;
+    if (currentFilter === "disponibles" && reward.stock <= 0) return false;
+    if (currentFilter === "alAlcance" && reward.pointsCost > balance) return false;
     return true;
   });
 }
@@ -150,7 +149,7 @@ function renderGrid() {
   if (visible.length === 0) {
     container.innerHTML = `
       <div class="empty-state">
-        <p>No hay recompensas disponibles en esta categoría por ahora.</p>
+        <p>No hay recompensas que coincidan con este filtro por ahora.</p>
       </div>
     `;
     return;
