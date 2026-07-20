@@ -141,35 +141,73 @@ hacks, and a strict separation between view, service, and storage.
 ## Database relational model
 
 The backend's real schema (PostgreSQL + PostGIS, defined with SQLAlchemy
-models and versioned with Alembic migrations) has about 30 tables in total —
-too many to chart legibly in one diagram. The one below shows the **core
-domain**: the tables that carry the main user story, from account to
-redeemed reward.
+models and versioned with Alembic migrations). All ~30 tables, grouped the
+same way the team's own [Eraser diagram](https://app.eraser.io) groups them:
+identity, POI/geography, gamification, visits & points, commercial, social,
+and AI.
 
 ```mermaid
 erDiagram
     ROLES ||--o{ USUARIOS : "rol_id"
+
+    PAISES ||--o{ DEPARTAMENTOS : "pais_id"
+    DEPARTAMENTOS ||--o{ CIUDADES : "departamento_id"
     CIUDADES ||--o{ POI : "ciudad_id"
     CATEGORIAS_POI ||--o{ POI : "categoria_id"
-    POI ||--o| ESTABLECIMIENTOS : "poi_id"
-    USUARIOS ||--o{ VISITAS : "usuario_id"
-    POI ||--o{ VISITAS : "poi_id"
+    USUARIOS ||--o{ POI : "creado_por_usuario_id"
+    POI ||--o{ POI_RELACIONES : "poi_origen_id"
+    POI ||--o{ POI_RELACIONES : "poi_destino_id"
+    TIPOS_RELACION_POI ||--o{ POI_RELACIONES : "tipo_relacion_id"
+    POI ||--o{ IMAGENES_POI : "poi_id"
+
+    POI ||--o{ RECOMPENSAS : "poi_id"
+    RECOMPENSAS ||--o{ RETOS : "recompensa_id"
+    USUARIOS ||--o{ RETOS : "creado_por_usuario_id"
+    ESTABLECIMIENTOS ||--o{ RETOS : "establecimiento_id"
     USUARIOS ||--o{ USUARIO_RETOS : "usuario_id"
     RETOS ||--o{ USUARIO_RETOS : "reto_id"
-    ESTABLECIMIENTOS ||--o{ RETOS : "establecimiento_id"
-    RECOMPENSAS ||--o{ RETOS : "recompensa_id"
-    POI ||--o{ RECOMPENSAS : "poi_id"
+    USUARIO_RETOS ||--o{ SESIONES_RETO : "usuario_reto_id"
+    USUARIOS ||--o{ RACHAS_RETOS : "usuario_id"
+    RETOS ||--o{ RACHAS_RETOS : "reto_id"
+    RETOS ||--o{ HITOS_RACHA : "reto_id"
+    RECOMPENSAS ||--o{ HITOS_RACHA : "recompensa_id"
+    INSIGNIAS ||--o{ HITOS_RACHA : "insignia_id"
+    USUARIOS ||--o{ HITOS_RACHA_ALCANZADOS : "usuario_id"
+    HITOS_RACHA ||--o{ HITOS_RACHA_ALCANZADOS : "hito_id"
+    USUARIO_RETOS ||--o{ HITOS_RACHA_ALCANZADOS : "usuario_reto_id"
+
+    USUARIOS ||--o{ VISITAS : "usuario_id"
+    POI ||--o{ VISITAS : "poi_id"
     USUARIOS ||--o{ CANJES : "usuario_id"
     RECOMPENSAS ||--o{ CANJES : "recompensa_id"
     USUARIO_RETOS ||--o{ CANJES : "usuario_reto_id"
     USUARIOS ||--o{ MOVIMIENTOS_PUNTOS : "usuario_id"
+    REGLAS_PUNTOS ||--o{ MOVIMIENTOS_PUNTOS : "regla_id"
     VISITAS ||--o| MOVIMIENTOS_PUNTOS : "visita_id"
+    COMPRAS ||--o| MOVIMIENTOS_PUNTOS : "compra_id"
     USUARIO_RETOS ||--o| MOVIMIENTOS_PUNTOS : "usuario_reto_id"
     CANJES ||--o| MOVIMIENTOS_PUNTOS : "canje_id"
 
+    POI ||--o| ESTABLECIMIENTOS : "poi_id"
+    ESTABLECIMIENTOS ||--o{ ESTABLECIMIENTO_USUARIOS : "establecimiento_id"
+    USUARIOS ||--o{ ESTABLECIMIENTO_USUARIOS : "usuario_id"
+    USUARIOS ||--o{ COMPRAS : "usuario_id"
+    ESTABLECIMIENTOS ||--o{ COMPRAS : "establecimiento_id"
+    USUARIOS ||--o{ COMPRAS : "cancelada_por"
+    ESTABLECIMIENTOS ||--o{ PROMOCIONES : "establecimiento_id"
+
+    USUARIOS ||--o{ COMENTARIOS : "usuario_id"
+    POI ||--o{ COMENTARIOS : "poi_id"
+    USUARIOS ||--o{ CALIFICACIONES : "usuario_id"
+    POI ||--o{ CALIFICACIONES : "poi_id"
+    USUARIOS ||--o{ FAVORITOS : "usuario_id"
+    POI ||--o{ FAVORITOS : "poi_id"
+
+    USUARIOS ||--o{ CONVERSACIONES_IA : "usuario_id"
+
     ROLES {
         int2 id PK
-        varchar nombre
+        varchar nombre UK
         text descripcion "nullable"
     }
 
@@ -180,8 +218,31 @@ erDiagram
         varchar apellido "nullable"
         varchar email UK
         text password_hash
+        varchar telefono "nullable"
+        text foto_url "nullable"
         varchar estado "ACTIVO | SUSPENDIDO | ELIMINADO"
         jsonb configuracion
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at "nullable"
+    }
+
+    PAISES {
+        int2 id PK
+        varchar nombre
+        char codigo_iso UK
+    }
+
+    DEPARTAMENTOS {
+        int4 id PK
+        int2 pais_id FK
+        varchar nombre
+    }
+
+    CIUDADES {
+        int8 id PK
+        int4 departamento_id FK
+        varchar nombre
     }
 
     CATEGORIAS_POI {
@@ -191,66 +252,167 @@ erDiagram
         varchar color "nullable"
     }
 
-    CIUDADES {
-        int8 id PK
-        int4 departamento_id FK
-        varchar nombre
-    }
-
     POI {
         uuid id PK
         int2 categoria_id FK
         int8 ciudad_id FK
         uuid creado_por_usuario_id FK "nullable"
+        varchar fuente "ADMIN | ESTABLECIMIENTO | USUARIO | IA"
+        int2 nivel "nullable, kept by a trigger"
         varchar nombre
         varchar slug UK
+        text descripcion "nullable"
+        text direccion "nullable"
         geography ubicacion "PostGIS point, srid 4326"
-        varchar estado "BORRADOR | PENDIENTE | APROBADO | ..."
+        int2 radio_validacion
+        varchar telefono "nullable"
+        varchar correo "nullable"
+        text sitio_web "nullable"
+        jsonb horarios
+        jsonb metadata
+        varchar estado "BORRADOR | PENDIENTE | APROBADO | RECHAZADO | INACTIVO"
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at "nullable"
     }
 
-    ESTABLECIMIENTOS {
-        uuid id PK
-        uuid poi_id FK "UK, 1:1 with POI"
-        varchar nit "nullable, UK"
-        varchar razon_social
-        varchar estado
+    TIPOS_RELACION_POI {
+        int2 id PK
+        varchar nombre
+        text descripcion "nullable"
+        boolean es_jerarquica
+        boolean es_bidireccional
+        boolean requiere_orden
     }
 
-    VISITAS {
-        uuid id PK
-        uuid usuario_id FK
+    POI_RELACIONES {
+        int8 id PK
+        uuid poi_origen_id FK
+        uuid poi_destino_id FK
+        int2 tipo_relacion_id FK
+        int2 orden "nullable"
+        timestamp vigencia_inicio
+        timestamp vigencia_fin "nullable"
+        jsonb metadata
+        boolean activo
+        timestamp created_at
+    }
+
+    IMAGENES_POI {
+        int8 id PK
         uuid poi_id FK
-        numeric distancia_metros "nullable"
-        varchar metodo_validacion "GPS | QR | MIXTA"
-        varchar estado "PENDIENTE | VALIDADA | RECHAZADA"
+        text url
+        int2 orden
+        boolean principal
     }
 
-    RETOS {
+    REGLAS_PUNTOS {
         uuid id PK
         varchar nombre
-        varchar tipo "VISITA | COMPRA | RECORRIDO"
-        varchar recurrencia "UNICA | DIARIA | SEMANAL | MENSUAL"
-        uuid recompensa_id FK "nullable"
-        uuid establecimiento_id FK "nullable"
-        varchar estado "BORRADOR | ACTIVO | FINALIZADO | CANCELADO"
-    }
-
-    USUARIO_RETOS {
-        uuid id PK
-        uuid usuario_id FK
-        uuid reto_id FK
-        jsonb progreso
-        int2 porcentaje
-        varchar estado
+        int2 prioridad
+        jsonb configuracion "e.g. evento, categoria, puntos"
+        timestamp vigencia_inicio "nullable"
+        timestamp vigencia_fin "nullable"
+        boolean activo
     }
 
     RECOMPENSAS {
         uuid id PK
         uuid poi_id FK "nullable"
         varchar nombre
+        text descripcion "nullable"
         int4 stock
         int4 puntos
         varchar estado
+    }
+
+    RETOS {
+        uuid id PK
+        varchar nombre
+        text descripcion "nullable"
+        varchar tipo "VISITA | COMPRA | RECORRIDO"
+        varchar recurrencia "UNICA | DIARIA | SEMANAL | MENSUAL"
+        int2 cantidad_requerida
+        uuid recompensa_id FK "nullable"
+        varchar modo_recompensa "GARANTIZADA | LIMITADA | SIN_RECOMPENSA"
+        uuid creado_por_usuario_id FK "nullable"
+        uuid establecimiento_id FK "nullable"
+        timestamp inicio
+        timestamp fin "nullable"
+        varchar estado "BORRADOR | ACTIVO | FINALIZADO | CANCELADO"
+        jsonb configuracion
+    }
+
+    USUARIO_RETOS {
+        uuid id PK
+        uuid usuario_id FK
+        uuid reto_id FK
+        timestamp periodo_inicio
+        timestamp periodo_fin "nullable"
+        int2 numero_intento
+        jsonb progreso
+        int2 porcentaje
+        timestamp fecha_completado "nullable"
+        varchar estado
+        timestamp created_at
+    }
+
+    SESIONES_RETO {
+        uuid id PK
+        uuid usuario_reto_id FK
+        timestamp inicio
+        timestamp fin "nullable"
+        varchar estado
+    }
+
+    RACHAS_RETOS {
+        uuid id PK
+        uuid usuario_id FK
+        uuid reto_id FK
+        int2 racha_actual
+        int2 racha_maxima
+        timestamp ultimo_periodo_inicio "nullable"
+        boolean ultimo_periodo_completado
+        timestamp updated_at
+    }
+
+    INSIGNIAS {
+        int2 id PK
+        varchar codigo UK
+        varchar nombre
+        text descripcion "nullable"
+        text icono "nullable"
+    }
+
+    HITOS_RACHA {
+        uuid id PK
+        uuid reto_id FK
+        int2 racha_requerida
+        varchar nombre
+        int4 puntos_bonus
+        uuid recompensa_id FK "nullable"
+        int2 insignia_id FK "nullable"
+    }
+
+    HITOS_RACHA_ALCANZADOS {
+        uuid id PK
+        uuid usuario_id FK
+        uuid hito_id FK
+        uuid usuario_reto_id FK
+        boolean recompensa_otorgada
+        timestamp created_at
+    }
+
+    VISITAS {
+        uuid id PK
+        uuid usuario_id FK
+        uuid poi_id FK
+        geography ubicacion_usuario "nullable"
+        numeric precision_metros "nullable"
+        numeric distancia_metros "nullable"
+        varchar metodo_validacion "GPS | QR | MIXTA"
+        varchar estado "PENDIENTE | VALIDADA | RECHAZADA"
+        timestamp created_at
     }
 
     CANJES {
@@ -260,36 +422,120 @@ erDiagram
         varchar origen "PUNTOS | RETO"
         uuid usuario_reto_id FK "nullable"
         text codigo_qr UK
+        timestamp fecha_expira "nullable"
+        timestamp fecha_redencion "nullable"
         varchar estado "PENDIENTE | REDIMIDO | EXPIRADO"
+        timestamp created_at
     }
 
     MOVIMIENTOS_PUNTOS {
         int8 id PK
         uuid usuario_id FK
+        uuid regla_id FK "nullable"
         uuid visita_id FK "nullable, one of four sources"
+        uuid compra_id FK "nullable"
         uuid usuario_reto_id FK "nullable"
         uuid canje_id FK "nullable"
         varchar tipo_movimiento "computed from which FK is set"
         int4 puntos
+        timestamp created_at
+    }
+
+    ESTABLECIMIENTOS {
+        uuid id PK
+        uuid poi_id FK "UK, 1:1 with POI"
+        varchar nit "nullable, UK"
+        varchar razon_social
+        varchar tipo_negocio "nullable"
+        date fecha_afiliacion
+        varchar estado
+        jsonb metadata
+    }
+
+    ESTABLECIMIENTO_USUARIOS {
+        uuid establecimiento_id PK, FK
+        uuid usuario_id PK, FK
+        varchar cargo "nullable"
+    }
+
+    COMPRAS {
+        uuid id PK
+        uuid usuario_id FK
+        uuid establecimiento_id FK
+        numeric valor
+        varchar moneda "COP | USD"
+        varchar codigo_transaccion "nullable, UK"
+        varchar estado "REGISTRADA | CANCELADA | VALIDADA"
+        uuid cancelada_por FK "nullable"
+        timestamp fecha_cancelacion "nullable"
+        timestamp created_at
+    }
+
+    PROMOCIONES {
+        uuid id PK
+        uuid establecimiento_id FK
+        varchar titulo
+        text descripcion "nullable"
+        timestamp inicio
+        timestamp fin
+        varchar estado
+    }
+
+    COMENTARIOS {
+        int8 id PK
+        uuid usuario_id FK
+        uuid poi_id FK
+        text contenido
+        varchar estado "PENDIENTE | APROBADO | RECHAZADO"
+        timestamp created_at
+    }
+
+    CALIFICACIONES {
+        int8 id PK
+        uuid usuario_id FK
+        uuid poi_id FK
+        int2 calificacion "1 to 5"
+        timestamp created_at
+    }
+
+    FAVORITOS {
+        uuid usuario_id PK, FK
+        uuid poi_id PK, FK
+        timestamp created_at
+    }
+
+    CONVERSACIONES_IA {
+        int8 id PK
+        uuid session_id
+        uuid usuario_id FK
+        varchar role "USER | ASSISTANT | SYSTEM"
+        text contenido
+        varchar modelo "nullable"
+        int4 tokens "nullable"
+        numeric temperatura "nullable"
+        int4 latencia_ms "nullable"
+        numeric costo_usd "nullable"
+        varchar finish_reason "nullable"
+        jsonb metadata
+        timestamp created_at
     }
 ```
 
-`MOVIMIENTOS_PUNTOS` is an append-only ledger: rows are never updated or
-deleted, and a user's point balance is never stored as a column — it's
-computed on read as `SUM(puntos)` through a database view. `POI` also carries
-a `PoiFuente` field (`ADMIN | ESTABLECIMIENTO | USUARIO | IA`) tracking who
-created each place.
+A few things worth knowing about this schema:
 
-Supporting tables not drawn above, grouped by area:
-
-| Area | Tables |
-|---|---|
-| Geography | `paises`, `departamentos` |
-| POI content & relations | `imagenes_poi`, `poi_relaciones`, `tipos_relacion_poi` |
-| Social / reviews | `comentarios`, `calificaciones`, `favoritos` |
-| Gamification extras | `reglas_puntos`, `rachas_retos`, `insignias`, `hitos_racha`, `hitos_racha_alcanzados`, `sesiones_reto` |
-| Commercial extras | `compras`, `promociones`, `establecimiento_usuarios` |
-| AI | `conversaciones_ia` |
+- `MOVIMIENTOS_PUNTOS` is an append-only ledger: rows are never updated or
+  deleted, and a user's point balance is never stored as a column — it's
+  computed on read as `SUM(puntos)` through a database view
+  (`saldo_puntos_usuario`).
+- `POI.nivel` is maintained by a database trigger
+  (`fn_actualizar_nivel_poi`), not by the application.
+- `POI_RELACIONES` is self-referencing: both `poi_origen_id` and
+  `poi_destino_id` point back to `POI`, which is how a POI can link to
+  related POIs (e.g. a route made of several stops).
+- `ESTABLECIMIENTO_USUARIOS` and `FAVORITOS` have no surrogate `id` — their
+  primary key is the pair of foreign keys.
+- `CONVERSACIONES_IA` exists in the schema but has no frontend feature
+  built on it yet — see [Roadmap](#roadmap-and-known-limitations).
 
 ---
 
