@@ -8,7 +8,7 @@ import { apiGet, apiGetItems, apiPost, apiPatch, isApiEnabled, ApiError } from "
 //   GET   /rewards                → catálogo (usuario ve solo APROBADO)
 //   POST  /rewards                → crear (admin)
 //   PATCH /rewards/{id}           → editar / cambiar estado (admin)
-//   POST  /rewards/{id}/redeem    → canjear por puntos → canje con código QR
+//   POST  /rewards/{id}/canjear   → canjear por puntos → canje con código QR
 //
 // Su modelo no tiene imagen, emoji ni categoría (decisión B3 pendiente en la
 // bitácora): el adaptador deja el emoji genérico y sin categoría — la página
@@ -144,7 +144,7 @@ export async function redeemReward(rewardId) {
   }
 
   try {
-    const canje = await apiPost(`/rewards/${rewardId}/redeem`);
+    const canje = await apiPost(`/rewards/${rewardId}/canjear`);
     return {
       ok: true,
       canje: {
