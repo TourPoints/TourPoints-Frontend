@@ -3,6 +3,7 @@ import { isAuthenticated } from "../../services/auth.service.js";
 import { toggleFavorite } from "../../services/favorite.service.js";
 import { navigate } from "../../router/router.js";
 import { loadIcons } from "../../utils/icons.js";
+import { formatRating } from "../../utils/poiFilter.js";
 import "/src/styles/molecules/poiCard.css";
 
 // Tarjeta de Punto de Interés.
@@ -67,7 +68,7 @@ export function poiCard({
             <span class="category">${escapeHtml(category)}</span>
             <div class="poi-card-rating">
               <i data-lucide="star"></i>
-              <span>${(Number(rating) || 0).toFixed(1)}</span>
+              ${formatRating(rating) ? `<span>${formatRating(rating)}</span>` : ""}
             </div>
           </div>
           <h3 class="poi-card-title">${escapeHtml(name)}</h3>

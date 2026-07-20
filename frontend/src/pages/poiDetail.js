@@ -17,6 +17,7 @@ import { refreshSessionPoints } from "../services/points.service.js";
 import { navigate } from "../router/router.js";
 import { goBackOr } from "../utils/navigation.js";
 import { loadIcons } from "../utils/icons.js";
+import { formatRating } from "../utils/poiFilter.js";
 import "/src/styles/pages/poiDetail.css";
 
 let detailMapInstance = null;
@@ -56,7 +57,11 @@ function buildDetailHTML(poi, reviews, favorite, visited, myReview) {
             <span class="category poi-detail-category ${categoryClass}">${poi.category}</span>
             <div class="poi-detail-rating">
               <i data-lucide="star"></i>
-              <span class="poi-detail-rating-value">${poi.rating.toFixed(1)}</span>
+              ${
+                formatRating(poi.rating)
+                  ? `<span class="poi-detail-rating-value">${formatRating(poi.rating)}</span>`
+                  : ""
+              }
               <span class="poi-detail-review-count">(${formatReviewCount(poi.reviewCount || 0)} reseñas)</span>
             </div>
           </div>

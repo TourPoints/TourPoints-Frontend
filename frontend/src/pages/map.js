@@ -8,6 +8,7 @@ import {
   filterPois,
   sortPois,
   withDistanceFrom,
+  formatRating,
 } from "../utils/poiFilter.js";
 import "/src/styles/pages/map.css";
 
@@ -597,7 +598,7 @@ function updateMarkers() {
           <h4 class="popup-title">${poi.name}</h4>
           <div class="popup-rating">
             <i data-lucide="star" class="star-mini"></i>
-            <span>${poi.rating.toFixed(1)}</span>
+            ${formatRating(poi.rating) ? `<span>${formatRating(poi.rating)}</span>` : ""}
             <span class="popup-points">+${poi.points} pts</span>
           </div>
           <a href="/poi/${poi.id}" data-link class="btn btn--primary btn-popup-more">Ver más</a>
@@ -662,7 +663,7 @@ function renderSidebarItem(poi) {
         <h5 class="item-title">${poi.name}</h5>
         <div class="item-rating-row">
           <i data-lucide="star" class="star-mini"></i>
-          <span class="item-rating">${poi.rating.toFixed(1)}</span>
+          ${formatRating(poi.rating) ? `<span class="item-rating">${formatRating(poi.rating)}</span>` : ""}
           <span class="item-category">${poi.category}</span>
         </div>
         ${distanceLabel ? `<span class="item-distance">${distanceLabel}</span>` : ""}

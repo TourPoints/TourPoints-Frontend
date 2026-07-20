@@ -70,6 +70,20 @@ export function sortPois(pois = [], sortBy = "Recomendados") {
 }
 
 /**
+ * Formatea una calificación para mostrar, o null si el POI no tiene ninguna
+ * todavía. El promedio real nunca puede valer 0 (las calificaciones van de 1
+ * a 5), así que 0 siempre significa "sin calificar" y no una nota real: sin
+ * este chequeo, un POI recién creado se leía como "0.0 estrellas", que
+ * parece una mala nota en vez de la ausencia de una.
+ * @param {number} rating
+ * @returns {string|null}
+ */
+export function formatRating(rating) {
+  const value = Number(rating) || 0;
+  return value > 0 ? value.toFixed(1) : null;
+}
+
+/**
  * Calcula la distancia en kilómetros entre dos coordenadas (fórmula de Haversine).
  * @returns {number} Distancia en kilómetros.
  */
