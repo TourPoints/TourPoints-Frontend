@@ -1,0 +1,124 @@
+.reward-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-blanco);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.reward-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.reward-card-img-container {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  flex-shrink: 0;
+}
+
+.reward-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Cuando la recompensa no tiene imagen, se usa su emoji como fallback. */
+.reward-card-img--emoji {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3.5rem;
+  background-color: var(--color-fondo-suave, #f3f4f6);
+}
+
+.reward-card-points {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-family: var(--font-base);
+  font-size: 0.8rem;
+  font-weight: 600;
+  background-color: var(--color-turquesa);
+  color: var(--color-blanco);
+  border: none;
+  border-radius: 50px;
+  padding: 0.3rem 0.75rem;
+  z-index: 2;
+}
+
+.reward-card-claimed-badge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-base);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  background-color: var(--color-blanco);
+  color: var(--color-gris-oscuro);
+  border-radius: 8px;
+  padding: 0.5rem 1.25rem;
+  z-index: 2;
+}
+
+.reward-card-content {
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.reward-card-title {
+  font-family: var(--font-base);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-gris-oscuro);
+}
+
+.reward-card-description {
+  font-family: var(--font-texto);
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--color-gris-oscuro);
+  opacity: 0.7;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex: 1;
+}
+
+.reward-card-btn {
+  font-family: var(--font-base);
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.reward-card-btn--available {
+  background-color: var(--color-principal);
+  color: var(--color-blanco);
+}
+
+.reward-card-btn--available:hover {
+  background-color: #003a9e;
+}
+
+.reward-card-btn--claimed {
+  background-color: #d1d5db;
+  color: #6b7280;
+  cursor: not-allowed;
+}

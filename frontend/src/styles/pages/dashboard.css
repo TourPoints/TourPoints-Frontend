@@ -1,0 +1,443 @@
+/* Dashboard del usuario. Sigue el wireframe "Dashboard Usuario Mid-Fidelity":
+   dos columnas en escritorio (contenido + lateral de historial), apilado en
+   móvil en el mismo orden que la versión estrecha del wireframe. */
+
+.dashboard-page {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  font-family: var(--font-base);
+}
+
+/* ── Cabecera: saludo + acciones ─────────────────────────────── */
+
+.dashboard-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.dashboard-greeting h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-gris-oscuro);
+}
+
+.dashboard-greeting p {
+  font-family: var(--font-texto);
+  font-size: 0.95rem;
+  color: #64748b;
+}
+
+.dashboard-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.dashboard-user-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.85rem 0.35rem 0.35rem;
+  background: var(--color-blanco);
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-gris-oscuro);
+}
+
+.dashboard-user-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-principal);
+  color: var(--color-blanco);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+/* Los dos botones comparten forma; heredan .btn-outline / .btn-primary del
+   sistema de modales y aquí solo se les da el icono en línea. */
+.dashboard-edit-btn,
+.dashboard-logout-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.dashboard-edit-btn svg,
+.dashboard-logout-btn svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+/* ── Métricas ─────────────────────────────────────────────────── */
+
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.dashboard-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1.1rem 1.25rem;
+  background: var(--color-blanco);
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+}
+
+.dashboard-stat > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.dashboard-stat-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.dashboard-stat-value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-gris-oscuro);
+}
+
+/* La tarjeta de puntos va rellena en azul con la moneda "P", como la de la
+   página de recompensas: es el mismo dato y debe verse como la misma cosa. */
+.dashboard-stat--points {
+  background: var(--color-principal);
+  border-color: var(--color-principal);
+}
+
+.dashboard-stat--points .dashboard-stat-label {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.dashboard-stat--points .dashboard-stat-value {
+  color: var(--color-amarillo);
+}
+
+.dashboard-stat-coin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--color-amarillo);
+  color: var(--color-principal);
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+/* ── Columnas ─────────────────────────────────────────────────── */
+
+.dashboard-columns {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.dashboard-section {
+  margin-bottom: 2rem;
+}
+
+.dashboard-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.dashboard-section-head h2 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-gris-oscuro);
+}
+
+.dashboard-section-head svg {
+  width: 1rem;
+  height: 1rem;
+  color: #94a3b8;
+}
+
+.dashboard-challenges {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+/* ── Recompensas al alcance ───────────────────────────────────── */
+
+.dashboard-rewards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.85rem;
+}
+
+.dash-reward {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 1rem 0.75rem;
+  background: var(--color-blanco);
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  text-decoration: none;
+  text-align: center;
+  transition: border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.dash-reward:hover {
+  border-color: #bfdbfe;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.07);
+}
+
+.dash-reward-emoji {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.dash-reward-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-gris-oscuro);
+}
+
+.dash-reward-cost {
+  font-family: var(--font-texto);
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+/* Fuera del alcance de los puntos actuales: atenuada, como en el wireframe,
+   pero sigue siendo enlace — ver qué falta también motiva. */
+.dash-reward--far {
+  opacity: 0.45;
+}
+
+/* ── Historial ────────────────────────────────────────────────── */
+
+.dashboard-history {
+  padding: 1.25rem;
+  background: var(--color-blanco);
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+}
+
+.dashboard-events {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.dash-event {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.dash-event-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #f1f5f9;
+}
+
+.dash-event-icon svg {
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+.dash-event-icon--trophy svg { color: var(--color-amarillo); }
+.dash-event-icon--target svg { color: var(--color-principal); }
+.dash-event-icon--heart  svg { color: var(--color-rosa); }
+
+.dash-event-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.dash-event-body p {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-gris-oscuro);
+  line-height: 1.35;
+}
+
+.dash-event-body span {
+  font-family: var(--font-texto);
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.dash-event-points {
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #16a34a;
+}
+
+/* Un canje resta puntos: el ledger lo trae en negativo y se pinta en rojo. */
+.dash-event-points--negative {
+  color: #dc2626;
+}
+
+/* ── CTA de exploración ───────────────────────────────────────── */
+
+.dashboard-cta {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background: var(--color-principal);
+  border-radius: 14px;
+  color: var(--color-blanco);
+}
+
+.dashboard-cta h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+
+.dashboard-cta p {
+  font-family: var(--font-texto);
+  font-size: 0.85rem;
+  opacity: 0.9;
+  margin-bottom: 1rem;
+}
+
+.dashboard-cta-btn {
+  display: inline-block;
+  padding: 0.5rem 1.1rem;
+  background: var(--color-blanco);
+  color: var(--color-principal);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 0.18s ease;
+}
+
+.dashboard-cta-btn:hover {
+  transform: translateY(-1px);
+}
+
+/* ── Estados vacíos ───────────────────────────────────────────── */
+
+.dashboard-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2rem 1rem;
+  background: var(--color-blanco);
+  border: 1px dashed #cbd5e1;
+  border-radius: 14px;
+  text-align: center;
+  grid-column: 1 / -1;
+}
+
+.dashboard-empty p {
+  font-family: var(--font-texto);
+  color: #64748b;
+}
+
+.dashboard-empty-hint {
+  font-family: var(--font-texto);
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+.dashboard-loading {
+  font-family: var(--font-texto);
+  color: #94a3b8;
+  grid-column: 1 / -1;
+}
+
+.dashboard-locked {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 4rem 1rem;
+  text-align: center;
+  font-family: var(--font-texto);
+  color: #64748b;
+}
+
+.dashboard-locked-icon {
+  width: 40px;
+  height: 40px;
+  color: #94a3b8;
+}
+
+/* ── Responsive ───────────────────────────────────────────────── */
+
+@media (max-width: 992px) {
+  .dashboard-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-greeting h1 {
+    font-size: 1.5rem;
+  }
+
+  .dashboard-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-challenges {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-rewards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-page {
+    padding: 0 1rem;
+  }
+
+  /* Las acciones caen bajo el saludo y ocupan el ancho a partes iguales. */
+  .dashboard-header-actions {
+    width: 100%;
+  }
+
+  .dashboard-edit-btn,
+  .dashboard-logout-btn {
+    flex: 1;
+    justify-content: center;
+  }
+}

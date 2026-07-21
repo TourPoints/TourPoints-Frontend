@@ -1,0 +1,256 @@
+/* --- Estilos para la vista de Detalle de POI --- */
+
+.poi-detail-page {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+  font-family: var(--font-base);
+}
+
+@media (min-width: 768px) {
+  .poi-detail-page {
+    padding: 2rem 2rem;
+  }
+}
+
+.poi-detail-loading,
+.poi-detail-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  min-height: 300px;
+  text-align: center;
+  color: #64748b;
+  font-family: var(--font-texto);
+}
+
+/* --- Volver ---
+   Ancla para el botón flotante: la galería recorta su propio contenido
+   (overflow: hidden), así que el botón vive fuera de ella y encima. */
+.poi-detail-hero {
+  position: relative;
+}
+
+/* Fondo translúcido en lugar de sólido: la portada asoma detrás y el botón
+   se lee igual sobre fotos claras u oscuras sin fijar un color de marca. */
+.poi-detail-back {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.9rem;
+  border: none;
+  border-radius: 50px;
+  background-color: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(4px);
+  color: #1e293b;
+  font-family: var(--font-base);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.18);
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.poi-detail-back:hover {
+  background-color: #ffffff;
+  transform: translateX(-2px);
+}
+
+.poi-detail-back svg,
+.poi-detail-back .lucide-arrow-left {
+  width: 1rem;
+  height: 1rem;
+}
+
+@media (max-width: 768px) {
+  .poi-detail-back {
+    top: 0.6rem;
+    left: 0.6rem;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8rem;
+  }
+}
+
+.poi-detail-layout {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (max-width: 992px) {
+  .poi-detail-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Meta: categoría + rating */
+.poi-detail-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.poi-detail-category {
+  font-size: 0.85rem;
+}
+
+.poi-detail-category.naturaleza { background-color: #10b981; }
+.poi-detail-category.cultura { background-color: #6366f1; }
+.poi-detail-category.gastronomia { background-color: #f97316; }
+.poi-detail-category.religiosa { background-color: #a855f7; }
+.poi-detail-category.compras { background-color: #ec4899; }
+
+.poi-detail-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-base);
+  font-size: 0.95rem;
+}
+
+.poi-detail-rating .lucide-star {
+  width: 1.1rem;
+  height: 1.1rem;
+  color: var(--color-amarillo);
+  fill: var(--color-amarillo);
+}
+
+.poi-detail-rating-value {
+  font-weight: 600;
+  color: var(--color-gris-oscuro);
+}
+
+.poi-detail-review-count {
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+
+/* Título */
+.poi-detail-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-gris-oscuro);
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+
+@media (max-width: 768px) {
+  .poi-detail-title {
+    font-size: 1.5rem;
+  }
+}
+
+/* Acerca de */
+.poi-detail-about {
+  margin-bottom: 2rem;
+}
+
+.poi-detail-about h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-gris-oscuro);
+  margin-bottom: 0.75rem;
+}
+
+.poi-detail-about p {
+  font-family: var(--font-texto);
+  font-size: 1rem;
+  color: #475569;
+  line-height: 1.7;
+}
+
+/* Info cards */
+.poi-detail-info-cards {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+@media (max-width: 640px) {
+  .poi-detail-info-cards {
+    flex-direction: column;
+  }
+}
+
+/* Mapa */
+.poi-detail-map-section {
+  margin-bottom: 2.5rem;
+}
+
+.poi-detail-map-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.poi-detail-map-header h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-gris-oscuro);
+}
+
+.poi-detail-map-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  padding: 0.4rem 1rem;
+}
+
+.poi-detail-map-link i {
+  width: 1rem;
+  height: 1rem;
+}
+
+.poi-detail-map {
+  width: 100%;
+  height: 280px;
+  border-radius: 16px;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.poi-detail-marker-wrapper {
+  background: transparent;
+  border: none;
+}
+
+.poi-detail-marker {
+  width: 36px;
+  height: 36px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-principal);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.poi-detail-marker i {
+  transform: rotate(45deg);
+  width: 18px;
+  height: 18px;
+  color: white;
+}
+
+.poi-detail-marker.naturaleza { background-color: #10b981; }
+.poi-detail-marker.cultura { background-color: #6366f1; }
+.poi-detail-marker.gastronomia { background-color: #f97316; }
+.poi-detail-marker.religiosa { background-color: #a855f7; }
+.poi-detail-marker.compras { background-color: #ec4899; }
+
+/* Los estilos de comentarios vivían aquí, pero reviewsList es un organismo y
+   el resto de organismos tienen su propio CSS. Están en
+   styles/organism/reviewsList.css. */

@@ -1,0 +1,40 @@
+.o-poi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 columnas en escritorio */
+  /* minmax en vez de 333px a secas: la fila mantiene esa altura de referencia
+     pero crece si el contenido pide más. Con el valor fijo, las tarjetas
+     necesitaban 381px (411px cuando el título ocupa dos líneas) y el
+     overflow:hidden de .poi-card recortaba el sobrante — el botón "Ver más"
+     desaparecía sin dejar rastro. Solo se veía en escritorio: de 1024px para
+     abajo el media query ya usaba filas automáticas. */
+  grid-auto-rows: minmax(333px, auto);
+  gap: 24px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+@media (max-width: 1024px) {
+  .o-poi-grid {
+    grid-template-columns: repeat(2, 1fr); /* Pasamos de 3 a 2 columnas */
+    grid-auto-rows: auto; /* Dejamos que el contenido maneje el alto flexible */
+    padding: 0 24px;
+    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 768px) {
+  .o-poi-grid {
+    grid-template-columns: repeat(2, 1fr); /* Se mantiene en 2 columnas, pero con menos espacio */
+    gap: 16px;
+    padding: 0 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .o-poi-grid {
+    grid-template-columns: 1fr;
+    grid-auto-rows: auto;    
+    gap: 20px;
+    padding: 0 16px;
+  }
+}

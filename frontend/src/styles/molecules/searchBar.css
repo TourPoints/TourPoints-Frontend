@@ -1,0 +1,35 @@
+.search-bar {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 672px;
+  background: #ffffff;
+  padding: 0.5rem 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  transition: 0.3s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.search-bar:focus-within {
+  border-color: var(--color-principal);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+}
+
+/* .sr-only vivía aquí, pero la usan más vistas que el buscador y solo
+   existía si este CSS estaba cargado. Ahora está en global.css. */
+
+.search-input {
+  margin: 0.5rem;
+  flex-grow: 1;
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  font-family: var(--font-texto);
+  background: transparent;
+}
+
+.search-input::placeholder {
+  color: #94a3b8;
+}

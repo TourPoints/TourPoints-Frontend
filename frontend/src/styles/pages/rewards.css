@@ -1,0 +1,225 @@
+.rewards-page {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 2rem 4rem;
+}
+
+/* Código de canje: es lo que el usuario presenta en el aliado, así que se
+   pinta grande, monoespaciado y seleccionable de un toque. */
+.rewards-redeem-code {
+  margin: 0.5rem 0 1rem;
+  text-align: center;
+}
+
+.rewards-redeem-code code {
+  display: inline-block;
+  padding: 0.6rem 0.9rem;
+  background: #f1f5f9;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  user-select: all;
+  word-break: break-all;
+}
+
+/* HERO */
+.rewards-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.rewards-hero-text {
+  flex: 1;
+}
+
+.rewards-hero-title {
+  font-family: var(--font-base);
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--color-gris-oscuro);
+  margin-bottom: 0.5rem;
+}
+
+.rewards-hero-subtitle {
+  font-family: var(--font-texto);
+  font-size: 1rem;
+  color: var(--color-gris-oscuro);
+  opacity: 0.7;
+  max-width: 520px;
+  line-height: 1.6;
+}
+
+.rewards-points-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background-color: var(--color-principal);
+  border-radius: 16px;
+  padding: 1.25rem 2rem;
+  min-width: 280px;
+}
+
+.rewards-points-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: var(--color-amarillo);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.rewards-points-letter {
+  font-family: var(--font-base);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-blanco);
+}
+
+.rewards-points-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.rewards-points-label {
+  font-family: var(--font-base);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.rewards-points-value {
+  font-family: var(--font-base);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-blanco);
+}
+
+/* FILTERS */
+.rewards-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.filter-btn {
+  font-family: var(--font-base);
+  font-size: 0.9rem;
+  font-weight: 500;
+  border: 1px solid #d1d5db;
+  border-radius: 50px;
+  padding: 0.5rem 1.25rem;
+  background-color: var(--color-blanco);
+  color: var(--color-gris-oscuro);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.3s ease;
+}
+
+.filter-btn:hover {
+  border-color: var(--color-principal);
+  color: var(--color-principal);
+}
+
+.filter-btn--active {
+  background-color: var(--color-principal);
+  border-color: var(--color-principal);
+  color: var(--color-blanco);
+}
+
+.filter-btn--active:hover {
+  background-color: #003a9e;
+  border-color: #003a9e;
+  color: var(--color-blanco);
+}
+
+.filter-btn .lucide {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* GRID */
+.rewards-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+}
+
+/* TABLET LARGE / SMALL LAPTOP */
+@media (max-width: 1024px) {
+  .rewards-hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .rewards-points-card {
+    min-width: auto;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .rewards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* TABLET STANDARD */
+@media (max-width: 768px) {
+  .rewards-page {
+    padding: 1.5rem 1rem 3rem;
+  }
+
+  .rewards-hero-title {
+    font-size: 2rem;
+  }
+
+  .rewards-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+}
+
+/* MOBILE */
+@media (max-width: 480px) {
+  .rewards-page {
+    padding: 1rem 0.75rem 2rem;
+  }
+
+  .rewards-hero-title {
+    font-size: 1.5rem;
+  }
+
+  .rewards-hero-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .rewards-points-card {
+    padding: 1rem 1.25rem;
+  }
+
+  .rewards-points-value {
+    font-size: 1.4rem;
+  }
+
+  .rewards-filters {
+    gap: 0.5rem;
+  }
+
+  .filter-btn {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.9rem;
+  }
+
+  .rewards-grid {
+    grid-template-columns: 1fr;
+  }
+}

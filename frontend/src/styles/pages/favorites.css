@@ -1,0 +1,90 @@
+/* --- Vista de favoritos ---
+   Sigue el patrón de la página de retos (contenedor, cabecera, grid) para que
+   las vistas del usuario se sientan de la misma familia. */
+
+.favorites-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.favorites-header h1 {
+  font-family: var(--font-base);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-gris-oscuro);
+}
+
+.favorites-header p {
+  font-family: var(--font-texto);
+  font-size: 0.9rem;
+  color: #64748b;
+  margin-top: 0.25rem;
+}
+
+.favorites-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  min-height: 250px;
+}
+
+@media (min-width: 576px) {
+  .favorites-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 992px) {
+  .favorites-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Las tarjetas se estiran para que todas midan igual dentro de una fila,
+   igual que en la rejilla de exploración. */
+.favorites-grid .poi-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: 1px solid #f1f5f9;
+}
+
+.favorites-loading,
+.favorites-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #64748b;
+  font-family: var(--font-texto);
+  font-size: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Era 💙 / 🔒 a 2.5rem de tipografía. Como SVG se mide en píxeles y toma el
+   color: el corazón en el rosa de favoritos, el candado en gris neutro. */
+.favorites-empty-icon {
+  width: 40px;
+  height: 40px;
+  color: var(--color-rosa-suave);
+}
+
+.favorites-empty-icon.lucide-lock {
+  color: #94a3b8;
+}
+
+.favorites-empty-hint {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  max-width: 42ch;
+}
+
+.favorites-empty .btn {
+  margin-top: 0.5rem;
+}

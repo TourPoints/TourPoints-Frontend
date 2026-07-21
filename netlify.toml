@@ -1,0 +1,36 @@
+# Despliegue de TourPoints en Netlify.
+#
+# Vive en el repo a propósito: así el despliegue queda definido por el código y
+# se revisa en un commit, en vez de depender de ajustes del panel que nadie
+# puede auditar ni revertir. Lo declarado aquí manda sobre la interfaz web.
+
+[build]
+  # El frontend no está en la raíz del repo, sino en frontend/.
+  base = "frontend"
+  command = "npm run build"
+  # Relativo a `base`, así que apunta a frontend/dist.
+  publish = "dist"
+
+[build.environment]
+  # package.json pide node >=24; sin fijarlo, Netlify elige su versión por
+  # defecto y el build puede fallar o compilar con otro runtime.
+  NODE_VERSION = "24"
+
+  # Vite hornea las VITE_* en el bundle durante el build, así que tiene que
+  # estar aquí y no en tiempo de ejecución. Sin ella, isApiConfigured() da
+  # false y la app desplegada se serviría con los mocks locales en vez de con
+  # los datos del backend.
+  # No es un secreto: es la URL pública que el navegador llama de todos modos.
+  VITE_API_URL = "https://tourpoints.159.54.176.254.nip.io/api/v1"
+
+# Fallback de SPA. El router resuelve las rutas en el navegador, así que /map o
+# /poi/<id> no son archivos del servidor: sin esta regla Netlify los busca, no
+# los encuentra y devuelve su 404 antes de que el router llegue a ejecutarse
+# (recargar con F5 o compartir un enlace profundo rompía por esto).
+#
+# El 200 es lo que lo convierte en un rewrite: sirve index.html conservando la
+# URL. Con 301/302 la barra saltaría a "/" y se perdería la ruta.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

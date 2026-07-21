@@ -1,0 +1,187 @@
+.header-global {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--color-gris-claro);
+  margin: 0 auto;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.04);
+}
+
+.nav-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1rem;
+  width: 70%;
+}
+
+
+/* align-items explícito: sin él vale "stretch", y como el enlace activo mide
+   más alto (subrayado + padding) estiraba a todos los enlaces, dejando el
+   texto pegado arriba de una caja más alta. Cualquier icono con altura propia
+   se centraba en esa caja y quedaba por debajo de la línea del texto. */
+.navegation {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.menu {
+  font-family: var(--font-base);
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5rem;
+  color: var(--color-gris-oscuro);
+  text-decoration: none;
+  transition: color 0.5s ease;
+}
+
+.menu:hover {
+  border-bottom: 2px solid var(--color-principal);
+  color: var(--color-principal);
+}
+
+.menu-active {
+  font-weight: 700;
+  color: var(--color-principal);
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--color-principal);
+}
+
+/* ---- Acceso a favoritos ----
+   Solo el icono: al lado de cinco enlaces de texto, una palabra más los
+   emborrona; un corazón se reconoce sin leerlo. Reposa en rosa suave para
+   insinuarse sin competir con el azul de la navegación, y se rellena en el
+   rosa fuerte —el mismo de las tarjetas— cuando estás en la vista. */
+/* Ocupa exactamente la banda del texto (line-height: 1.5rem) en vez de una
+   caja mayor: así el corazón se centra sobre la línea de los enlaces y no
+   flota por debajo. */
+.nav-favorites {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  color: var(--color-rosa-suave);
+  text-decoration: none;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.nav-favorites svg {
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  transition: fill 0.2s ease;
+}
+
+.nav-favorites:hover {
+  background-color: #fff1f2;
+  color: var(--color-rosa);
+  transform: scale(1.08);
+}
+
+.nav-favorites--active {
+  color: var(--color-rosa);
+}
+
+.nav-favorites--active svg {
+  fill: var(--color-rosa);
+}
+
+/* El menú de perfil va siempre a la derecha, en cualquier tamaño: es el
+   acceso al panel de administración y no puede depender del ancho. */
+.header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1.25rem;
+  flex-shrink: 0;
+}
+
+.buttons-container {
+  justify-content: flex-end;
+  display: flex;
+  gap: 1.25rem;
+}
+
+/* ---- Selector de idioma ----
+   Píldora segmentada ES/EN. Dos botones y no un desplegable: con solo dos
+   idiomas se ve el estado y la alternativa de un vistazo, sin abrir nada. */
+.lang-toggle {
+  display: inline-flex;
+  padding: 0.15rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  background: #ffffff;
+}
+
+.lang-toggle-btn {
+  border: none;
+  background: transparent;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-family: var(--font-base);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--color-gris-oscuro);
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.lang-toggle-btn:hover {
+  color: var(--color-principal);
+}
+
+.lang-toggle-btn.active {
+  background: var(--color-principal);
+  color: #ffffff;
+}
+
+/*TABLETS GRANDES / LAPTOPS PEQUEÑAS (Horizontal)*/
+@media (max-width: 1024px) {
+  .nav-container {
+    gap: 2rem;
+    width: 60%;
+  }
+  /* En pantallas estrechas los botones de texto estorban; el menú de perfil
+     ya ofrece iniciar sesión y registrarse. */
+  .buttons-container {
+    display: none;
+  }
+}
+
+/* TABLETS ESTÁNDAR (vertical) */
+@media (max-width: 768px) {
+  /* 2rem de padding lateral (64px en 375px) apretaban el contenido; se baja. */
+  .header-global {
+    padding: 0.75rem 1rem;
+  }
+
+  /* Con el nav oculto (en móvil vive en la bottom-nav), el contenedor no debe
+     seguir reservando el 60%: que ocupe solo lo que necesita el logo, para no
+     empujar el menú de perfil fuera del borde. */
+  .nav-container {
+    width: auto;
+    gap: 0.5rem;
+  }
+
+  .navegation {
+    display: none;
+  }
+
+  /* El logo a 2rem robaba ancho al menú de perfil; se ajusta para móvil. */
+  .logo {
+    font-size: 1.4rem;
+    margin-right: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo {
+    font-size: 1.25rem;
+  }
+}

@@ -1,0 +1,96 @@
+/* 1. Reinicio general (Reset/Normalize) */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* 2. Variables globales (Colores y fuentes) */
+:root {
+  /* Colores */
+  --color-principal: #004ac6;
+  --color-turquesa: #06b6d4;
+  --color-amarillo: #fbbf24;
+  --color-gris-claro: #f8fafc;
+  --color-blanco: #ffffff;
+  --color-gris-oscuro: #1e293b;
+
+  /* Favoritos. Estaban cableados a mano y con dos rojos distintos: #e11d48 en
+     las tarjetas y #ef4444 en el detalle. Un solo par para toda la app: el
+     suave para el corazón en reposo, el intenso cuando está guardado. */
+  --color-rosa: #e11d48;
+  --color-rosa-suave: #fb7185;
+  /* Fuentes */
+  --font-base: "Poppins", sans-serif;
+  --font-texto: "inter", sans-serif;
+
+  /* Medidas del armazón. Estaban repetidas a mano en cada vista que necesitaba
+     restar el header (el mapa usaba 56px cuando el real mide 65) y nadie
+     descontaba la barra inferior, que es fixed y tapaba el contenido. Una sola
+     fuente de verdad para las dos.
+     La barra inferior suma el área segura: en un iPhone con barra de gestos
+     crece por debajo y, sin este env(), volvería a comerse el contenido. */
+  --header-h: 80px;
+  --header-h-mobile: 65px;
+  --bottom-nav-h: calc(3.95rem + env(safe-area-inset-bottom));
+
+  /* La interfaz está diseñada solo en claro. Sin esto, un navegador en modo
+     oscuro pinta el lienzo de negro por defecto y los textos, que sí están
+     fijados en tonos oscuros, se vuelven ilegibles. */
+  color-scheme: light;
+}
+
+/* Fondo explícito: html y body eran transparentes y heredaban el color por
+   defecto del navegador, que cambia según el tema del sistema.
+
+   La fuente iba en el mismo saco: nadie la declaraba aquí, así que todo lo que
+   no la pedía a mano caía en el serif por defecto del navegador (Times New
+   Roman). Se notaba sobre todo en el menú de perfil, donde el título llevaba
+   Poppins y los items de al lado salían en Times. Declarada aquí, se hereda. */
+html,
+body {
+  background-color: var(--color-blanco);
+  color: var(--color-gris-oscuro);
+  font-family: var(--font-base);
+}
+
+
+
+/* Padding solo para layout público; el admin maneja su propio spacing */
+.public-layout main {
+  width: 100%;
+  padding: 3.1rem 0;
+}
+
+.logo {
+  font-family: var(--font-base);
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--color-principal);
+  text-decoration: none;
+  margin-right: 2rem;
+}
+
+.logo--blanco {
+  font-family: var(--font-base);
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--color-blanco);
+  text-decoration: none;
+}
+/* ---- Utilidades ---- */
+
+/* Visible solo para lectores de pantalla. Vivía en searchBar.css, donde solo
+   existía si esa vista estaba cargada; la usan también las estrellas del
+   formulario de comentarios y las etiquetas de los formularios. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

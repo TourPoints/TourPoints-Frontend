@@ -1,0 +1,224 @@
+/* --- Sección de comentarios del detalle de POI ---
+   Venía de styles/pages/poiDetail.css: reviewsList es un organismo y el resto
+   de organismos tienen su hoja propia. */
+
+.reviews-section {
+  margin-bottom: 2rem;
+}
+
+.reviews-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
+}
+
+.reviews-header h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-gris-oscuro);
+}
+
+/* Contador real de comentarios, junto al título. */
+.reviews-count {
+  background-color: #eff6ff;
+  color: var(--color-principal);
+  border-radius: 50px;
+  padding: 0.1rem 0.55rem;
+  font-family: var(--font-base);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.reviews-see-all {
+  align-self: flex-start;
+  margin-top: 1rem;
+  background: none;
+  border: none;
+  color: var(--color-principal);
+  font-family: var(--font-base);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.reviews-see-all:hover {
+  color: #003a9e;
+}
+
+.reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.reviews-empty {
+  font-family: var(--font-texto);
+  color: #94a3b8;
+  text-align: center;
+  padding: 2rem;
+}
+
+/* ---- Formulario de comentario ---- */
+
+.review-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.review-form-rating {
+  border: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.review-form-rating legend {
+  float: left;
+  font-family: var(--font-base);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #475569;
+  padding: 0;
+  margin-right: 0.75rem;
+}
+
+/* Fila invertida: el marcado va de 5 a 1 para que "input:checked ~ label"
+   alcance a las estrellas de menor valor, que CSS solo ve como hermanos
+   posteriores. row-reverse las devuelve al orden visual de 1 a 5. */
+.review-stars-input {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+  gap: 0.15rem;
+}
+
+.review-star-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.review-star-label {
+  cursor: pointer;
+  line-height: 0;
+  padding: 0.1rem;
+  border-radius: 4px;
+}
+
+.review-star-label svg {
+  width: 1.35rem;
+  height: 1.35rem;
+  color: #cbd5e1;
+  fill: none;
+  transition: color 0.15s, fill 0.15s;
+}
+
+/* La estrella marcada y todas las de menor valor (hermanos posteriores). */
+.review-star-input:checked ~ .review-star-label svg,
+.review-stars-input:hover .review-star-label:hover svg,
+.review-star-label:hover ~ .review-star-label svg {
+  color: var(--color-amarillo);
+  fill: var(--color-amarillo);
+}
+
+/* Foco visible al recorrer las estrellas con el teclado: el input real está
+   oculto, así que el anillo tiene que pintarlo su etiqueta. */
+.review-star-input:focus-visible + .review-star-label {
+  outline: 2px solid var(--color-principal);
+  outline-offset: 2px;
+}
+
+.review-form-text {
+  width: 100%;
+  resize: vertical;
+  min-height: 80px;
+  padding: 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-family: var(--font-texto);
+  font-size: 0.9rem;
+  color: #1e293b;
+  background-color: var(--color-blanco);
+}
+
+.review-form-text:focus {
+  outline: none;
+  border-color: var(--color-principal);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.review-form-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.review-form-counter {
+  font-family: var(--font-texto);
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.review-form-counter--limit {
+  color: #e11d48;
+  font-weight: 600;
+}
+
+.review-form-error {
+  font-family: var(--font-texto);
+  font-size: 0.8rem;
+  color: #dc2626;
+  margin: 0;
+}
+
+.review-form-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  background-color: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 16px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.review-form-notice p {
+  font-family: var(--font-texto);
+  font-size: 0.9rem;
+  color: #475569;
+  margin: 0;
+}
+
+.review-form-notice--done {
+  border-style: solid;
+  border-color: #bbf7d0;
+  background-color: #f0fdf4;
+}
+
+@media (max-width: 576px) {
+  .review-form-rating {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+
+  .review-form-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

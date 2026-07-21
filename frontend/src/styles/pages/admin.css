@@ -1,0 +1,963 @@
+/* ============================================================
+   admin.css – Panel Administrativo TourPoints
+   Light theme: sidebar blanco, fondo gris suave, azul primario
+   ============================================================ */
+
+/* Inter ya no se importa aquí: se carga en index.html junto a Poppins. Tenerlo
+   escondido en la hoja del admin hacía que el sitio público dependiera de ella
+   para su propio texto (--font-texto es Inter). */
+
+/* ---- Reset base para admin ---- */
+.admin-wrapper * {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  /* Antes: 'Inter', 'Segoe UI', sans-serif cableado a mano. Mismo resultado,
+     pero ahora sale del token de diseño y se cambia en un solo sitio. */
+  font-family: var(--font-texto);
+}
+
+/* ---- Layout principal ---- */
+.admin-wrapper {
+  display: flex;
+  min-height: 100vh;
+  background: #f1f5f9;
+}
+
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
+.sidebar {
+  width: 200px;
+  min-height: 100vh;
+  background: #ffffff;
+  border-right: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 0;
+  flex-shrink: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 100;
+}
+
+.sidebar-brand {
+  padding: 0 1.25rem 1.5rem;
+  border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 0.75rem;
+}
+
+.sidebar-brand-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #2563eb;
+  display: block;
+  line-height: 1.3;
+}
+
+.sidebar-brand-sub {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  display: block;
+  margin-top: 0.15rem;
+}
+
+.sidebar-nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0 0.75rem;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.6rem 0.85rem;
+  border-radius: 8px;
+  color: #475569;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+  cursor: pointer;
+}
+
+.sidebar-link:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+.sidebar-link.active {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.sidebar-link svg,
+.sidebar-link .s-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid #f1f5f9;
+  margin-top: auto;
+}
+
+.sidebar-user-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+.sidebar-user-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #1e293b;
+  display: block;
+  line-height: 1.2;
+}
+
+.sidebar-user-role {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  display: block;
+}
+
+/* ============================================================
+   MAIN CONTENT
+   ============================================================ */
+.admin-main {
+  flex: 1;
+  margin-left: 200px;
+  padding: 2rem 2.5rem;
+  min-height: 100vh;
+  overflow-y: auto;
+}
+
+/* ---- Page header ---- */
+.admin-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.75rem;
+}
+
+.admin-page-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+/* ---- Botones ---- */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  padding: 0.55rem 1.1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+  text-decoration: none;
+}
+
+.btn-primary:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37,99,235,0.35);
+}
+
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #ffffff;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.btn-outline:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.3rem;
+  border-radius: 6px;
+  transition: background 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+}
+
+.btn-icon:hover { background: #f1f5f9; }
+/* Estos colores no pintaban nada mientras los botones fueron ✏️🔄🗑️: un emoji
+   trae su propia paleta e ignora `color`. Con SVG por fin se aplican. */
+.btn-icon.edit  { color: #2563eb; }
+.btn-icon.edit:hover { background: #eff6ff; }
+.btn-icon.del   { color: #ef4444; }
+.btn-icon.del:hover  { background: #fef2f2; }
+
+.btn-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ---- Stats cards ---- */
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+}
+
+.stat-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  transition: box-shadow 0.2s;
+}
+
+.stat-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+}
+
+.stat-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+/* SVG de Lucide, no emoji: necesita medidas explícitas y toma el color del
+   azul de marca, en vez de traer su propia paleta como hacía 📍✅🕒⭐. */
+.stat-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: var(--color-principal);
+  stroke-width: 2;
+}
+
+.stat-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+}
+
+.stat-badge.up   { background: #dcfce7; color: #16a34a; }
+.stat-badge.info { background: #dbeafe; color: #2563eb; }
+.stat-badge.warn { background: #fef9c3; color: #ca8a04; }
+.stat-badge.new  { background: #fee2e2; color: #dc2626; }
+
+.stat-label {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.stat-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1.2;
+}
+
+/* ---- Tabla section ---- */
+.admin-table-section {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.admin-table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #f1f5f9;
+  gap: 1rem;
+}
+
+.admin-search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.45rem 0.85rem;
+  flex: 1;
+  max-width: 340px;
+}
+
+.admin-search input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 0.875rem;
+  color: #334155;
+  width: 100%;
+}
+
+.admin-search input::placeholder { color: #94a3b8; }
+
+.admin-search-icon {
+  color: #94a3b8;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* La tabla scrollea dentro de su propio contenedor: con muchas columnas
+   no debe desbordar la sección ni empujar el layout del panel. */
+.admin-table-scroll {
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+}
+
+.admin-table th {
+  text-align: left;
+  padding: 0.7rem 1.25rem;
+  background: #f8fafc;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #64748b;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.admin-table td {
+  padding: 0.9rem 1.25rem;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.875rem;
+  color: #334155;
+  vertical-align: middle;
+}
+
+.admin-table tr:last-child td { border-bottom: none; }
+
+.admin-table tr:hover td { background: #f8fafc; }
+
+/* POI name cell */
+.poi-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.poi-thumb {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: #e2e8f0;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+}
+
+.poi-name {
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 0.875rem;
+  line-height: 1.3;
+}
+
+.poi-id {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+/* Category badges */
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge-historico  { background: #ccfbf1; color: #0f766e; }
+.badge-gastronomia { background: #fed7aa; color: #c2410c; }
+.badge-naturaleza { background: #bbf7d0; color: #15803d; }
+.badge-cultura    { background: #dbeafe; color: #1d4ed8; }
+.badge-religiosa  { background: #ede9fe; color: #6d28d9; }
+.badge-compras    { background: #fce7f3; color: #be185d; }
+.badge-default    { background: #f1f5f9; color: #475569; }
+
+/* Status dots */
+.status-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.875rem;
+}
+
+.status-dot::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-activo::before   { background: #22c55e; }
+.status-pendiente::before { background: #f59e0b; }
+.status-inactivo::before  { background: #94a3b8; }
+.status-suspendido::before { background: #ef4444; }
+
+/* Desplegable de estado en la fila (reemplaza al antiguo botón de ícono
+   "Cambiar estado", que alternaba en silencio sin decir a qué estado). Se
+   pinta como una píldora coloreada — el mismo lenguaje que ya usan los
+   badges de categoría/dificultad — en vez del <select> plano original, que
+   con la flecha nativa del navegador se veía genérico y desentonaba del
+   resto del panel. El punto de color es un <span> aparte porque un <select>
+   no dibuja ::before en la mayoría de navegadores. */
+.status-select-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  background: #f8fafc;
+  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.status-select-wrap.status-activo     { background: #ecfdf5; border-color: #a7f3d0; }
+.status-select-wrap.status-pendiente  { background: #fffbeb; border-color: #fde68a; }
+.status-select-wrap.status-inactivo   { background: #f1f5f9; border-color: #e2e8f0; }
+.status-select-wrap.status-suspendido { background: #fef2f2; border-color: #fecaca; }
+
+.status-select-wrap:focus-within {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.status-dot-mini {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-dot-mini.status-activo     { background: #16a34a; }
+.status-dot-mini.status-pendiente  { background: #d97706; }
+.status-dot-mini.status-inactivo   { background: #64748b; }
+.status-dot-mini.status-suspendido { background: #dc2626; }
+
+/* appearance:none quita la flecha nativa (distinta en cada navegador) para
+   sustituirla por el mismo chevron de Lucide que usa el resto de la app,
+   como imagen de fondo: un <select> no puede llevar un <i data-lucide>
+   normal dentro sin envolverlo en otro elemento y pelear con el picker
+   nativo, así que el fondo es el atajo estándar para este caso. */
+.status-select {
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  background-color: transparent;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right center;
+  background-size: 13px;
+  padding: 0.1rem 1.1rem 0.1rem 0.05rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: #1e293b;
+  cursor: pointer;
+}
+
+.status-select:focus {
+  outline: none;
+}
+
+/* Points */
+.points-val {
+  color: #2563eb;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+/* Actions */
+.actions-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Cola de moderación de comentarios */
+.moderation-comment {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  max-width: 360px;
+}
+
+.moderation-comment-author {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.moderation-comment-text {
+  font-size: 0.85rem;
+  color: #475569;
+  line-height: 1.4;
+}
+
+/* ---- Pagination ---- */
+.admin-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1.25rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.pagination-info {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.pagination-pages {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.page-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #475569;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.page-btn:hover { background: #f1f5f9; }
+
+.page-btn.active {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+}
+
+.page-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ---- Dashboard cards ---- */
+.admin-dash-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.admin-dash-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1.5rem;
+  text-decoration: none;
+  color: #1e293b;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.admin-dash-card:hover {
+  box-shadow: 0 6px 24px rgba(37,99,235,0.12);
+  transform: translateY(-4px);
+}
+
+/* Los emojis medían 2rem de tipografía; el SVG se mide en píxeles. Hereda el
+   azul de marca, así toda la tarjeta habla el mismo idioma visual. */
+.dash-card-icon {
+  width: 28px;
+  height: 28px;
+  color: var(--color-principal);
+  stroke-width: 1.75;
+}
+.dash-card-title { font-size: 1rem; font-weight: 700; color: #1e293b; }
+.dash-card-desc  { font-size: 0.8rem; color: #94a3b8; }
+
+/* ---- Access denied ---- */
+.access-denied {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 0.75rem;
+  color: #ef4444;
+  text-align: center;
+}
+
+.access-denied p { font-size: 1.05rem; }
+/* Era ⛔ a 2rem. En rojo, que es lo que un acceso denegado debe decir. */
+.access-denied-icon {
+  width: 32px;
+  height: 32px;
+  color: #dc2626;
+}
+.access-denied-link { margin-top: 1rem; }
+
+/* Miniatura de POI: acepta emoji o imagen real */
+/* La miniatura sigue aceptando un emoji —en Recompensas lo escribe el admin y
+   es dato suyo—, pero cuando lleva un icono hay que medirlo: el SVG traería
+   sus 24px por defecto y llenaría la celda de 38px. */
+.poi-thumb .thumb-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--color-principal);
+}
+
+.poi-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+/* Fila de tabla vacía o en error */
+.admin-empty {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+/* Texto secundario dentro de celdas (fechas, notas) */
+.cell-muted {
+  color: #94a3b8;
+  font-size: 0.82rem;
+}
+
+/* Stock por debajo del umbral de aviso */
+.stock-low {
+  color: #ef4444;
+}
+
+/* ---- Pie del sidebar ----
+   Agrupa las dos salidas del panel: volver al sitio y cerrar sesión. El
+   padding lateral iguala al de .sidebar-nav; sin él los botones quedaban
+   pegados a los bordes porque .sidebar no tiene padding horizontal. */
+.sidebar-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0 0.75rem;
+}
+
+/* ---- Volver al sitio público (sidebar) ----
+   Cierra la navegación, separado de los enlaces por un respiro. Los enlaces
+   del menú no tienen borde, así que el contorno propio basta para que se lea
+   como otra cosa: no navegas dentro del panel, te sales de él.
+
+   Salida no destructiva, así que reposa en gris y solo se tiñe de azul al
+   interactuar — no compite con el rojo del logout. La flecha apunta a la
+   izquierda y se desplaza en ese sentido al pasar el ratón: el espejo exacto
+   del gesto de cerrar sesión. */
+.sidebar-back {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.85rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.sidebar-back:hover {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #2563eb;
+}
+
+/* Ya no es un carácter «←» sino un SVG de Lucide: sin medidas ocuparía sus
+   24px por defecto y desencuadraría la fila. */
+.sidebar-back-arrow {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  transition: transform 0.18s ease;
+}
+
+/* El sidebar mide 200px y el pie tiene padding lateral: sin esto las
+   etiquetas de una sola palabra larga parten en dos líneas. */
+.sidebar-back-label,
+.sidebar-logout-label {
+  white-space: nowrap;
+}
+
+.sidebar-back:hover .sidebar-back-arrow {
+  transform: translateX(-3px);
+}
+
+/* ---- Botón de cerrar sesión (sidebar) ----
+   Acción destructiva: reposa en gris para no competir con la navegación,
+   y solo se tiñe de rojo al interactuar, cuando la intención ya es explícita. */
+.sidebar-logout {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  background: transparent;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #64748b;
+  text-align: left;
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease,
+    transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.sidebar-logout-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  transition: transform 0.18s ease;
+}
+
+.sidebar-logout-label {
+  flex: 1;
+}
+
+.sidebar-logout:hover {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.12);
+}
+
+/* El icono log-out ya lleva su propia flecha saliendo de la puerta, así que
+   basta con desplazarlo en ese sentido. Antes había además una flecha «→»
+   aparte que aparecía en hover: con el emoji 🚪 hacía falta para leer la
+   intención, ahora sobra. La rotación de «puerta abriéndose» tampoco tiene
+   sentido sobre un glifo que no es una puerta. */
+.sidebar-logout:hover .sidebar-logout-icon {
+  transform: translateX(2px);
+}
+
+.sidebar-logout:active {
+  transform: translateY(0);
+  box-shadow: none;
+  background: #fee2e2;
+}
+
+/* Foco visible por teclado: obligatorio en una acción destructiva. */
+.sidebar-logout:focus-visible {
+  outline: none;
+  border-color: #dc2626;
+  color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.25);
+}
+
+/* Respeta a quien pide menos movimiento en el sistema. */
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-logout,
+  .sidebar-logout-icon,
+  .sidebar-logout-arrow {
+    transition: none;
+  }
+
+  .sidebar-logout:hover {
+    transform: none;
+  }
+
+  .sidebar-logout:hover .sidebar-logout-icon {
+    transform: none;
+  }
+}
+
+/* ---- Admin content (dashboard home) ---- */
+.admin-content { max-width: 100%; }
+
+.admin-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.25rem;
+}
+
+.admin-subtitle {
+  font-size: 0.875rem;
+  color: #94a3b8;
+  margin-bottom: 2rem;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 900px) {
+  .admin-stats { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Tablas → tarjetas. Antes, por debajo de 720px de ancho de tabla, la única
+   salida era hacer scroll horizontal para ver las columnas de la derecha —
+   en un celular eso significa desplazar la tabla entera con el pulgar para
+   leer el estado o las acciones de una sola fila. Cada <td> ya trae su
+   encabezado de columna en data-label (ver createAdminCrudView.js): con la
+   fila en columna, ese atributo se convierte en la etiqueta de la tarjeta. */
+@media (max-width: 768px) {
+  .admin-table-scroll {
+    overflow-x: visible;
+  }
+
+  .admin-table {
+    min-width: 0;
+  }
+
+  .admin-table thead {
+    display: none;
+  }
+
+  .admin-table tr {
+    display: block;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    margin-bottom: 0.85rem;
+    padding: 0.25rem 1rem;
+    background: #ffffff;
+  }
+
+  .admin-table tr:last-child {
+    margin-bottom: 0;
+  }
+
+  .admin-table td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.65rem 0;
+    border-bottom: 1px solid #f1f5f9;
+    text-align: right;
+  }
+
+  .admin-table tr td:last-child {
+    border-bottom: none;
+  }
+
+  /* La etiqueta de columna, a la izquierda, con el mismo estilo que tenía el
+     <th> de la tabla — para que se sienta como la misma información, solo
+     reacomodada, no como un componente distinto. */
+  .admin-table td::before {
+    content: attr(data-label);
+    flex-shrink: 0;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #64748b;
+    text-align: left;
+  }
+
+  /* La celda de título (imagen + nombre) es más rica que una etiqueta suelta:
+     se deja ocupar todo el ancho, con la etiqueta arriba en vez de al lado. */
+  .admin-table td:first-child {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+
+  .admin-table td:first-child::before {
+    text-align: left;
+  }
+
+  .poi-cell {
+    width: 100%;
+  }
+
+  .actions-cell {
+    justify-content: flex-end;
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .sidebar { width: 60px; }
+  .sidebar-brand-sub,
+  .sidebar-link span,
+  .sidebar-user-name,
+  .sidebar-user-role,
+  .sidebar-brand-title { display: none; }
+  .admin-main { margin-left: 60px; }
+  .admin-stats { grid-template-columns: 1fr 1fr; }
+
+  /* Con el sidebar colapsado a 60px solo caben los iconos. Las etiquetas del
+     pie se ocultaban antes: "Cerrar sesión" se desbordaba del contenedor. */
+  .sidebar-footer { padding: 0 0.5rem; }
+  .sidebar-back-label,
+  .sidebar-logout-label,
+  .sidebar-logout-arrow { display: none; }
+  .sidebar-back,
+  .sidebar-logout { justify-content: center; padding: 0.65rem 0.25rem; }
+}

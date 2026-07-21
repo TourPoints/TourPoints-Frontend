@@ -1,0 +1,176 @@
+.footer-global {
+  width: 100%;
+  background-color: var(--color-principal);
+  color: var(--color-blanco);
+}
+
+.footer-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 3rem 2rem 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 2rem;
+}
+
+.footer-info {
+  flex: 1 1 280px;
+  max-width: 320px;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.footer-info p {
+  font-family: var(--font-texto);
+  font-size: 0.95rem;
+  color: var(--color-blanco);
+  line-height: 1.6;
+  opacity: 0.9;
+}
+
+.footer-links {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 120px;
+}
+
+.footer-links h4 {
+  font-family: var(--font-base);
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+/* El hueco baja de 0.75rem a 0.25rem y esos milímetros pasan al padding del
+   enlace: la fila sigue midiendo lo mismo (31px de paso, el pie se ve igual)
+   pero el área que responde al dedo sube de 19px a 27px. Debajo de 24px el
+   objetivo es demasiado pequeño para tocarlo con seguridad (WCAG 2.2 AA), y
+   un pie enlazado que falla al primer toque es un pie que nadie usa. */
+.footer-links ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.footer-links a {
+  font-family: var(--font-texto);
+  font-size: 0.95rem;
+  color: var(--color-blanco);
+  text-decoration: none;
+  opacity: 0.85;
+  transition: opacity 0.3s ease;
+  display: inline-block;
+  padding: 0.25rem 0;
+}
+
+.footer-links a:hover {
+  opacity: 1;
+}
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(248, 250, 252, 0.2);
+  padding: 1.25rem 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer-bottom p {
+  font-family: var(--font-texto);
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.footer-social {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Mismo trato que los enlaces: el icono sigue midiendo 1.25rem, pero el área
+   táctil crece a 28px repartiendo el hueco en padding. Un icono de 20px es de
+   los objetivos más difíciles de acertar con el pulgar. */
+.footer-social a {
+  color: var(--color-blanco);
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+}
+
+.footer-social a:hover {
+  opacity: 1;
+}
+
+.footer-social .lucide {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* TABLET LARGE */
+@media (max-width: 1024px) {
+  .footer-container {
+    padding: 2.5rem 1.5rem 1.5rem;
+  }
+}
+
+/* TABLET STANDARD */
+@media (max-width: 768px) {
+  .footer-container {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 2rem 1.5rem 1.5rem;
+    gap: 1.5rem;
+  }
+
+  /* La regla base dice `flex: 1 1 280px`, pensada para el contenedor en fila:
+     ahí 280px es un ancho base y flex-grow reparte el espacio sobrante a lo
+     ancho. Aquí el contenedor pasa a `column`, el eje principal se vuelve
+     vertical y ese mismo 280px se convierte en un ALTO base, con grow para
+     estirarse aún más: el bloque medía 280px para 121px de contenido y dejaba
+     un boquete azul de 159px sobre "Explora". */
+  .footer-info {
+    max-width: 100%;
+    flex: 0 0 auto;
+  }
+
+  /* Aquí había un `flex-direction: row` que apuntaba al elemento equivocado.
+     .footer-links no es el contenedor de las tres columnas, es CADA columna:
+     ponerla en fila no colocaba las secciones una al lado de otra, acostaba el
+     título junto a su propia lista, y "Explora" acababa a la izquierda de sus
+     enlaces. Cada sección vuelve a apilar título sobre lista, como dice la
+     regla base, y las tres se apilan entre sí: un pie de móvil normal. */
+  .footer-links h4 {
+    margin-bottom: 0.5rem;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    gap: 0.75rem;
+    text-align: center;
+    padding: 1rem 1.5rem;
+  }
+}
+
+/* MOBILE */
+@media (max-width: 480px) {
+  .footer-container {
+    padding: 1.5rem 1rem 1rem;
+  }
+
+  .footer-bottom {
+    padding: 1rem;
+  }
+}
