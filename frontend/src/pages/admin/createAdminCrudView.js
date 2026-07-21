@@ -340,9 +340,12 @@ export function statusSelect(current, options) {
   // El punto de color va en un <span> aparte, no en el propio <select>: la
   // mayoría de navegadores no dibuja ::before dentro de un elemento de
   // formulario, así que un color puesto directo en el select no se vería.
+  // La clase de estado se repite en el contenedor para que la píldora
+  // entera se tiña (fondo + borde), no solo el punto.
+  const statusClass = `status-${normalizeText(current)}`;
   return `
-    <div class="status-select-wrap">
-      <span class="status-dot-mini status-${normalizeText(current)}" aria-hidden="true"></span>
+    <div class="status-select-wrap ${statusClass}">
+      <span class="status-dot-mini ${statusClass}" aria-hidden="true"></span>
       <select class="status-select" aria-label="Cambiar estado">${opts}</select>
     </div>
   `;
