@@ -9,7 +9,13 @@ import { getCurrentUser, updateSessionUser } from "./auth.service.js";
 //   GET   /rewards                → catálogo (usuario ve solo APROBADO)
 //   POST  /rewards                → crear (admin)
 //   PATCH /rewards/{id}           → editar / cambiar estado (admin)
-//   POST  /rewards/{id}/canjear   → canjear por puntos → canje con código QR
+//   POST  /rewards/{id}/redeem     → canjear por puntos → canje con código QR
+//
+// ⚠️ Esta ruta cambió de nombre al menos una vez (fue /canjear, ahora es de
+// nuevo /redeem, verificado contra el OpenAPI en vivo). Si el canje vuelve a
+// fallar con 404, lo primero es comparar esta línea contra
+// GET https://tourpoints.159.54.176.254.nip.io/openapi.json antes de asumir
+// cualquier otra causa.
 //
 // Su modelo no tiene imagen, emoji ni categoría (decisión B3 pendiente en la
 // bitácora): el adaptador deja el emoji genérico y sin categoría — la página
@@ -190,7 +196,7 @@ export async function redeemReward(rewardId) {
   }
 
   try {
-    const canje = await apiPost(`/rewards/${rewardId}/canjear`);
+    const canje = await apiPost(`/rewards/${rewardId}/redeem`);
     return {
       ok: true,
       canje: {
