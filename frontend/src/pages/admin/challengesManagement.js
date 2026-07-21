@@ -6,11 +6,10 @@ import {
   createChallenge,
   updateChallenge,
   deleteChallenge,
-  toggleChallengeStatus,
   CHALLENGE_STATUSES,
 } from "../../services/challenge.service.js";
 import { CHALLENGE_TYPES, CHALLENGE_DIFFICULTIES } from "../../mocks/challenges.js";
-import { createAdminCrudView, statusDot, titleCell } from "./createAdminCrudView.js";
+import { createAdminCrudView, statusSelect, titleCell } from "./createAdminCrudView.js";
 import { escapeHtml } from "../../components/organism/modal.js";
 import { normalizeText } from "../../utils/text.js";
 import { formatDate } from "../../utils/date.js";
@@ -32,7 +31,6 @@ const { view, init } = createAdminCrudView({
     create: createChallenge,
     update: updateChallenge,
     remove: deleteChallenge,
-    toggleStatus: toggleChallengeStatus,
   },
 
   columns: [
@@ -57,7 +55,7 @@ const { view, init } = createAdminCrudView({
       render: (c) =>
         `<span class="badge ${DIFFICULTY_CLASS[c.difficulty] ?? ""}">${escapeHtml(c.difficulty)}</span>`,
     },
-    { header: "Estado", render: (c) => statusDot(c.status) },
+    { header: "Estado", render: (c) => statusSelect(c.status, CHALLENGE_STATUSES) },
     { header: "Puntos", render: (c) => `<span class="points-val">${escapeHtml(c.points)} pts</span>` },
     { header: "Fecha límite", render: (c) => `<span class="cell-muted">${formatDate(c.deadline)}</span>` },
   ],

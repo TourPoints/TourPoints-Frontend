@@ -5,14 +5,9 @@
 // y requieren credenciales, que son responsabilidad del backend. Aquí solo se
 // consultan, editan, suspenden o eliminan.
 
-import {
-  getUsers,
-  updateUser,
-  deleteUser,
-  toggleUserStatus,
-} from "../../services/user.service.js";
+import { getUsers, updateUser, deleteUser } from "../../services/user.service.js";
 import { USER_ROLES, USER_STATUSES } from "../../mocks/users.js";
-import { createAdminCrudView, statusDot, titleCell } from "./createAdminCrudView.js";
+import { createAdminCrudView, statusSelect, titleCell } from "./createAdminCrudView.js";
 import { escapeHtml } from "../../components/organism/modal.js";
 import { formatDate } from "../../utils/date.js";
 
@@ -33,7 +28,6 @@ const { view, init } = createAdminCrudView({
     list: getUsers,
     update: updateUser,
     remove: deleteUser,
-    toggleStatus: toggleUserStatus,
   },
 
   columns: [
@@ -47,7 +41,7 @@ const { view, init } = createAdminCrudView({
         }),
     },
     { header: "Rol", render: (u) => roleBadge(u.role) },
-    { header: "Estado", render: (u) => statusDot(u.status) },
+    { header: "Estado", render: (u) => statusSelect(u.status, USER_STATUSES) },
     {
       header: "Puntos",
       render: (u) => `<span class="points-val">${(Number(u.points) || 0).toLocaleString("es-ES")} pts</span>`,

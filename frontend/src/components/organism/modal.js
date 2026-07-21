@@ -43,6 +43,19 @@ function renderField(field, values) {
       )
       .join("");
     control = `<select id="${id}" name="${field.name}" ${required}>${options}</select>`;
+  } else if (field.type === "file") {
+    // Un input de archivo no puede llevar un valor preseleccionado (los
+    // navegadores lo bloquean por seguridad): en modo edición, `value` trae
+    // la URL de la imagen ya guardada, así que se muestra como miniatura en
+    // vez de intentar precargarla en el input.
+    const preview = value
+      ? `<img src="${escapeHtml(value)}" alt="" class="modal-field-preview">`
+      : "";
+    control = `
+      ${preview}
+      <input id="${id}" type="file" name="${field.name}" accept="${escapeHtml(field.accept ?? "image/*")}" ${required}>
+      ${value ? `<span class="modal-field-hint">Deja este campo vacío para conservar la imagen actual.</span>` : ""}
+    `;
   } else if (field.type === "textarea") {
     control = `<textarea id="${id}" name="${field.name}" rows="3" ${required}
       placeholder="${escapeHtml(field.placeholder ?? "")}">${escapeHtml(value)}</textarea>`;
@@ -149,7 +162,13 @@ function validate(fields, data) {
     const raw = data[field.name];
     const value = typeof raw === "string" ? raw.trim() : raw;
 
-    if (field.required && !value) {
+    // Un <input type="file"> sin selección llega como un File de tamaño 0,
+    // no como null/"": es un objeto y por tanto "truthy" para el chequeo
+    // genérico de abajo. Sin este caso aparte, un campo de archivo marcado
+    // required nunca fallaría la validación aunque no se eligiera nada.
+    const isEmptyFile = field.type === "file" && value instanceof File && value.size === 0;
+
+    if (field.required && (!value || isEmptyFile)) {
       errors[field.name] = "Este campo es obligatorio.";
       return;
     }

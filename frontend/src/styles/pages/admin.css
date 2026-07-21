@@ -452,6 +452,46 @@
 .status-activo::before   { background: #22c55e; }
 .status-pendiente::before { background: #f59e0b; }
 .status-inactivo::before  { background: #94a3b8; }
+.status-suspendido::before { background: #ef4444; }
+
+/* Desplegable de estado en la fila (reemplaza al antiguo botón de ícono
+   "Cambiar estado", que alternaba en silencio sin decir a qué estado). El
+   punto de color es un <span> aparte porque un <select> no dibuja ::before
+   en la mayoría de navegadores. */
+.status-select-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.status-dot-mini {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-dot-mini.status-activo     { background: #22c55e; }
+.status-dot-mini.status-pendiente  { background: #f59e0b; }
+.status-dot-mini.status-inactivo   { background: #94a3b8; }
+.status-dot-mini.status-suspendido { background: #ef4444; }
+
+.status-select {
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.8rem;
+  font-family: inherit;
+  color: #1e293b;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.status-select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
 
 /* Points */
 .points-val {

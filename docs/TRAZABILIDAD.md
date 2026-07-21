@@ -37,7 +37,7 @@ Lo que sí se hizo bien y quedó registrado con merge commits: `feature/rewards`
 **La traza no se perdió**: el ticket va en el mensaje del commit (`feat(TOUR-2): ...`),
 aunque no en el nombre de la rama. Para buscar el trabajo de un ticket:
 `git log --oneline --grep="TOUR-2"`.
-
+ 
 ## Ramas trampa
 
 No hagas checkout de estas para cambiar su feature — están congeladas en un estado antiguo

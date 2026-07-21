@@ -6,10 +6,9 @@ import {
   createReward,
   updateReward,
   deleteReward,
-  toggleRewardStatus,
   REWARD_STATUSES,
 } from "../../services/reward.service.js";
-import { createAdminCrudView, statusDot, titleCell } from "./createAdminCrudView.js";
+import { createAdminCrudView, statusSelect, titleCell } from "./createAdminCrudView.js";
 import { escapeHtml } from "../../components/organism/modal.js";
 
 // El campo/columna "Categoría" se quitó: el modelo real de `recompensas` no
@@ -35,7 +34,6 @@ const { view, init } = createAdminCrudView({
     create: createReward,
     update: updateReward,
     remove: deleteReward,
-    toggleStatus: toggleRewardStatus,
   },
 
   columns: [
@@ -48,7 +46,7 @@ const { view, init } = createAdminCrudView({
       render: (r) => `<span class="points-val">${escapeHtml(r.pointsCost)} pts</span>`,
     },
     { header: "Stock", render: (r) => stockCell(r.stock) },
-    { header: "Estado", render: (r) => statusDot(r.status) },
+    { header: "Estado", render: (r) => statusSelect(r.status, REWARD_STATUSES) },
   ],
 
   fields: () => [

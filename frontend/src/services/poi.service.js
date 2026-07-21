@@ -1,5 +1,14 @@
 import { mockPois } from "../mocks/pois.js";
-import { apiGet, apiGetItems, apiPost, apiPatch, apiDelete, isApiEnabled, ApiError } from "./api.client.js";
+import {
+  apiGet,
+  apiGetItems,
+  apiPost,
+  apiPatch,
+  apiDelete,
+  apiPostForm,
+  isApiEnabled,
+  ApiError,
+} from "./api.client.js";
 import { readCollection, writeCollection, nextNumericId } from "./localStore.js";
 
 // Servicio de Puntos de Interés. Cableado al backend real (docs/CABLEADO.md).
@@ -215,14 +224,47 @@ async function toBackendPoi(data) {
 }
 
 /**
+ * Sube una imagen para un POI y la marca como principal. Su endpoint no
+ * acepta URLs de texto: el archivo va por multipart, el backend lo sube a
+ * Cloudinary y devuelve la URL resultante. Por eso el campo de imagen del
+ * formulario del admin es un `<input type="file">`, no un campo de texto.
+ * @param {string} poiId
+ * @param {File} file
+ * @returns {Promise<{ok: boolean, url?: string, error?: string}>}
+ */
+export async function uploadPoiImage(poiId, file) {
+  if (!isApiEnabled("pois")) {
+    return { ok: false, error: "La subida de imágenes estará disponible cuando el backend esté conectado." };
+  }
+
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("principal", "true");
+
+  try {
+    const imagen = await apiPostForm(`/poi/${poiId}/images`, formData);
+    return { ok: true, url: imagen.url };
+  } catch (error) {
+    const detalle = typeof error.detail === "string" ? error.detail : null;
+    return { ok: false, error: detalle ?? "No pudimos subir la imagen. Inténtalo de nuevo." };
+  }
+}
+
+/**
  * Crea un POI. Contra el backend el alta nace BORRADOR y se encadena el flujo
  * de moderación (enviar a revisión → aprobar) para que quede en el estado que
- * el formulario pidió. La imagen del formulario no viaja: su endpoint de
- * imágenes recibe archivos, no URLs (pendiente en la bitácora).
+ * el formulario pidió. Si el formulario trajo una imagen, se sube justo
+ * después de crear el POI (recién ahí existe el id que pide su endpoint).
  */
 export async function createPoi(data) {
   if (isApiEnabled("pois")) {
     const creado = await apiPost("/poi", await toBackendPoi(data));
+
+    if (data.image instanceof File && data.image.size > 0) {
+      const subida = await uploadPoiImage(creado.id, data.image);
+      if (!subida.ok) console.warn("POI creado; la subida de imagen falló:", subida.error);
+    }
+
     const target = toEstado(data.status ?? "Pendiente");
     try {
       if (target !== "BORRADOR") await apiPost(`/poi/${creado.id}/submit-for-review`);
@@ -262,6 +304,12 @@ export async function updatePoi(id, changes) {
     try {
       const body = await toBackendPoi(changes);
       await apiPatch(`/poi/${id}`, body);
+
+      if (changes.image instanceof File && changes.image.size > 0) {
+        const subida = await uploadPoiImage(id, changes.image);
+        if (!subida.ok) console.warn("POI actualizado; la subida de imagen falló:", subida.error);
+      }
+
       // El cambio de estado va por el endpoint de moderación, no por el PATCH.
       if (changes.status !== undefined) {
         await apiPatch(`/poi/${id}/moderation`, { estado: toEstado(changes.status) }).catch((e) =>

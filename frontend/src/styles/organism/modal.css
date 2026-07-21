@@ -124,6 +124,23 @@
   min-height: 1em;
 }
 
+/* Miniatura de la imagen ya guardada, para un <input type="file"> en modo
+   edición: el propio input no puede mostrarla (los navegadores no permiten
+   preseleccionar un archivo), así que se pinta aparte. */
+.modal-field-preview {
+  width: 100%;
+  max-width: 220px;
+  height: 110px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.modal-field-hint {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
 .modal-field input:invalid,
 .modal-field select:invalid {
   border-color: #e2e8f0;

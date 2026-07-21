@@ -16,11 +16,10 @@ import {
   createPoi,
   updatePoi,
   deletePoi,
-  togglePoiStatus,
   POI_STATUSES,
   PUBLISHED_STATUS,
 } from "../../services/poi.service.js";
-import { createAdminCrudView, statusDot, titleCell } from "./createAdminCrudView.js";
+import { createAdminCrudView, statusSelect, titleCell } from "./createAdminCrudView.js";
 import { escapeHtml } from "../../components/organism/modal.js";
 import { normalizeText } from "../../utils/text.js";
 import { getCategories, ALL_CATEGORIES } from "../../utils/poiFilter.js";
@@ -51,7 +50,7 @@ function poiFields(items) {
     { name: "lng", label: "Longitud", type: "number", step: "any", required: true },
     { name: "points", label: "Puntos", type: "number", min: 0, required: true },
     { name: "rating", label: "Valoración", type: "number", step: "0.1", min: 0, max: 5 },
-    { name: "image", label: "URL de la imagen", wide: true, placeholder: "https://..." },
+    { name: "image", label: "Imagen del lugar", type: "file", accept: "image/*", wide: true },
     { name: "description", label: "Descripción", type: "textarea", wide: true },
   ];
 }
@@ -67,7 +66,6 @@ const { view, init } = createAdminCrudView({
     create: createPoi,
     update: updatePoi,
     remove: deletePoi,
-    toggleStatus: togglePoiStatus,
   },
 
   columns: [
@@ -82,7 +80,7 @@ const { view, init } = createAdminCrudView({
     },
     { header: "Categoría", render: (poi) => categoryBadge(poi.category) },
     { header: "Ubicación", render: (poi) => escapeHtml(poi.location) },
-    { header: "Estado", render: (poi) => statusDot(poi.status) },
+    { header: "Estado", render: (poi) => statusSelect(poi.status, POI_STATUSES) },
     { header: "Puntos", render: (poi) => `<span class="points-val">${escapeHtml(poi.points)} pts</span>` },
   ],
 

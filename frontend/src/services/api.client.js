@@ -169,3 +169,47 @@ export function apiPut(path, body, options = {}) {
 export function apiDelete(path, options = {}) {
   return request(path, { ...options, method: "DELETE" });
 }
+
+/**
+ * POST con cuerpo multipart/form-data (subida de archivos, p. ej. imágenes
+ * de POI). No reutiliza request(): esa función siempre serializa el cuerpo a
+ * JSON y fija Content-Type: application/json, y un FormData necesita justo
+ * lo contrario — el navegador arma el boundary del multipart solo, fijar el
+ * header a mano rompe el parseo en el servidor.
+ * @param {string} path
+ * @param {FormData} formData
+ */
+export async function apiPostForm(path, formData, { timeout = DEFAULT_TIMEOUT_MS } = {}) {
+  const url = new URL(`${BASE_URL}${path}`, window.location.origin);
+
+  const headers = { Accept: "application/json" };
+  const token = getToken();
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers,
+      body: formData,
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.json().catch(() => null);
+      throw new ApiError(`La petición a ${path} falló`, response.status, errorBody?.detail ?? null);
+    }
+
+    if (response.status === 204) return null;
+    return await response.json();
+  } catch (error) {
+    if (error.name === "AbortError") {
+      throw new ApiError(`La petición a ${path} superó el tiempo de espera`, 408);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}

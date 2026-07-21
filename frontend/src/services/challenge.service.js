@@ -121,9 +121,16 @@ export async function createChallenge(data) {
   return service.create(data);
 }
 
-async function toggleToStatus(id, status) {
-  const estado = status === "Activo" ? "ACTIVO" : "CANCELADO";
-  await apiPatch(`/challenges/${id}/moderation`, { estado });
+// Inverso de mapEstado: hay que cubrir los tres valores, no solo
+// Activo/no-Activo. El desplegable de estado del panel ofrece "Pendiente"
+// como opción real (igual que en POIs y recompensas) — con un mapeo binario,
+// elegirla habría cancelado el reto en silencio en vez de devolverlo a
+// borrador.
+const toEstadoReto = (status) =>
+  status === "Activo" ? "ACTIVO" : status === "Pendiente" ? "BORRADOR" : "CANCELADO";
+
+async function setChallengeEstado(id, status) {
+  await apiPatch(`/challenges/${id}/moderation`, { estado: toEstadoReto(status) });
   return getChallengeById(id);
 }
 
@@ -134,7 +141,7 @@ async function toggleToStatus(id, status) {
  */
 export async function updateChallenge(id, changes) {
   if (isApiEnabled("challenges")) {
-    if (changes.status !== undefined) return toggleToStatus(id, changes.status);
+    if (changes.status !== undefined) return setChallengeEstado(id, changes.status);
     console.warn("Editar retos aún no tiene endpoint en el backend; cambio ignorado.");
     return getChallengeById(id);
   }
@@ -163,7 +170,7 @@ export async function toggleChallengeStatus(id) {
   if (isApiEnabled("challenges")) {
     const actual = await getChallengeById(id);
     if (!actual) return null;
-    return toggleToStatus(id, actual.status === "Activo" ? "Inactivo" : "Activo");
+    return setChallengeEstado(id, actual.status === "Activo" ? "Inactivo" : "Activo");
   }
   return service.toggleStatus(id, ["Activo", "Inactivo"]);
 }

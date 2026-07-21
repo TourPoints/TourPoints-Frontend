@@ -195,9 +195,6 @@ export function createAdminCrudView(config) {
               <button class="btn-icon edit" title="Editar" aria-label="Editar" data-action="edit">
                 <i data-lucide="square-pen" aria-hidden="true"></i>
               </button>
-              <button class="btn-icon" title="Cambiar estado" aria-label="Cambiar estado" data-action="toggle">
-                <i data-lucide="refresh-cw" aria-hidden="true"></i>
-              </button>
               <button class="btn-icon del" title="Eliminar" aria-label="Eliminar" data-action="delete">
                 <i data-lucide="trash-2" aria-hidden="true"></i>
               </button>
@@ -208,10 +205,21 @@ export function createAdminCrudView(config) {
       )
       .join("");
 
-    const actions = { edit: handleEdit, toggle: handleToggle, delete: handleDelete };
+    const actions = { edit: handleEdit, delete: handleDelete };
     tbody.querySelectorAll("[data-action]").forEach((btn) => {
       const id = btn.closest("tr").dataset.id;
       btn.addEventListener("click", () => actions[btn.dataset.action](id));
+    });
+
+    // El desplegable de estado (una de las columnas, si la vista lo define
+    // con statusSelect()) es su propia acción: cambia al elegir una opción,
+    // sin pasar por el botón "Editar". Antes había un botón de ícono
+    // ("Cambiar estado") que alternaba entre dos estados en silencio, sin
+    // decir cuál — el admin no sabía qué iba a pasar hasta después de
+    // hacer clic.
+    tbody.querySelectorAll(".status-select").forEach((select) => {
+      const id = select.closest("tr").dataset.id;
+      select.addEventListener("change", () => handleStatusChange(id, select.value));
     });
   }
 
@@ -292,8 +300,8 @@ export function createAdminCrudView(config) {
     await refresh();
   }
 
-  async function handleToggle(id) {
-    await service.toggleStatus(id);
+  async function handleStatusChange(id, status) {
+    await service.update(id, { status });
     await refresh();
   }
 
@@ -311,6 +319,33 @@ export function createAdminCrudView(config) {
 /** Punto de estado coloreado, compartido por todas las vistas. */
 export function statusDot(status) {
   return `<span class="status-dot status-${normalizeText(status)}">${escapeHtml(status)}</span>`;
+}
+
+/**
+ * Desplegable de estado, en reemplazo del antiguo botón "Cambiar estado":
+ * ese ícono alternaba entre dos valores sin decir cuál, así que el admin no
+ * sabía qué iba a pasar hasta después de hacer clic. Este control muestra
+ * todos los estados reales por nombre y aplica el que se elija — la propia
+ * fila dice, en todo momento, en qué estado está y a qué puede cambiar.
+ * @param {string} current - Estado actual del elemento.
+ * @param {Array<string>} options - Estados válidos para esta entidad.
+ */
+export function statusSelect(current, options) {
+  const opts = options
+    .map(
+      (status) =>
+        `<option value="${escapeHtml(status)}" ${status === current ? "selected" : ""}>${escapeHtml(status)}</option>`
+    )
+    .join("");
+  // El punto de color va en un <span> aparte, no en el propio <select>: la
+  // mayoría de navegadores no dibuja ::before dentro de un elemento de
+  // formulario, así que un color puesto directo en el select no se vería.
+  return `
+    <div class="status-select-wrap">
+      <span class="status-dot-mini status-${normalizeText(current)}" aria-hidden="true"></span>
+      <select class="status-select" aria-label="Cambiar estado">${opts}</select>
+    </div>
+  `;
 }
 
 /** Celda con miniatura (emoji o imagen) + título e identificador. */
