@@ -19,6 +19,14 @@ export const API_TIMEOUT_MS = 8000;
 // están en la lista siguen usando los mocks de localStorage aunque haya URL.
 // Todos los módulos del MVP están cableados; el comentario histórico de
 // arriba queda como registro de por qué existe la puerta.
+//
+// ⚠️ "rewards" está fuera TEMPORALMENTE: el backend desplegado tiene una
+// caída y apenas expone datos ahora mismo. reward.service.js ya tiene un
+// canje local completo (valida saldo y stock, descuenta ambos, genera un
+// código de canje) para que el equipo pueda seguir probando el sistema de
+// puntos con datos que administra el propio panel admin mientras se
+// resuelve. Cuando el backend vuelva a responder, sumar "rewards" de nuevo
+// a este Set — no hace falta tocar nada más.
 export const API_MODULES = new Set([
   "auth",
   "pois",
@@ -27,7 +35,6 @@ export const API_MODULES = new Set([
   "visits",
   "points",
   "challenges",
-  "rewards",
   "users",
 ]);
 

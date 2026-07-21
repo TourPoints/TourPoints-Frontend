@@ -1,6 +1,7 @@
 import { mockRewards } from "../mocks/rewards.js";
 import { createCrudService } from "./createCrudService.js";
 import { apiGet, apiGetItems, apiPost, apiPatch, isApiEnabled, ApiError } from "./api.client.js";
+import { getCurrentUser, updateSessionUser } from "./auth.service.js";
 
 // Servicio de Recompensas. Cableado al backend real (docs/CABLEADO.md).
 //
@@ -132,15 +133,60 @@ export async function toggleRewardStatus(id) {
 }
 
 /**
- * Canjea una recompensa por puntos. Solo existe contra el backend: el canje
- * descuenta stock con triggers atómicos y resta puntos en el ledger; el
- * código QR resultante es el que se presenta físicamente en el aliado.
+ * Canjea una recompensa por puntos.
+ *
+ * Contra el backend, el canje descuenta stock con triggers atómicos y resta
+ * puntos en el ledger; el código QR resultante es el que se presenta
+ * físicamente en el aliado.
+ *
+ * Sin backend (o con el módulo "rewards" desactivado mientras el equipo de
+ * backend resuelve una caída), el canje sigue funcionando: valida saldo y
+ * stock contra los datos locales, descuenta ambos, y genera un código de
+ * canje local.
+ *
+ * El descuento de puntos solo toca la sesión (updateSessionUser), nunca
+ * updateUser(): "users" puede seguir apuntando al backend real aunque
+ * "rewards" no lo haga, y updateUser en modo API intenta un GET /users/{id}
+ * de vuelta para devolver el usuario actualizado — con el backend caído esa
+ * llamada lanza y el canje entero fallaría por una escritura que ni
+ * necesita la red. La sesión es la única fuente de verdad del saldo en modo
+ * local de todos modos (ver points.service.js).
  * @param {string} rewardId
  * @returns {Promise<{ok: boolean, canje?: Object, error?: string}>}
  */
 export async function redeemReward(rewardId) {
   if (!isApiEnabled("rewards")) {
-    return { ok: false, error: "El canje estará disponible cuando el backend esté conectado." };
+    const user = getCurrentUser();
+    if (!user) return { ok: false, error: "Necesitas iniciar sesión para canjear." };
+
+    const reward = await service.getById(rewardId);
+    if (!reward) return { ok: false, error: "No encontramos esa recompensa." };
+    if (reward.status !== "Activo") {
+      return { ok: false, error: "Esta recompensa no está disponible para canje." };
+    }
+    if (Number(reward.stock) <= 0) {
+      return { ok: false, error: "Ya no queda stock de esta recompensa." };
+    }
+
+    const saldo = Number(user.points) || 0;
+    const costo = Number(reward.pointsCost) || 0;
+    if (saldo < costo) {
+      return { ok: false, error: "No tienes puntos suficientes para este canje." };
+    }
+
+    await service.update(rewardId, { stock: Number(reward.stock) - 1 });
+    updateSessionUser({ points: saldo - costo });
+
+    return {
+      ok: true,
+      canje: {
+        id: `local-${Date.now()}`,
+        codigoQr: `TP-LOCAL-${Math.random().toString(36).slice(2, 10).toUpperCase()}`,
+        estado: "PENDIENTE",
+        expira: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        recompensa: reward.name,
+      },
+    };
   }
 
   try {
