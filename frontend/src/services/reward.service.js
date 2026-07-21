@@ -66,14 +66,26 @@ function toBackendReward(data) {
   return body;
 }
 
-/** Lista las recompensas (vacía si la sesión no alcanza). */
-export async function getRewards() {
+/**
+ * Lista las recompensas.
+ *
+ * Por defecto un 401/403 devuelve lista vacía (dashboard y admin prefieren
+ * una sección vacía a romperse). La página pública de recompensas pasa
+ * throwOnAuthError para distinguir "catálogo vacío" de "sesión vencida":
+ * sin eso, un JWT expirado se veía como "no hay recompensas", que manda al
+ * usuario a sospechar del backend en vez de a iniciar sesión de nuevo.
+ * @param {{throwOnAuthError?: boolean}} [options]
+ */
+export async function getRewards({ throwOnAuthError = false } = {}) {
   if (isApiEnabled("rewards")) {
     try {
       const items = await apiGetItems("/rewards");
       return items.map(adaptRecompensa);
     } catch (error) {
-      if (error instanceof ApiError && (error.status === 401 || error.status === 403)) return [];
+      if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
+        if (throwOnAuthError) throw error;
+        return [];
+      }
       throw error;
     }
   }
