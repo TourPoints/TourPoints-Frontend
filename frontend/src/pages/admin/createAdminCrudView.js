@@ -189,8 +189,8 @@ export function createAdminCrudView(config) {
       .map(
         (item) => `
         <tr data-id="${escapeHtml(item.id)}">
-          ${columns.map((col) => `<td>${col.render(item)}</td>`).join("")}
-          <td>
+          ${columns.map((col) => `<td data-label="${escapeHtml(col.header)}">${col.render(item)}</td>`).join("")}
+          <td data-label="Acciones">
             <div class="actions-cell">
               <button class="btn-icon edit" title="Editar" aria-label="Editar" data-action="edit">
                 <i data-lucide="square-pen" aria-hidden="true"></i>

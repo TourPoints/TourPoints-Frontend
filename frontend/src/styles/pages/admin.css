@@ -813,6 +813,88 @@
   .admin-stats { grid-template-columns: repeat(2, 1fr); }
 }
 
+/* Tablas → tarjetas. Antes, por debajo de 720px de ancho de tabla, la única
+   salida era hacer scroll horizontal para ver las columnas de la derecha —
+   en un celular eso significa desplazar la tabla entera con el pulgar para
+   leer el estado o las acciones de una sola fila. Cada <td> ya trae su
+   encabezado de columna en data-label (ver createAdminCrudView.js): con la
+   fila en columna, ese atributo se convierte en la etiqueta de la tarjeta. */
+@media (max-width: 768px) {
+  .admin-table-scroll {
+    overflow-x: visible;
+  }
+
+  .admin-table {
+    min-width: 0;
+  }
+
+  .admin-table thead {
+    display: none;
+  }
+
+  .admin-table tr {
+    display: block;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    margin-bottom: 0.85rem;
+    padding: 0.25rem 1rem;
+    background: #ffffff;
+  }
+
+  .admin-table tr:last-child {
+    margin-bottom: 0;
+  }
+
+  .admin-table td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.65rem 0;
+    border-bottom: 1px solid #f1f5f9;
+    text-align: right;
+  }
+
+  .admin-table tr td:last-child {
+    border-bottom: none;
+  }
+
+  /* La etiqueta de columna, a la izquierda, con el mismo estilo que tenía el
+     <th> de la tabla — para que se sienta como la misma información, solo
+     reacomodada, no como un componente distinto. */
+  .admin-table td::before {
+    content: attr(data-label);
+    flex-shrink: 0;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #64748b;
+    text-align: left;
+  }
+
+  /* La celda de título (imagen + nombre) es más rica que una etiqueta suelta:
+     se deja ocupar todo el ancho, con la etiqueta arriba en vez de al lado. */
+  .admin-table td:first-child {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+
+  .admin-table td:first-child::before {
+    text-align: left;
+  }
+
+  .poi-cell {
+    width: 100%;
+  }
+
+  .actions-cell {
+    justify-content: flex-end;
+    width: 100%;
+  }
+}
+
 @media (max-width: 640px) {
   .sidebar { width: 60px; }
   .sidebar-brand-sub,
