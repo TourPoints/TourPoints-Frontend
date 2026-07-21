@@ -1,7 +1,8 @@
 import { mockReviews } from "../mocks/reviews.js";
 import { readCollection, writeCollection, nextPrefixedId } from "./localStore.js";
 import { getCurrentUser } from "./auth.service.js";
-import { apiGetItems, apiPost, apiPut, apiDelete, isApiEnabled, ApiError } from "./api.client.js";
+import { apiGetItems, apiPost, apiPut, apiPatch, apiDelete, isApiEnabled, ApiError } from "./api.client.js";
+import { getAllPois } from "./poi.service.js";
 
 // Servicio de reseñas. Cableado al backend real (docs/CABLEADO.md).
 //
@@ -223,4 +224,59 @@ export async function deleteMyReview(reviewId) {
     all.filter((review) => review.id !== reviewId)
   );
   return { ok: true };
+}
+
+// ── Moderación (panel admin) ──────────────────────────────────
+
+/**
+ * Todos los comentarios pendientes de moderación, de cualquier POI.
+ *
+ * El backend no tiene un listado global de comentarios: solo
+ * GET /poi/{id}/comments, con un filtro de estado que únicamente un admin
+ * puede usar. Para armar una cola cruzada se piden en paralelo los
+ * pendientes de cada POI y se combinan — mismo patrón que getAllPois() en
+ * poi.service.js, y razonable a esta escala de catálogo (decenas de POIs,
+ * no miles).
+ * @returns {Promise<Array<Object>>}
+ */
+export async function getPendingComments() {
+  if (!isApiEnabled("reviews")) return [];
+
+  const pois = await getAllPois();
+  const listas = await Promise.all(
+    pois.map((poi) =>
+      apiGetItems(`/poi/${poi.id}/comments`, { estado: "PENDIENTE" })
+        .then((items) => items.map((c) => ({ ...c, poiName: poi.name })))
+        .catch(() => [])
+    )
+  );
+
+  return listas.flat().map((c) => ({
+    id: c.id,
+    poiId: c.poi_id,
+    poiName: c.poiName,
+    author: c.usuario?.nombre ?? "Visitante",
+    text: c.contenido,
+    createdAt: c.created_at,
+  }));
+}
+
+/**
+ * Aprueba o rechaza un comentario pendiente.
+ * @param {number|string} commentId
+ * @param {"APROBADO"|"RECHAZADO"} estado
+ * @returns {Promise<{ok: boolean, error?: string}>}
+ */
+export async function moderateComment(commentId, estado) {
+  if (!isApiEnabled("reviews")) {
+    return { ok: false, error: "La moderación estará disponible cuando el backend esté conectado." };
+  }
+
+  try {
+    await apiPatch(`/comments/${commentId}/moderation`, { estado });
+    return { ok: true };
+  } catch (error) {
+    const detalle = typeof error.detail === "string" ? error.detail : null;
+    return { ok: false, error: detalle ?? "No pudimos actualizar el comentario." };
+  }
 }

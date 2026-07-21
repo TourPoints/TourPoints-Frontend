@@ -507,6 +507,26 @@
   gap: 0.25rem;
 }
 
+/* Cola de moderación de comentarios */
+.moderation-comment {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  max-width: 360px;
+}
+
+.moderation-comment-author {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.moderation-comment-text {
+  font-size: 0.85rem;
+  color: #475569;
+  line-height: 1.4;
+}
+
 /* ---- Pagination ---- */
 .admin-pagination {
   display: flex;

@@ -8,6 +8,7 @@ import { usersManagement, initUsersManagement } from "../pages/admin/usersManage
 import { poisManagement, initPoisManagement } from "../pages/admin/poisManagement.js";
 import { challengesManagement, initChallengesManagement } from "../pages/admin/challengesManagement.js";
 import { rewardsManagement, initRewardsManagement } from "../pages/admin/rewardsManagement.js";
+import { moderationManagement, initModerationManagement } from "../pages/admin/moderationManagement.js";
 import { adminSettings }        from "../pages/admin/settings.js";
 import { dashboard, initDashboard } from "../pages/dashboard.js";
 import { explore, initExplore } from "../pages/explore.js";
@@ -110,6 +111,12 @@ export const routes = {
       "/admin/rewards": {
         component: rewardsManagement,
         init: initRewardsManagement,
+        layout: "admin",
+        auth: true
+      },
+      "/admin/moderation": {
+        component: moderationManagement,
+        init: initModerationManagement,
         layout: "admin",
         auth: true
       },

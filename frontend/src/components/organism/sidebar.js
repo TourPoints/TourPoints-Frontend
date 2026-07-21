@@ -88,6 +88,7 @@ export function sidebar() {
         ${link("/admin/pois",        "map-pinned",         "Puntos de Interés")}
         ${link("/admin/challenges",  "target",             "Retos")}
         ${link("/admin/rewards",     "ticket",             "Recompensas")}
+        ${link("/admin/moderation",  "message-square-warning", "Moderación")}
         ${link("/admin/settings",    "sliders-horizontal", "Configuración")}
 
         <!-- Salir del panel sin cerrar sesión. Va aquí, cerrando la navegación,
