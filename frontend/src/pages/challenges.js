@@ -21,13 +21,16 @@ import { escapeHtml } from "../components/organism/modal.js";
 import { normalizeText, includesNormalized, debounce } from "../utils/text.js";
 import { formatDate } from "../utils/date.js";
 import { loadIcons } from "../utils/icons.js";
+import { t } from "../i18n/index.js";
 import "/src/styles/pages/challenges.css";
 
 // Pestañas de filtrado. "Todos" incluye cualquier estado de progreso.
-const TABS = [
-  { id: "todos", label: "Todos" },
-  { id: PROGRESS.IN_PROGRESS, label: "En curso" },
-  { id: PROGRESS.COMPLETED, label: "Completados" },
+// Función y no constante: las etiquetas deben resolverse en el idioma activo
+// en cada render, no en el del arranque.
+const TABS = () => [
+  { id: "todos", label: t("challenges.tabAll") },
+  { id: PROGRESS.IN_PROGRESS, label: t("challenges.tabInProgress") },
+  { id: PROGRESS.COMPLETED, label: t("challenges.tabCompleted") },
 ];
 
 let allChallenges = [];
@@ -40,8 +43,8 @@ export function challenges() {
     <section class="challenges-page">
       <div class="challenges-header">
         <div class="challenges-header-text">
-          <h1>Mis Retos</h1>
-          <p>Supera desafíos locales, acumula puntos y desbloquea recompensas exclusivas mientras exploras la ciudad.</p>
+          <h1>${t("challenges.title")}</h1>
+          <p>${t("challenges.subtitle")}</p>
         </div>
         <div class="challenges-tabs" id="challenges-tabs" role="tablist"></div>
       </div>
@@ -50,13 +53,13 @@ export function challenges() {
       <div class="challenges-search-wrapper">
         <i data-lucide="search" class="search-icon"></i>
         <input type="search" id="challenges-search" class="challenges-search"
-               placeholder="Buscar retos..." autocomplete="off">
+               placeholder="${t("challenges.searchPlaceholder")}" autocomplete="off">
       </div>
 
       <!-- Progreso móvil -->
       <div class="challenges-progress-card">
         <div>
-          <span class="progress-card-label">TU PROGRESO</span>
+          <span class="progress-card-label">${t("challenges.yourProgress")}</span>
           <span class="progress-card-value" id="mobile-points">0 pts</span>
         </div>
         <span class="progress-card-trophy" aria-hidden="true">
@@ -68,7 +71,7 @@ export function challenges() {
       <div class="challenges-stats" id="challenges-stats"></div>
 
       <div class="challenges-grid" id="challenges-grid">
-        <p class="challenges-loading">Cargando retos...</p>
+        <p class="challenges-loading">${t("challenges.loading")}</p>
       </div>
     </section>
   `;
@@ -119,7 +122,7 @@ function renderTabs() {
   const container = document.getElementById("challenges-tabs");
   if (!container) return;
 
-  container.innerHTML = TABS.map(
+  container.innerHTML = TABS().map(
     (tab) => `
       <button type="button" role="tab" data-tab="${tab.id}"
               class="challenges-tab ${tab.id === currentTab ? "active" : ""}"
@@ -153,15 +156,15 @@ function renderStats() {
 
   container.innerHTML = `
     <div class="challenges-stat">
-      <span class="challenges-stat-label">PUNTOS TOTALES</span>
+      <span class="challenges-stat-label">${t("challenges.statPoints")}</span>
       <span class="challenges-stat-value">${points.toLocaleString("es-ES")}</span>
     </div>
     <div class="challenges-stat">
-      <span class="challenges-stat-label">RETOS ACTIVOS</span>
+      <span class="challenges-stat-label">${t("challenges.statActive")}</span>
       <span class="challenges-stat-value">${inProgress}</span>
     </div>
     <div class="challenges-stat">
-      <span class="challenges-stat-label">COMPLETADOS</span>
+      <span class="challenges-stat-label">${t("challenges.statCompleted")}</span>
       <span class="challenges-stat-value">${completed}</span>
     </div>
   `;
@@ -204,16 +207,16 @@ function emptyStateFor(tab) {
   if (!getCurrentUser() && tab !== "todos") {
     return `
       <div class="challenges-empty">
-        <p>Inicia sesión para llevar el registro de tus retos.</p>
-        <a href="/login" class="btn btn--primary" data-link>Iniciar sesión</a>
+        <p>${t("challenges.emptyLogin")}</p>
+        <a href="/login" class="btn btn--primary" data-link>${t("challenges.loginCta")}</a>
       </div>
     `;
   }
 
   const messages = {
-    todos: "No hay retos disponibles en este momento. ¡Vuelve pronto!",
-    [PROGRESS.IN_PROGRESS]: "No tienes retos en curso. Empieza uno desde la pestaña «Todos».",
-    [PROGRESS.COMPLETED]: "Todavía no has completado ningún reto. ¡El primero está esperando!",
+    todos: t("challenges.emptyAll"),
+    [PROGRESS.IN_PROGRESS]: t("challenges.emptyInProgress"),
+    [PROGRESS.COMPLETED]: t("challenges.emptyCompleted"),
   };
 
   return `
@@ -228,7 +231,7 @@ function showGridError() {
   if (!container) return;
   container.innerHTML = `
     <div class="challenges-empty">
-      <p>No pudimos cargar los retos. Inténtalo de nuevo.</p>
+      <p>${t("challenges.error")}</p>
     </div>
   `;
 }
@@ -252,7 +255,7 @@ function openDetail(challengeId) {
     <div class="modal-box challenge-detail" role="dialog" aria-modal="true" aria-label="${escapeHtml(challenge.name)}">
       <div class="challenge-detail-media">
         <img src="${escapeHtml(challenge.image)}" alt="" loading="lazy">
-        <span class="challenge-card-points">+${escapeHtml(challenge.points)} pts</span>
+        <span class="challenge-card-points">${t("cards.ptsBadge", { points: escapeHtml(challenge.points) })}</span>
       </div>
       <div class="challenge-detail-body">
         <div class="challenge-detail-tags">
@@ -260,13 +263,13 @@ function openDetail(challengeId) {
           <span class="badge badge-default">${escapeHtml(challenge.difficulty)}</span>
           ${
             state === PROGRESS.IN_PROGRESS
-              ? `<span class="badge challenge-badge-active">En curso</span>`
+              ? `<span class="badge challenge-badge-active">${t("challenges.inProgressBadge")}</span>`
               : ""
           }
         </div>
         <h2 class="challenge-detail-title">${escapeHtml(challenge.name)}</h2>
         <p class="challenge-detail-desc">${escapeHtml(challenge.description)}</p>
-        <p class="challenge-detail-deadline">Disponible hasta el ${formatDate(challenge.deadline)}</p>
+        <p class="challenge-detail-deadline">${t("challenges.availableUntil", { date: formatDate(challenge.deadline) })}</p>
         <p class="challenge-detail-feedback" data-feedback hidden></p>
         <div class="modal-actions">
           ${detailActions(state, Boolean(user))}
@@ -328,7 +331,7 @@ function openDetail(challengeId) {
       if (result.state !== PROGRESS.COMPLETED) {
         // Aún faltan objetivos para completar el reto: se informa en el
         // propio modal y se deja abierto.
-        showDetailFeedback(overlay, "¡Avance registrado! Aún te faltan objetivos para completar el reto.");
+        showDetailFeedback(overlay, t("challenges.progressFeedback"));
         render();
         return;
       }
@@ -360,20 +363,20 @@ function showDetailFeedback(overlay, message) {
 function detailActions(state, isLoggedIn) {
   if (!isLoggedIn) {
     return `
-      <a href="/login" class="btn-primary" data-link>Inicia sesión para participar</a>
-      <button type="button" class="btn-outline" data-action="close">Cerrar</button>
+      <a href="/login" class="btn-primary" data-link>${t("challenges.loginToJoin")}</a>
+      <button type="button" class="btn-outline" data-action="close">${t("challenges.close")}</button>
     `;
   }
 
   if (state === PROGRESS.IN_PROGRESS) {
     return `
-      <button type="button" class="btn-outline" data-action="abandon">Abandonar reto</button>
-      <button type="button" class="btn-primary" data-action="complete">Marcar como completado</button>
+      <button type="button" class="btn-outline" data-action="abandon">${t("challenges.abandon")}</button>
+      <button type="button" class="btn-primary" data-action="complete">${t("challenges.complete")}</button>
     `;
   }
 
   return `
-    <button type="button" class="btn-outline" data-action="close">Cerrar</button>
-    <button type="button" class="btn-primary" data-action="start">Comenzar reto</button>
+    <button type="button" class="btn-outline" data-action="close">${t("challenges.close")}</button>
+    <button type="button" class="btn-primary" data-action="start">${t("challenges.start")}</button>
   `;
 }

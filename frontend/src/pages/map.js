@@ -10,6 +10,7 @@ import {
   withDistanceFrom,
   formatRating,
 } from "../utils/poiFilter.js";
+import { t, tCategory } from "../i18n/index.js";
 import "/src/styles/pages/map.css";
 
 // Centro por defecto cuando no hay geolocalización: Barranquilla, Colombia.
@@ -67,7 +68,7 @@ export function map() {
       <div class="map-mobile-controls">
         <div class="mobile-search-wrapper">
           <i data-lucide="search" class="search-icon"></i>
-          <input type="search" id="mobile-map-search" class="mobile-search-input" placeholder="Buscar lugares mágicos..." autocomplete="off">
+          <input type="search" id="mobile-map-search" class="mobile-search-input" placeholder="${t("map.mobileSearchPlaceholder")}" autocomplete="off">
         </div>
         <div class="mobile-category-scroll" id="mobile-category-scroll"></div>
       </div>
@@ -75,10 +76,10 @@ export function map() {
       <!-- Barra Lateral Izquierda (Desktop) -->
       <aside class="map-sidebar">
         <div class="sidebar-search-section">
-          <h3>Explorar Mapa</h3>
+          <h3>${t("map.sidebarTitle")}</h3>
           <div class="sidebar-search-wrapper">
             <i data-lucide="search" class="search-icon"></i>
-            <input type="search" id="sidebar-map-search" class="sidebar-search-input" placeholder="Buscar lugares, hitos..." autocomplete="off">
+            <input type="search" id="sidebar-map-search" class="sidebar-search-input" placeholder="${t("map.sidebarSearchPlaceholder")}" autocomplete="off">
           </div>
 
           <div class="sidebar-categories" id="sidebar-categories"></div>
@@ -86,9 +87,9 @@ export function map() {
 
         <!-- Sección Cerca de ti -->
         <div class="sidebar-list-section">
-          <h4 id="sidebar-list-heading">LUGARES DESTACADOS</h4>
+          <h4 id="sidebar-list-heading">${t("map.featuredHeading")}</h4>
           <div class="sidebar-pois-list" id="sidebar-pois-list">
-            <div class="sidebar-loading">Cargando lugares cercanos...</div>
+            <div class="sidebar-loading">${t("map.loadingNearby")}</div>
           </div>
         </div>
       </aside>
@@ -101,17 +102,17 @@ export function map() {
         <div class="map-notice" id="map-notice" role="status" hidden>
           <i class="map-notice-icon" data-lucide="map-pin" aria-hidden="true"></i>
           <p class="map-notice-text" id="map-notice-text"></p>
-          <button type="button" class="map-notice-retry" id="map-notice-retry">Reintentar</button>
-          <button type="button" class="map-notice-close" id="map-notice-close" aria-label="Cerrar aviso">&times;</button>
+          <button type="button" class="map-notice-retry" id="map-notice-retry">${t("map.retry")}</button>
+          <button type="button" class="map-notice-close" id="map-notice-close" aria-label="${t("map.closeNotice")}">&times;</button>
         </div>
 
-        <button class="map-locate-btn" id="btn-locate" type="button" aria-label="Centrar en mi ubicación">
+        <button class="map-locate-btn" id="btn-locate" type="button" aria-label="${t("map.locateAria")}">
           <i data-lucide="locate-fixed"></i>
         </button>
 
         <button class="btn btn--primary btn-route-float" id="btn-route-start">
           <i data-lucide="compass"></i>
-          <span>Iniciar Ruta</span>
+          <span>${t("map.startRoute")}</span>
         </button>
       </main>
 
@@ -207,13 +208,13 @@ async function setupMapAndData() {
 function geolocationMessage(error) {
   switch (error?.code) {
     case 1: // PERMISSION_DENIED
-      return "Bloqueaste el acceso a tu ubicación. Actívala en el candado de la barra de direcciones para ver qué tienes cerca.";
+      return t("map.geoDenied");
     case 2: // POSITION_UNAVAILABLE
-      return "No pudimos determinar tu ubicación. Mostramos el centro de Barranquilla.";
+      return t("map.geoUnavailable");
     case 3: // TIMEOUT
-      return "Tu ubicación tardó demasiado en responder. Mostramos el centro de Barranquilla.";
+      return t("map.geoTimeout");
     default:
-      return "No pudimos acceder a tu ubicación. Mostramos el centro de Barranquilla.";
+      return t("map.geoDefault");
   }
 }
 
@@ -224,16 +225,14 @@ function geolocationMessage(error) {
  */
 function requestUserLocation() {
   if (!navigator.geolocation) {
-    showLocationNotice("Tu navegador no permite compartir la ubicación.");
+    showLocationNotice(t("map.geoUnsupported"));
     return;
   }
 
   // Sin contexto seguro el navegador deniega la petición sin preguntar.
   // Pasa al abrir la app por IP de red local en vez de localhost.
   if (!window.isSecureContext) {
-    showLocationNotice(
-      "La ubicación necesita una conexión segura (https o localhost). Mostramos el centro de Barranquilla."
-    );
+    showLocationNotice(t("map.geoInsecure"));
     return;
   }
 
@@ -276,7 +275,7 @@ function renderCategoryPills() {
         <button class="pill-btn ${category === currentCategory ? "active" : ""}"
                 data-category="${category}">
           <i data-lucide="${getCategoryIcon(category)}"></i>
-          <span>${category}</span>
+          <span>${tCategory(category)}</span>
         </button>
       `
       )
@@ -349,20 +348,20 @@ async function toggleRoute() {
   }
 
   if (!hasUserLocation) {
-    showLocationNotice("Necesitamos tu ubicación para trazar la ruta. Actívala y reintenta.");
+    showLocationNotice(t("map.routeNeedLocation"));
     requestUserLocation();
     return;
   }
 
   if (typeof L.Routing?.control !== "function") {
-    showLocationNotice("El trazado de rutas no está disponible ahora mismo.");
+    showLocationNotice(t("map.routeUnavailable"));
     return;
   }
 
   const target =
     filteredPois.find((poi) => String(poi.id) === String(selectedPoiId)) ?? filteredPois[0];
   if (!target) {
-    showLocationNotice("No hay ningún lugar al que trazar la ruta con el filtro actual.");
+    showLocationNotice(t("map.routeNoTarget"));
     return;
   }
 
@@ -392,7 +391,7 @@ async function toggleRoute() {
       // El servidor demo puede negar/limitar la petición: no dejamos el botón
       // colgado en "Trazando..." ni una ruta a medias.
       clearRoute();
-      showLocationNotice("No pudimos trazar la ruta ahora. Inténtalo de nuevo en un momento.");
+      showLocationNotice(t("map.routeFailed"));
     })
     .addTo(mapInstance);
 }
@@ -419,7 +418,7 @@ function setRouteButtonState(state) {
 
   if (label) {
     label.textContent =
-      state === "active" ? "Quitar ruta" : state === "routing" ? "Trazando…" : "Iniciar Ruta";
+      state === "active" ? t("map.removeRoute") : state === "routing" ? t("map.routing") : t("map.startRoute");
   }
 }
 
@@ -476,7 +475,7 @@ function setLocationButtonState(state) {
   btn.disabled = locating;
   btn.setAttribute(
     "aria-label",
-    locating ? "Buscando tu ubicación" : "Centrar en mi ubicación"
+    locating ? t("map.locating") : t("map.locateAria")
   );
 }
 
@@ -528,7 +527,7 @@ function drawUserMarker() {
 
   userMarker = L.marker([userCoords.lat, userCoords.lng], { icon: userIcon })
     .addTo(mapInstance)
-    .bindPopup("<b>Tu ubicación actual</b>");
+    .bindPopup(`<b>${t("map.youAreHere")}</b>`);
 }
 
 /**
@@ -561,7 +560,7 @@ function applyFilters() {
 function updateSidebarHeading() {
   const heading = document.getElementById("sidebar-list-heading");
   if (heading) {
-    heading.textContent = hasUserLocation ? "CERCA DE TI" : "LUGARES DESTACADOS";
+    heading.textContent = hasUserLocation ? t("map.nearYouHeading") : t("map.featuredHeading");
   }
 }
 
@@ -632,7 +631,7 @@ function updateSidebarList() {
   if (filteredPois.length === 0) {
     listContainer.innerHTML = `
       <div class="sidebar-empty">
-        <p>No hay lugares que coincidan con tu filtro.</p>
+        <p>${t("map.emptyFilter")}</p>
       </div>
     `;
     return;
@@ -653,8 +652,8 @@ function renderSidebarItem(poi) {
     poi.distance === undefined
       ? ""
       : poi.distance < 1
-        ? `A ${Math.round(poi.distance * 1000)} m de distancia`
-        : `A ${poi.distance.toFixed(1)} km de distancia`;
+        ? t("map.distanceM", { m: Math.round(poi.distance * 1000) })
+        : t("map.distanceKm", { km: poi.distance.toFixed(1) });
 
   return `
     <div class="sidebar-poi-item" data-poi-id="${poi.id}">
@@ -664,7 +663,7 @@ function renderSidebarItem(poi) {
         <div class="item-rating-row">
           <i data-lucide="star" class="star-mini"></i>
           ${formatRating(poi.rating) ? `<span class="item-rating">${formatRating(poi.rating)}</span>` : ""}
-          <span class="item-category">${poi.category}</span>
+          <span class="item-category">${tCategory(poi.category)}</span>
         </div>
         ${distanceLabel ? `<span class="item-distance">${distanceLabel}</span>` : ""}
       </div>
@@ -694,7 +693,7 @@ function showSidebarError() {
   if (!listContainer) return;
   listContainer.innerHTML = `
     <div class="sidebar-empty">
-      <p>No pudimos cargar los lugares. Inténtalo de nuevo.</p>
+      <p>${t("map.error")}</p>
     </div>
   `;
 }

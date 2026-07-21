@@ -1,3 +1,4 @@
+import { t } from "../../i18n/index.js";
 import "/src/styles/organism/footer.css";
 
 export function footer() {
@@ -9,35 +10,35 @@ export function footer() {
             <img src="/icons/isotipo_tourPoints_blanco.svg" alt="TourPoints Logo" class="logo-footer">
             <a href="/" class="logo--blanco">TourPoints</a>
             </div>
-                <p>Haciendo que cada paso por la ciudad cuente. La plataforma lider en gamificacion de turismo local.</p>
+                <p>${t("footer.tagline")}</p>
             </div>
             <div class="footer-links">
-                <h4>Explora</h4>
+                <h4>${t("footer.explore")}</h4>
                 <ul>
-                    <li><a href="" data-link>Destinos</a></li>
-                    <li><a href="" data-link>Retos</a></li>
-                    <li><a href="" data-link>Empresas</a></li>
+                    <li><a href="" data-link>${t("footer.destinations")}</a></li>
+                    <li><a href="" data-link>${t("footer.challenges")}</a></li>
+                    <li><a href="" data-link>${t("footer.companies")}</a></li>
                 </ul>
             </div>
             <div class="footer-links">
-                <h4>Compania</h4>
+                <h4>${t("footer.company")}</h4>
                 <ul>
-                    <li><a href="" data-link>Sobre nosotros</a></li>
-                    <li><a href="" data-link>Blog</a></li>
-                    <li><a href="" data-link>Contacto</a></li>
+                    <li><a href="" data-link>${t("footer.about")}</a></li>
+                    <li><a href="" data-link>${t("footer.blog")}</a></li>
+                    <li><a href="" data-link>${t("footer.contact")}</a></li>
                 </ul>
             </div>
             <div class="footer-links">
-                <h4>Legal</h4>
+                <h4>${t("footer.legal")}</h4>
                 <ul>
-                    <li><a href="" data-link>Privacidad</a></li>
-                    <li><a href="" data-link>Terminos</a></li>
-                    <li><a href="" data-link>Cookies</a></li>
+                    <li><a href="" data-link>${t("footer.privacy")}</a></li>
+                    <li><a href="" data-link>${t("footer.terms")}</a></li>
+                    <li><a href="" data-link>${t("footer.cookies")}</a></li>
                 </ul>
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2026 TourPoints Inc. All rights reserved.</p>
+            <p>${t("footer.rights")}</p>
             <div class="footer-social">
                 <a href="#" aria-label="Instagram">
                   <svg class="lucide lucide-instagram" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

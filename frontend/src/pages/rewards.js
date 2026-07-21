@@ -1,11 +1,12 @@
 import { rewardCard } from "../components/molecules/rewardCard.js";
 import { getRewards, redeemReward } from "../services/reward.service.js";
-import { isApiEnabled } from "../services/api.client.js";
+import { isApiEnabled, ApiError } from "../services/api.client.js";
 import { openConfirmModal, escapeHtml } from "../components/organism/modal.js";
 import { formatDate } from "../utils/date.js";
 import { getCurrentUser } from "../services/auth.service.js";
 import { refreshSessionPoints } from "../services/points.service.js";
 import { loadIcons } from "../utils/icons.js";
+import { t } from "../i18n/index.js";
 import "/src/styles/pages/rewards.css";
 
 // Antes esta página filtraba por categoría (Restauración/Alojamiento/...),
@@ -18,11 +19,12 @@ import "/src/styles/pages/rewards.css";
 // cualquier recompensa: si tiene stock, y si el usuario tiene puntos para
 // pagarla.
 
-const FILTERS = {
-  todas: { label: "Todas", icon: "layout-grid" },
-  disponibles: { label: "Disponibles", icon: "package-check" },
-  alAlcance: { label: "A mi alcance", icon: "wallet" },
-};
+// Función y no constante: las etiquetas deben salir en el idioma activo.
+const FILTERS = () => ({
+  todas: { label: t("rewards.filterAll"), icon: "layout-grid" },
+  disponibles: { label: t("rewards.filterAvailable"), icon: "package-check" },
+  alAlcance: { label: t("rewards.filterAffordable"), icon: "wallet" },
+});
 const DEFAULT_FILTER = "todas";
 
 let allRewards = [];
@@ -33,15 +35,15 @@ export function rewards() {
     <section class="rewards-page">
       <div class="rewards-hero">
         <div class="rewards-hero-text">
-          <h1 class="rewards-hero-title">Canjea tus puntos</h1>
-          <p class="rewards-hero-subtitle">Usa tus puntos acumulados para obtener descuentos, pases VIP y merchandising exclusivo de los mejores destinos.</p>
+          <h1 class="rewards-hero-title">${t("rewards.title")}</h1>
+          <p class="rewards-hero-subtitle">${t("rewards.subtitle")}</p>
         </div>
         <div class="rewards-points-card">
           <div class="rewards-points-icon">
             <span class="rewards-points-letter">P</span>
           </div>
           <div class="rewards-points-info">
-            <span class="rewards-points-label">PUNTOS TOTALES</span>
+            <span class="rewards-points-label">${t("rewards.totalPoints")}</span>
             <span class="rewards-points-value" id="rewards-points-value">-- pts</span>
           </div>
         </div>
@@ -50,7 +52,7 @@ export function rewards() {
       <div class="rewards-filters" id="rewards-filters"></div>
 
       <div class="rewards-grid" id="rewards-grid">
-        <p class="u-text-center">Cargando recompensas...</p>
+        <p class="u-text-center">${t("rewards.loading")}</p>
       </div>
     </section>
   `;
@@ -67,8 +69,8 @@ export async function initRewards() {
     if (grid) {
       grid.innerHTML = `
         <div class="empty-state">
-          <p>Inicia sesión para ver y canjear las recompensas.</p>
-          <a href="/login" class="btn btn--primary" data-link>Iniciar sesión</a>
+          <p>${t("rewards.loginPrompt")}</p>
+          <a href="/login" class="btn btn--primary" data-link>${t("rewards.loginCta")}</a>
         </div>
       `;
     }
@@ -80,8 +82,14 @@ export async function initRewards() {
   renderUserPoints();
 
   try {
-    allRewards = await getRewards();
+    allRewards = await getRewards({ throwOnAuthError: true });
   } catch (error) {
+    // Con sesión local pero token vencido, el backend responde 401/403: se
+    // invita a entrar de nuevo en vez de enseñar un catálogo vacío mentiroso.
+    if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
+      renderSessionExpired();
+      return;
+    }
     console.error("Error al cargar las recompensas:", error);
     showErrorState();
     return;
@@ -97,14 +105,14 @@ function renderUserPoints() {
   if (!pointsEl) return;
 
   const user = getCurrentUser();
-  pointsEl.textContent = user ? `${Number(user.points || 0).toLocaleString("es-ES")} pts` : "Inicia sesión";
+  pointsEl.textContent = user ? `${Number(user.points || 0).toLocaleString("es-ES")} pts` : t("rewards.signIn");
 }
 
 function renderFilters() {
   const container = document.getElementById("rewards-filters");
   if (!container) return;
 
-  container.innerHTML = Object.entries(FILTERS)
+  container.innerHTML = Object.entries(FILTERS())
     .map(
       ([key, { label, icon }]) => `
       <button class="filter-btn ${key === currentFilter ? "filter-btn--active" : ""}" data-filter="${key}">
@@ -149,7 +157,7 @@ function renderGrid() {
   if (visible.length === 0) {
     container.innerHTML = `
       <div class="empty-state">
-        <p>No hay recompensas que coincidan con este filtro por ahora.</p>
+        <p>${t("rewards.empty")}</p>
       </div>
     `;
     return;
@@ -186,16 +194,19 @@ async function handleRedeem(rewardId) {
 
   const saldo = Number(user.points) || 0;
   const confirmed = await openConfirmModal({
-    title: `Canjear: ${reward.name}`,
-    message: `Este canje descuenta ${reward.pointsCost.toLocaleString("es-ES")} puntos de tu saldo (${saldo.toLocaleString("es-ES")} pts). ¿Continuar?`,
-    confirmLabel: "Canjear",
+    title: t("rewards.redeemTitle", { name: reward.name }),
+    message: t("rewards.redeemMessage", {
+      cost: reward.pointsCost.toLocaleString("es-ES"),
+      balance: saldo.toLocaleString("es-ES"),
+    }),
+    confirmLabel: t("rewards.redeemConfirm"),
   });
   if (!confirmed) return;
 
   const result = await redeemReward(rewardId);
 
   if (!result.ok) {
-    await openConfirmModal({ title: "No se pudo canjear", message: result.error, confirmLabel: "Entendido" });
+    await openConfirmModal({ title: t("rewards.redeemFailTitle"), message: result.error, confirmLabel: t("rewards.understood") });
     return;
   }
 
@@ -217,18 +228,18 @@ function showRedemptionCode(canje) {
   const overlay = document.createElement("div");
   overlay.className = "modal-overlay";
   overlay.innerHTML = `
-    <div class="modal-box modal-box--sm" role="dialog" aria-modal="true" aria-label="Canje realizado">
+    <div class="modal-box modal-box--sm" role="dialog" aria-modal="true" aria-label="${t("rewards.redeemedAria")}">
       <div class="modal-header">
-        <h2 class="modal-title">¡Canje realizado!</h2>
-        <button type="button" class="modal-close" aria-label="Cerrar">&times;</button>
+        <h2 class="modal-title">${t("rewards.redeemedTitle")}</h2>
+        <button type="button" class="modal-close" aria-label="${t("rewards.closeAria")}">&times;</button>
       </div>
       <p class="modal-message">
-        Presenta este código en <strong>${escapeHtml(canje.recompensa)}</strong> para redimir tu recompensa.
-        ${canje.expira ? `Vence el ${escapeHtml(formatDate(String(canje.expira).slice(0, 10)))}.` : ""}
+        ${t("rewards.redeemedMessage", { name: escapeHtml(canje.recompensa) })}
+        ${canje.expira ? t("rewards.expires", { date: escapeHtml(formatDate(String(canje.expira).slice(0, 10))) }) : ""}
       </p>
       <p class="rewards-redeem-code"><code>${escapeHtml(canje.codigoQr)}</code></p>
       <div class="modal-actions">
-        <button type="button" class="btn-primary modal-confirm">Entendido</button>
+        <button type="button" class="btn-primary modal-confirm">${t("rewards.understood")}</button>
       </div>
     </div>
   `;
@@ -240,12 +251,23 @@ function showRedemptionCode(canje) {
   overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
 }
 
+function renderSessionExpired() {
+  const grid = document.getElementById("rewards-grid");
+  if (!grid) return;
+  grid.innerHTML = `
+    <div class="empty-state">
+      <p>${t("rewards.sessionExpired")}</p>
+      <a href="/login" class="btn btn--primary" data-link>${t("rewards.loginCta")}</a>
+    </div>
+  `;
+}
+
 function showErrorState() {
   const container = document.getElementById("rewards-grid");
   if (!container) return;
   container.innerHTML = `
     <div class="error-state">
-      <p>Hubo un error al cargar las recompensas. Por favor, intenta de nuevo.</p>
+      <p>${t("rewards.error")}</p>
     </div>
   `;
 }

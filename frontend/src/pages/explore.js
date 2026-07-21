@@ -6,6 +6,7 @@ import { loadIcons } from "../utils/icons.js";
 import { debounce } from "../utils/text.js";
 import { ALL_CATEGORIES, getCategories, filterPois, sortPois } from "../utils/poiFilter.js";
 import { refreshMyFavorites } from "../services/favorite.service.js";
+import { t, tCategory } from "../i18n/index.js";
 import "/src/styles/pages/explore.css";
 
 // Estado interno para filtros, ordenación y paginación.
@@ -50,23 +51,23 @@ export function explore() {
       <!-- Fila de cabecera de resultados y filtros de ordenación -->
       <div class="explore-title-row">
         <div class="explore-title-left">
-          <h2>Explora destinos</h2>
-          <span class="results-count" id="results-count">Cargando lugares...</span>
+          <h2>${t("explore.title")}</h2>
+          <span class="results-count" id="results-count">${t("explore.loadingCount")}</span>
         </div>
         <div class="explore-sort-right">
-          <label for="sort-select">Ordenar por:</label>
+          <label for="sort-select">${t("explore.sortLabel")}</label>
           <select id="sort-select" class="sort-dropdown">
-            <option value="Recomendados">Recomendados</option>
-            <option value="PuntosDesc">Más puntos (+ a -)</option>
-            <option value="PuntosAsc">Menos puntos (- a +)</option>
-            <option value="Nombre">Nombre (A-Z)</option>
+            <option value="Recomendados">${t("explore.sortRecommended")}</option>
+            <option value="PuntosDesc">${t("explore.sortPointsDesc")}</option>
+            <option value="PuntosAsc">${t("explore.sortPointsAsc")}</option>
+            <option value="Nombre">${t("explore.sortName")}</option>
           </select>
         </div>
       </div>
 
       <!-- Grid de tarjetas de Puntos de Interés -->
       <div class="explore-grid" id="pois-grid-container">
-        <div class="loading-state">Cargando puntos de interés...</div>
+        <div class="loading-state">${t("explore.loadingGrid")}</div>
       </div>
 
       <div class="pagination-container" id="pagination-container"></div>
@@ -138,7 +139,7 @@ function renderCategoryPills() {
       <button class="pill-btn ${category === currentCategory ? "active" : ""}"
               data-category="${category}">
         <i data-lucide="${CATEGORY_ICONS[category] ?? "compass"}"></i>
-        <span>${category}</span>
+        <span>${tCategory(category)}</span>
       </button>
     `
     )
@@ -221,8 +222,7 @@ function updateResultsCount() {
   const countEl = document.getElementById("results-count");
   if (!countEl) return;
 
-  const noun = filteredPois.length === 1 ? "lugar encontrado" : "lugares encontrados";
-  countEl.textContent = `${filteredPois.length} ${noun} cerca de ti`;
+  countEl.textContent = t("explore.results", { count: filteredPois.length });
 }
 
 /**
@@ -235,8 +235,8 @@ function renderGrid() {
   if (filteredPois.length === 0) {
     container.innerHTML = `
       <div class="empty-state">
-        <p>No encontramos lugares que coincidan con tu búsqueda.</p>
-        <span>Prueba seleccionando otra categoría o cambiando la palabra clave.</span>
+        <p>${t("explore.emptyTitle")}</p>
+        <span>${t("explore.emptyHint")}</span>
       </div>
     `;
     return;
@@ -284,12 +284,12 @@ function renderPagination(totalPages) {
 
   container.innerHTML = `
     <button class="pagination-btn arrow-btn" ${currentPage === 1 ? "disabled" : ""}
-            data-page="${currentPage - 1}" aria-label="Página anterior">
+            data-page="${currentPage - 1}" aria-label="${t("explore.prevPage")}">
       <i data-lucide="chevron-left"></i>
     </button>
     ${pageButtons}
     <button class="pagination-btn arrow-btn" ${currentPage === totalPages ? "disabled" : ""}
-            data-page="${currentPage + 1}" aria-label="Página siguiente">
+            data-page="${currentPage + 1}" aria-label="${t("explore.nextPage")}">
       <i data-lucide="chevron-right"></i>
     </button>
   `;
@@ -313,7 +313,7 @@ function showErrorState() {
   if (!container) return;
   container.innerHTML = `
     <div class="error-state">
-      <p>Hubo un error al cargar los lugares. Por favor, intenta de nuevo.</p>
+      <p>${t("explore.error")}</p>
     </div>
   `;
 }

@@ -13,6 +13,7 @@
 import { getCurrentUser, logout } from "../../services/auth.service.js";
 import { openConfirmModal, escapeHtml } from "./modal.js";
 import { navigate } from "../../router/router.js";
+import { t } from "../../i18n/index.js";
 import "../../styles/organism/userMenu.css";
 
 /**
@@ -45,7 +46,7 @@ export function userMenu() {
         aria-haspopup="menu"
         aria-expanded="false"
         aria-controls="user-menu-dropdown"
-        aria-label="${user ? `Cuenta de ${escapeHtml(user.name)}` : "Cuenta"}"
+        aria-label="${user ? t("menu.accountOf", { name: escapeHtml(user.name) }) : t("menu.account")}"
       >
         ${
           user
@@ -65,17 +66,17 @@ export function userMenu() {
 function anonymousItems() {
   return `
     <div class="user-menu-header">
-      <span class="user-menu-title">¿Ya nos conoces?</span>
-      <span class="user-menu-sub">Entra para guardar lugares y sumar puntos.</span>
+      <span class="user-menu-title">${t("menu.anonTitle")}</span>
+      <span class="user-menu-sub">${t("menu.anonSub")}</span>
     </div>
     <div class="user-menu-section">
       <a href="/login" class="user-menu-item user-menu-item--primary" data-link role="menuitem">
         <i class="user-menu-icon" data-lucide="log-in" aria-hidden="true"></i>
-        <span>Iniciar sesión</span>
+        <span>${t("menu.login")}</span>
       </a>
       <a href="/register" class="user-menu-item" data-link role="menuitem">
         <i class="user-menu-icon" data-lucide="user-plus" aria-hidden="true"></i>
-        <span>Crear cuenta</span>
+        <span>${t("menu.register")}</span>
       </a>
     </div>
   `;
@@ -97,7 +98,7 @@ function authenticatedItems(user) {
         </div>
       </div>
       <div class="user-menu-meta">
-        ${isAdminUser ? `<span class="user-menu-badge">Administrador</span>` : ""}
+        ${isAdminUser ? `<span class="user-menu-badge">${t("menu.adminBadge")}</span>` : ""}
         <span class="user-menu-points">${(Number(user.points) || 0).toLocaleString("es-ES")} pts</span>
       </div>
     </div>
@@ -106,14 +107,14 @@ function authenticatedItems(user) {
       isAdminUser
         ? `
       <div class="user-menu-section">
-        <span class="user-menu-section-title">Administración</span>
+        <span class="user-menu-section-title">${t("menu.adminSection")}</span>
         <a href="/admin" class="user-menu-item user-menu-item--primary" data-link role="menuitem">
           <i class="user-menu-icon" data-lucide="gauge" aria-hidden="true"></i>
-          <span>Panel de administración</span>
+          <span>${t("menu.adminPanel")}</span>
         </a>
         <a href="/admin/users" class="user-menu-item" data-link role="menuitem">
           <i class="user-menu-icon" data-lucide="users-round" aria-hidden="true"></i>
-          <span>Gestión de usuarios</span>
+          <span>${t("menu.userManagement")}</span>
         </a>
       </div>
     `
@@ -123,19 +124,19 @@ function authenticatedItems(user) {
     <div class="user-menu-section">
       <a href="/dashboard" class="user-menu-item" data-link role="menuitem">
         <i class="user-menu-icon" data-lucide="layout-dashboard" aria-hidden="true"></i>
-        <span>Mi panel</span>
+        <span>${t("menu.myDashboard")}</span>
       </a>
       <a href="/favorites" class="user-menu-item" data-link role="menuitem">
         <i class="user-menu-icon" data-lucide="heart" aria-hidden="true"></i>
-        <span>Mis favoritos</span>
+        <span>${t("menu.myFavorites")}</span>
       </a>
       <a href="/rewards" class="user-menu-item" data-link role="menuitem">
         <i class="user-menu-icon" data-lucide="ticket" aria-hidden="true"></i>
-        <span>Mis recompensas</span>
+        <span>${t("menu.myRewards")}</span>
       </a>
       <button class="user-menu-item user-menu-item--danger" id="user-menu-logout" type="button" role="menuitem">
         <i class="user-menu-icon" data-lucide="log-out" aria-hidden="true"></i>
-        <span>Cerrar sesión</span>
+        <span>${t("menu.logout")}</span>
       </button>
     </div>
   `;
@@ -191,9 +192,9 @@ export function initUserMenu() {
     close();
 
     const confirmed = await openConfirmModal({
-      title: "Cerrar sesión",
-      message: "¿Seguro que quieres salir de tu cuenta?",
-      confirmLabel: "Cerrar sesión",
+      title: t("menu.logout"),
+      message: t("menu.logoutMessage"),
+      confirmLabel: t("menu.logout"),
     });
     if (!confirmed) return;
 

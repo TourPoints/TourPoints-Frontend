@@ -4,13 +4,16 @@
 // en el header. La pestaña activa se marca al renderizar: el router repinta
 // el layout en cada navegación, así que no hace falta JS adicional.
 
+import { t } from "../../i18n/index.js";
 import "../../styles/organism/bottomNav.css";
 
-const NAV_ITEMS = [
-  { href: "/explore", icon: "compass", label: "Explorar" },
-  { href: "/challenges", icon: "trophy", label: "Retos" },
-  { href: "/rewards", icon: "gift", label: "Premios" },
-  { href: "/map", icon: "map", label: "Mapa" },
+// Las etiquetas se resuelven al renderizar (no en una constante de módulo):
+// así el cambio de idioma las actualiza con el repintado del router.
+const NAV_ITEMS = () => [
+  { href: "/explore", icon: "compass", label: t("nav.bottomExplore") },
+  { href: "/challenges", icon: "trophy", label: t("nav.bottomChallenges") },
+  { href: "/rewards", icon: "gift", label: t("nav.bottomRewards") },
+  { href: "/map", icon: "map", label: t("nav.bottomMap") },
 ];
 
 export function bottomNav() {
@@ -18,7 +21,7 @@ export function bottomNav() {
 
   return `
     <nav class="bottom-nav" aria-label="Navegación principal">
-      ${NAV_ITEMS.map(
+      ${NAV_ITEMS().map(
         (item) => `
         <a href="${item.href}" data-link
            class="bottom-nav-item ${path === item.href ? "active" : ""}">

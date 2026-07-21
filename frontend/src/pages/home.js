@@ -9,6 +9,7 @@ import { getChallenges } from "../services/challenge.service.js";
 import { navigate } from "../router/router.js";
 import { refreshMyFavorites } from "../services/favorite.service.js";
 import { loadIcons } from "../utils/icons.js";
+import { t } from "../i18n/index.js";
 
 // Nº de destinos y retos destacados en la portada. El primer POI se pinta grande.
 const FEATURED_COUNT = 5;
@@ -18,8 +19,8 @@ export function home() {
   return `
     
     <section class="hero">
-    <h1>Descubre la ciudad, gana recompensas y comparte tu experiencia</h1>
-    <p>Explora los rincones más interesantes de tu ciudad, completa desafíos únicos y canjea tus puntos por recompensas.</p>
+    <h1>${t("home.heroTitle")}</h1>
+    <p>${t("home.heroSubtitle")}</p>
       
     ${searchBar()}
 
@@ -29,28 +30,28 @@ export function home() {
     <section class="highlights">
       <div class="hi-text">
         <div>
-        <h2>Destinos destacados</h2>
-        <p>Lugares populares que te esperan</p>
+        <h2>${t("home.featuredTitle")}</h2>
+        <p>${t("home.featuredSubtitle")}</p>
         </div>
-        <a class="link" href="/explore" data-link>Ver todos</a>
+        <a class="link" href="/explore" data-link>${t("home.viewAll")}</a>
       </div>
       <div class="highlights-points" id="home-pois">
-        <p class="u-text-center">Cargando destinos destacados...</p>
+        <p class="u-text-center">${t("home.loadingPois")}</p>
       </div>
     </section>
 
     <section class="challenge">
         <div class=challenge-text>
-        <h2>Retos destacados</h2>
-        <p>Completa desafíos únicos, descubre nuevos lugares y acumula puntos para desbloquear recompensas exclusivas.</p>
+        <h2>${t("home.challengesTitle")}</h2>
+        <p>${t("home.challengesSubtitle")}</p>
         </div>
         <div id="home-challenges">
-          <p class="u-text-center">Cargando retos destacados...</p>
+          <p class="u-text-center">${t("home.loadingChallenges")}</p>
         </div>
     </section>
 
     <section class="steps">
-      <h2>Cómo funciona TourPoins</h2>
+      <h2>${t("home.howTitle")}</h2>
       <div class="steps-section">
         
         <div class="steps-content">
@@ -59,8 +60,8 @@ export function home() {
           <div class="step-item">
             <div class="step-number">1</div>
             <div class="step-text">
-              <h3 class="step-title">Explora y descubre</h3>
-              <p class="step-description">Encuentra los lugares más interesantes de la ciudad filtrando por tus gustos.</p>
+              <h3 class="step-title">${t("home.step1Title")}</h3>
+              <p class="step-description">${t("home.step1Desc")}</p>
             </div>
           </div>
 
@@ -68,8 +69,8 @@ export function home() {
           <div class="step-item">
             <div class="step-number">2</div>
             <div class="step-text">
-              <h3 class="step-title">Realiza Check-in</h3>
-              <p class="step-description">Visita el lugar, interactúa con la comunidad y acumula puntos en tu perfil.</p>
+              <h3 class="step-title">${t("home.step2Title")}</h3>
+              <p class="step-description">${t("home.step2Desc")}</p>
             </div>
           </div>
 
@@ -77,8 +78,8 @@ export function home() {
           <div class="step-item">
             <div class="step-number">3</div>
             <div class="step-text">
-              <h3 class="step-title">Gana recompensas</h3>
-              <p class="step-description">Canjea tus puntos por descuentos, accesos VIP y productos exclusivos.</p>
+              <h3 class="step-title">${t("home.step3Title")}</h3>
+              <p class="step-description">${t("home.step3Desc")}</p>
             </div>
           </div>
 
@@ -105,12 +106,12 @@ export function home() {
         <div class="decor-circle decor-circle--bottom-left"></div>
         
         <div class="cta-text-group">
-          <h2 class="cta-title">¿Listo para redescubrir tu entorno?</h2>
-          <p class="cta-subtitle">Únete a miles de exploradores y empieza a ganar hoy mismo.</p>
+          <h2 class="cta-title">${t("home.ctaTitle")}</h2>
+          <p class="cta-subtitle">${t("home.ctaSubtitle")}</p>
         </div>
 
         <div class="cta-action">
-          ${buttonLinks("/register", "Comenzar ahora", "white")} 
+          ${buttonLinks("/register", t("home.ctaButton"), "white")}
         </div>
 
       </div>
@@ -169,7 +170,7 @@ async function loadFeaturedPois(container) {
     initFavoriteButtons(container);
   } catch (error) {
     console.error("Error al cargar los destinos destacados:", error);
-    container.innerHTML = `<p class="u-text-center">Hubo un error al cargar los destinos destacados.</p>`;
+    container.innerHTML = `<p class="u-text-center">${t("home.errorPois")}</p>`;
   }
 }
 
@@ -184,6 +185,6 @@ async function loadFeaturedChallenges(container) {
     container.innerHTML = challengeGrid(featured);
   } catch (error) {
     console.error("Error al cargar los retos destacados:", error);
-    container.innerHTML = `<p class="u-text-center">Hubo un error al cargar los retos destacados.</p>`;
+    container.innerHTML = `<p class="u-text-center">${t("home.errorChallenges")}</p>`;
   }
 }

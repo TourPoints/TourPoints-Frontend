@@ -11,6 +11,7 @@ import { getMyFavoriteEntries } from "../services/favorite.service.js";
 import { getCurrentUser } from "../services/auth.service.js";
 import { poiCard, initFavoriteButtons } from "../components/molecules/poisCard.js";
 import { loadIcons } from "../utils/icons.js";
+import { t } from "../i18n/index.js";
 import "/src/styles/pages/favorites.css";
 
 let favoritePois = [];
@@ -19,12 +20,12 @@ export function favorites() {
   return `
     <section class="favorites-page">
       <div class="favorites-header">
-        <h1>Mis Favoritos</h1>
-        <p id="favorites-subtitle">Los lugares que has guardado para después.</p>
+        <h1>${t("favorites.title")}</h1>
+        <p id="favorites-subtitle">${t("favorites.subtitle")}</p>
       </div>
 
       <div class="favorites-grid" id="favorites-grid">
-        <p class="favorites-loading">Cargando tus favoritos...</p>
+        <p class="favorites-loading">${t("favorites.loading")}</p>
       </div>
     </section>
   `;
@@ -46,7 +47,7 @@ export async function initFavorites() {
     console.error("Error al cargar los favoritos:", error);
     container.innerHTML = `
       <div class="favorites-empty">
-        <p>No pudimos cargar tus favoritos. Inténtalo de nuevo.</p>
+        <p>${t("favorites.error")}</p>
       </div>
     `;
     return;
@@ -72,17 +73,17 @@ function render() {
   if (subtitle) {
     subtitle.textContent =
       favoritePois.length === 0
-        ? "Los lugares que has guardado para después."
-        : `${favoritePois.length} ${favoritePois.length === 1 ? "lugar guardado" : "lugares guardados"}.`;
+        ? t("favorites.subtitle")
+        : t("favorites.savedCount", { count: favoritePois.length });
   }
 
   if (favoritePois.length === 0) {
     container.innerHTML = `
       <div class="favorites-empty">
         <i class="favorites-empty-icon" data-lucide="heart" aria-hidden="true"></i>
-        <p>Todavía no has guardado ningún lugar.</p>
-        <span class="favorites-empty-hint">Pulsa el corazón de cualquier destino para tenerlo a mano aquí.</span>
-        <a href="/explore" class="btn btn--primary" data-link>Explorar destinos</a>
+        <p>${t("favorites.emptyTitle")}</p>
+        <span class="favorites-empty-hint">${t("favorites.emptyHint")}</span>
+        <a href="/explore" class="btn btn--primary" data-link>${t("favorites.exploreCta")}</a>
       </div>
     `;
     loadIcons();
@@ -107,14 +108,14 @@ function render() {
 function renderSignedOut(container) {
   const subtitle = document.getElementById("favorites-subtitle");
   if (subtitle) {
-    subtitle.textContent = "Guarda los lugares que quieras visitar y tenlos siempre a mano.";
+    subtitle.textContent = t("favorites.signedOutSubtitle");
   }
 
   container.innerHTML = `
     <div class="favorites-empty">
       <i class="favorites-empty-icon" data-lucide="lock" aria-hidden="true"></i>
-      <p>Inicia sesión para ver tus lugares guardados.</p>
-      <a href="/login" class="btn btn--primary" data-link>Iniciar sesión</a>
+      <p>${t("favorites.signedOutTitle")}</p>
+      <a href="/login" class="btn btn--primary" data-link>${t("favorites.loginCta")}</a>
     </div>
   `;
   loadIcons();

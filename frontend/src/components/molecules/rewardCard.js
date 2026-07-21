@@ -1,3 +1,4 @@
+import { t } from "../../i18n/index.js";
 import "/src/styles/molecules/rewardCard.css";
 
 // El modelo real de recompensa (services/reward.service.js) no tiene un
@@ -17,13 +18,13 @@ export function rewardCard({ id, name, description = "", image, emoji = "🎁", 
             : `<div class="reward-card-img reward-card-img--emoji">${emoji}</div>`
         }
         <span class="reward-card-points">${Number(points).toLocaleString()} PTS</span>
-        ${soldOut ? '<span class="reward-card-claimed-badge">AGOTADO</span>' : ""}
+        ${soldOut ? `<span class="reward-card-claimed-badge">${t("cards.soldOut")}</span>` : ""}
       </div>
       <div class="reward-card-content">
         <h3 class="reward-card-title">${name}</h3>
         <p class="reward-card-description">${description}</p>
         <button class="reward-card-btn ${soldOut ? "reward-card-btn--claimed" : "reward-card-btn--available"}" ${soldOut ? "disabled" : ""} data-reward-id="${id}">
-          ${soldOut ? "Sin stock" : "Canjear"}
+          ${soldOut ? t("cards.noStock") : t("cards.redeem")}
         </button>
       </div>
     </article>

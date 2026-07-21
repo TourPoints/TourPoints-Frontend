@@ -4,6 +4,7 @@ import { toggleFavorite } from "../../services/favorite.service.js";
 import { navigate } from "../../router/router.js";
 import { loadIcons } from "../../utils/icons.js";
 import { formatRating } from "../../utils/poiFilter.js";
+import { t, tCategory } from "../../i18n/index.js";
 import "/src/styles/molecules/poiCard.css";
 
 // Tarjeta de Punto de Interés.
@@ -32,13 +33,13 @@ export function poiCard({
 }) {
   const cardClass = isFeatured ? "poi-card poi-card-featured" : "poi-card";
   const favClass = isFavorite ? " btn-heart--active" : "";
-  const favLabel = isFavorite ? "Quitar de favoritos" : "Guardar en favoritos";
+  const favLabel = isFavorite ? t("cards.removeFavorite") : t("cards.addFavorite");
 
   return `
     <article class="${cardClass}" data-id="${escapeHtml(id)}">
       <div class="poi-card-img-container">
         <img src="${escapeHtml(image)}" alt="${escapeHtml(name)}" class="poi-card-img" loading="lazy">
-        <span class="poi-card-points"> +${escapeHtml(points)} puntos</span>
+        <span class="poi-card-points"> ${t("cards.pointsBadge", { points: escapeHtml(points) })}</span>
         <button
           type="button"
           class="btn-heart${favClass}"
@@ -52,7 +53,7 @@ export function poiCard({
           isFeatured
             ? `
           <div class="poi-card-featured-overlay">
-            <span class="category">${escapeHtml(category)}</span>
+            <span class="category">${escapeHtml(tCategory(category))}</span>
             <h3 class="poi-card-title">${escapeHtml(name)}</h3>
           </div>
         `
@@ -65,7 +66,7 @@ export function poiCard({
           ? `
         <div class="poi-card-content">
           <div class="pois-card-header-info">
-            <span class="category">${escapeHtml(category)}</span>
+            <span class="category">${escapeHtml(tCategory(category))}</span>
             <div class="poi-card-rating">
               <i data-lucide="star"></i>
               ${formatRating(rating) ? `<span>${formatRating(rating)}</span>` : ""}
@@ -73,7 +74,7 @@ export function poiCard({
           </div>
           <h3 class="poi-card-title">${escapeHtml(name)}</h3>
           <p class="pois-card-description">${escapeHtml(description)}</p>
-          <a href="/poi/${escapeHtml(id)}" data-link class="btn btn--primary btn-card-more">Ver más</a>
+          <a href="/poi/${escapeHtml(id)}" data-link class="btn btn--primary btn-card-more">${t("cards.viewMore")}</a>
         </div>
       `
           : ""
@@ -90,7 +91,7 @@ export function poiCard({
 function paintFavorite(btn, isFavorite) {
   btn.classList.toggle("btn-heart--active", isFavorite);
   btn.setAttribute("aria-pressed", String(isFavorite));
-  btn.setAttribute("aria-label", isFavorite ? "Quitar de favoritos" : "Guardar en favoritos");
+  btn.setAttribute("aria-label", isFavorite ? t("cards.removeFavorite") : t("cards.addFavorite"));
 }
 
 /**
