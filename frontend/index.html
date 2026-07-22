@@ -5,7 +5,10 @@
     <!-- Rutas absolutas, no relativas: en una ruta anidada como /poi/<id> un
          ./ resuelve contra /poi/ y el recurso da 404. Y el favicon vive en la
          raíz del sitio tras el build (Vite copia public/ ahí), no en /public. -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" >
+    <!-- El isotipo en SVG escala nítido a cualquier tamaño de pestaña; el .ico
+         se conserva como respaldo para navegadores sin favicon SVG. -->
+    <link rel="icon" type="image/svg+xml" href="/icons/isotipo_tourPoints.svg" >
+    <link rel="alternate icon" type="image/x-icon" href="/favicon.ico" >
     <!-- Las dos fuentes de la identidad, juntas y a la vista: Poppins para la
          interfaz (--font-base) e Inter para el cuerpo de texto (--font-texto).
          Inter entraba por un @import escondido dentro de styles/pages/admin.css,
