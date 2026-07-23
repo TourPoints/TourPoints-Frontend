@@ -12,11 +12,9 @@ geoespacial).
   repasas, no memorices la guía sola.
 - Las secciones marcadas **"Pregunta probable"** son el entrenamiento real:
   tápate la respuesta y practica decirla en voz alta.
-- Hay **una sola pieza sin verificar** en todo el documento, marcada
-  explícitamente en el módulo 3: la consulta SQL exacta detrás de la búsqueda
-  geoespacial. No encontré su código fuente en ninguna rama del repo backend
-  (ver esa sección) — antes de citarla como "así está implementado" en una
-  entrevista, confírmala con el compañero que la escribió.
+- Esta versión ya no tiene piezas sin verificar: la consulta geoespacial que
+  antes aparecía como "no encontrada en el repo" (módulo 3) se localizó y se
+  cita directamente del código real.
 
 ---
 
@@ -30,10 +28,11 @@ geoespacial).
 6. [Gamificación: retos, rachas e hitos](#6-gamificación-retos-rachas-e-hitos)
 7. [Estados y moderación](#7-estados-y-moderación)
 8. [Capa de servicios del frontend](#8-capa-de-servicios-del-frontend)
-9. [Bugs reales encontrados y corregidos](#9-bugs-reales-encontrados-y-corregidos)
-10. [Build, despliegue y configuración](#10-build-despliegue-y-configuración)
-11. [Responsive y depuración de layout](#11-responsive-y-depuración-de-layout)
-12. [Flashcards de repaso rápido](#12-flashcards-de-repaso-rápido)
+9. [Internacionalización (i18next)](#9-internacionalización-i18next)
+10. [Bugs reales encontrados y corregidos](#10-bugs-reales-encontrados-y-corregidos)
+11. [Build, despliegue y configuración](#11-build-despliegue-y-configuración)
+12. [Responsive y depuración de layout](#12-responsive-y-depuración-de-layout)
+13. [Flashcards de repaso rápido](#13-flashcards-de-repaso-rápido)
 
 ---
 
@@ -227,24 +226,32 @@ backend ya hace el join). El frontend convierte metros a kilómetros
 (`p.distancia_metros / 1000`) y respeta esa distancia sobre cualquier
 cálculo local (`map.js:450-453`).
 
-> ⚠️ **Lo que no pude verificar:** el código fuente exacto de este endpoint
-> (`GET /poi`) no está en ninguna rama del repositorio backend a la que
-> tengo acceso — todos los `app/routers/poi.py` que revisé (`main`,
-> `develop`, y cada `feature/*`) son un `TODO` sin implementar, o un archivo
-> vacío. El servidor desplegado sí lo tiene funcionando (lo comprobé en vivo:
-> 9 POIs con distancias reales calculadas). El patrón esperado con PostGIS
-> para este contrato sería algo como:
-> ```sql
-> SELECT *, ST_Distance(ubicacion, ST_MakePoint(:lng, :lat)::geography) AS distancia_metros
-> FROM poi
-> WHERE ST_DWithin(ubicacion, ST_MakePoint(:lng, :lat)::geography, :radio_metros)
->   AND estado = 'APROBADO'
-> ORDER BY distancia_metros;
-> ```
-> Antes de presentar esto como "así está hecho" en una entrevista, pídele al
-> compañero de backend que te confirme la consulta real — lo que sí podés
-> afirmar con seguridad es el **contrato** (parámetros de entrada, forma de
-> la respuesta) y el **tipo de dato** (`geography`, verificado en el modelo).
+**Verificado contra el código real** (`app/repositories/poi_repository.py`,
+rama `develop` del backend — esta sección estuvo marcada como "no
+encontrada" en una versión anterior de esta guía; se ubicó después):
+
+```python
+lat, lng, radio = filters.get("lat"), filters.get("lng"), filters.get("radio_metros")
+if lat is not None and lng is not None and radio is not None:
+    punto = point_from_coords(lat, lng)
+    query = query.filter(func.ST_DWithin(Poi.ubicacion, punto, float(radio)))
+# ...
+if lat is not None and lng is not None:
+    punto = point_from_coords(lat, lng)
+    columns.append(func.ST_Distance(Poi.ubicacion, punto).label("distancia_metros"))
+```
+Es SQLAlchemy ORM, no SQL crudo, pero llama exactamente a las mismas
+funciones de PostGIS que predecía la versión anterior de esta guía
+(`ST_DWithin` para el filtro por radio, `ST_Distance` para el valor que
+viaja al frontend). Sin `estado` explícito en los filtros, `_filtered_query`
+fuerza `Poi.estado == "APROBADO"` — el mismo patrón de "estado visible por
+defecto" del módulo 7. La lista se ordena por `ST_Distance` cuando hay
+coordenadas (`list()`, más abajo en el mismo archivo), lo que explica por
+qué el POI más cercano siempre es `filteredPois[0]` en el frontend (ver
+3.6). El `lat`/`lng` que trae cada POI en la respuesta no es una columna
+separada: se extrae del punto `geography` con `ST_Y`/`ST_X` sobre un cast a
+`Geometry` (`_with_aggregates`), en la misma consulta que calcula el
+promedio de calificaciones y la imagen principal.
 
 ### 3.4 — Leaflet: el mapa interactivo
 
@@ -349,7 +356,26 @@ filtrada (`filteredPois[0]`, que está ordenada por distancia cuando hay
 ubicación — ver 3.1). Si abrió un popup, ese POI queda marcado como
 `selectedPoiId` y la ruta apunta ahí en su lugar.
 
-### 3.7 — Responsive del mapa: el bug real que se corrigió
+### 3.7 — POIs visitados y ruta automática desde el detalle
+
+Dos features que se apoyan en lo mismo: saber qué POIs ya visitó el usuario.
+`getMyVisitedPoiIds()` (`visit.service.js`) hace **una sola** llamada a
+`/visits/me` y devuelve un `Set` de ids — no una llamada por tarjeta. El
+mapa lo consulta una vez al iniciar (`initMap()`) y lo usa para pintar de
+verde tanto el pin (`marker-pin-bubble--visited`, con un check en la
+esquina) como la tarjeta de la lista lateral, reemplazando el color de
+categoría en vez de mezclarse con él — mismo criterio en los dos lugares.
+
+**Llegar con una ruta ya trazada:** el botón "Ver en el mapa" del detalle de
+un POI navega a `/map?poi=<id>` en vez de abrir Google Maps. `initMap()` lee
+ese parámetro, centra el mapa y abre el popup del POI de inmediato (antes de
+tener la ubicación del usuario), y en cuanto la geolocalización resuelve,
+dispara `toggleRoute()` sola — sin que el usuario tenga que tocar el botón
+flotante. Se "consume" una sola vez (se limpia la variable justo antes de
+llamar a `toggleRoute()`) para que un "Centrar en mi ubicación" posterior no
+la retrace sin que se pida.
+
+### 3.8 — Responsive del mapa: el bug real que se corrigió
 
 Vale la pena mencionarlo porque es un ejemplo concreto de depuración con
 evidencia, no "a ojo": los botones flotantes ("Iniciar Ruta" y "centrar en
@@ -607,7 +633,65 @@ detecte — el retry absorbe ese caso puntual sin enmascarar errores reales.
 
 ---
 
-## 9. Bugs reales encontrados y corregidos
+## 9. Internacionalización (i18next)
+
+**Dónde vive.** `src/i18n/index.js` + `src/i18n/locales/{es,en}.json`.
+
+**La decisión clave: JSON empaquetado en el bundle, sin backend de
+i18next.** Con solo dos idiomas y un único namespace, cargar las
+traducciones por HTTP (el patrón típico de i18next en apps grandes) es
+complejidad que no se paga sola — los dos archivos se importan como
+cualquier módulo JS y viajan en el mismo bundle. La inicialización queda
+**síncrona** (`initImmediate: false`), así que `t()` funciona desde el
+primer render sin esperar ninguna promesa.
+
+**El idioma persiste en `localStorage`** bajo el mismo prefijo
+(`tourpoints:lang`) que el resto del estado de la app, y se aplica también
+a `document.documentElement.lang` — no solo por prolijidad: un lector de
+pantalla y el corrector ortográfico del navegador leen ese atributo para
+saber en qué idioma está el contenido.
+
+**El problema real que resuelve el patrón "repintar toda la ruta":** las
+páginas son funciones que devuelven HTML como *string* (módulo 1) — no hay
+un árbol de componentes reactivo que se actualice solo cuando cambia el
+idioma. La solución: el botón de idioma llama a `setLang()` y después a
+`renderRoute()` (el mismo router de siempre), que vuelve a ejecutar
+`page.component()` desde cero. Como cada `t("clave")` se evalúa **en el
+momento de generar el HTML**, un solo repintado deja toda la vista en el
+idioma nuevo — no hace falta que cada página escuche un evento de cambio
+de idioma.
+
+**Trampa a evitar: constantes de módulo con `t()` adentro.** Si una lista
+de opciones (pestañas, filtros, ítems de navegación) se calcula una sola
+vez al cargar el módulo —`const TABS = [...]` con `t()` dentro— queda
+congelada en el idioma que estaba activo la primera vez que se importó el
+archivo, y cambiar de idioma después no la actualiza aunque el resto de la
+página sí cambie. El proyecto lo resuelve convirtiendo esas listas en
+**funciones** (`const TABS = () => [...]`, ver `challenges.js`,
+`rewards.js`, `bottomNav.js`) que se llaman en cada render, en vez de
+constantes evaluadas una sola vez.
+
+**Traducir datos, no solo interfaz — el caso de las categorías.** Las
+categorías de POI (`"Naturaleza"`, `"Cultura"`...) no son texto de
+interfaz: vienen del backend en español y ese mismo string se usa como
+`data-category` para filtrar. Traducir la etiqueta visible sin tocar el
+valor de filtrado necesitó su propio helper, `tCategory()`: busca una
+traducción en un bloque `categories` del JSON por el nombre normalizado, y
+si no la encuentra (una categoría nueva del backend que aún no se tradujo)
+devuelve el nombre tal cual llegó en vez de romper o mostrar la clave sin
+traducir — el filtro sigue funcionando porque el atributo `data-category`
+nunca pasa por `tCategory()`, solo la etiqueta que se muestra.
+
+**Pregunta probable: "¿por qué no usan el detector de idioma del navegador
+(`i18next-browser-languagedetector`)?"**
+Decisión consciente de mantener el idioma explícito y persistente por
+usuario (`localStorage`), no inferido de las cabeceras del navegador en
+cada visita — así el usuario elige una vez y la app no le cambia el idioma
+solo porque cambió de red o de dispositivo con configuración distinta.
+
+---
+
+## 10. Bugs reales encontrados y corregidos
 
 Esta sección es material de entrevista tan bueno como cualquier otra —
 "encontré esto, entendí por qué pasaba, y lo arreglé" demuestra más
@@ -626,14 +710,37 @@ todos los puntos (`String(item.id) === String(poiId)`), no forzar a número.
 **Lección:** un fallo silencioso (sin excepción) es más peligroso que uno
 ruidoso — este pasó desapercibido hasta que alguien probó el clic a mano.
 
-### Endpoint de canje equivocado
+### El endpoint de canje que cambió de nombre dos veces
 
-`reward.service.js` llamaba a `POST /rewards/{id}/redeem`. El router real
-del backend expone `POST /rewards/{id}/canjear`
-(`app/routers/recompensas.py:72`). Cada intento de canje habría devuelto
-**404** — el flujo de dinero de toda la app estaba roto, y no se habría
-notado hasta que alguien intentara canjear de verdad. Se encontró leyendo
-el router real, no por un reporte de error.
+Esta es la historia completa, no solo el primer capítulo: es el mejor
+ejemplo del proyecto de por qué "leer el router" no siempre alcanza.
+
+1. **Primera vez:** `reward.service.js` llamaba a `POST
+   /rewards/{id}/redeem`. El backend desplegado exponía
+   `/rewards/{id}/canjear`. Cada canje real habría dado **404**. Arreglo:
+   cambiar el frontend a `/canjear`.
+2. **Segunda vez, sesiones después:** al revalidar la integración completa,
+   el mismo endpoint había vuelto a `/redeem` en el servidor desplegado —
+   `/canjear` ahora daba 404, `/redeem` daba 403 (existe, pide sesión). El
+   frontend volvió a cambiar, esta vez de vuelta a `/redeem`.
+
+**Por qué pasó dos veces, y por qué es estructural, no casualidad:** el
+código fuente de los routers del backend (`app/routers/*.py`) está vacío o
+es un `TODO` en **todas** las ramas del repositorio a las que hay acceso —
+`main`, `develop`, cada `feature/*`. La única fuente de verdad real es el
+servidor **ya desplegado**, y su `openapi.json` en vivo
+(`GET /openapi.json`) es lo único confiable para verificar un contrato,
+no el código versionado. La técnica que terminó funcionando: descargar el
+`openapi.json` del servidor y comparar el `operationId` real contra lo que
+llama el frontend, y para confirmarlo sin ambigüedad, dos peticiones sin
+token a ambas rutas — la que existe responde 401/403 (pide auth), la que no
+existe responde 404. Un 403 nunca miente sobre si la ruta existe; un 404 sí
+puede confundirse con "no tengo permiso" si no se compara contra la otra.
+
+**La lección que vale para cualquier integración con un backend en
+desarrollo activo:** un contrato de API no es algo que se verifica una vez.
+`reward.service.js` quedó con un comentario permanente señalando esta
+línea exacta como sospechosa la próxima vez que un canje falle con 404.
 
 ### Filtros de categoría que no podían funcionar
 
@@ -672,9 +779,93 @@ correcta es `/icons/...`, no `/public/icons/...`. Y por ser **relativas**
 en una sola línea: ruta relativa (rompe en rutas anidadas) apuntando a un
 directorio que no sobrevive al build (rompe siempre en producción).
 
+### Coordenadas del check-in mandadas como objeto en vez de texto WKT
+
+El check-in por GPS (`POST /visits`) daba **422** en cada intento, con el
+mensaje genérico de "no pudimos registrar la visita" — no el mensaje
+específico de distancia que el propio sistema muestra cuando el rechazo es
+de negocio (estar lejos del POI). Esa diferencia es la pista: un 422 con
+mensaje genérico casi siempre es un error de **validación de forma**, no de
+**regla de negocio** — el backend nunca llegó a medir la distancia.
+
+La causa: `visit.service.js` mandaba
+`ubicacion_usuario: { lat: coords.lat, lng: coords.lng }`, un objeto. El
+esquema del backend (`VisitaCreate`, con un `field_validator`) exige un
+**string en formato WKT** — `"POINT(longitud latitud)"`, con el orden
+invertido respecto a como se maneja en el resto del frontend (longitud
+primero). Pydantic rechazaba el objeto por tipo antes de que el backend
+pudiera medir nada. Arreglo:
+`` `POINT(${coords.lng} ${coords.lat})` ``. De paso, `precision_metros`
+tampoco podía viajar `null` con `metodo_validacion: "GPS"` (otro validador
+del mismo esquema lo exige) — ahora cae a 20 metros si el navegador no
+reporta precisión, en vez de bloquear el check-in por un dato que el
+dispositivo no dio.
+
+**Lección:** un 422 con mensaje genérico en el frontend es la señal de que
+el error nunca llegó a la lógica de negocio — hay que mirar la forma del
+cuerpo de la petición antes que la lógica que se cree estar probando.
+
+### El rol de admin que el frontend cree tener, pero el backend no reconoce
+
+Un admin podía **entrar** al panel, **crear** un POI y marcarlo "Activo" —
+pero el POI se quedaba invisible en Explora y el Mapa, sin ningún error en
+pantalla. La causa: crear un POI (`POST /poi`) solo exige estar
+autenticado, pero **aprobarlo** (`PATCH /poi/{id}/moderation`) exige ser
+admin de verdad, verificado contra la tabla `roles` en la base de datos
+(módulo 2). `createPoi()` encadena ambos pasos automáticamente, y si el
+segundo falla, lo atrapa en silencio:
+```js
+} catch (error) {
+  console.warn("POI creado; la transición de estado falló:", error);
+}
+```
+El POI queda creado y `PENDIENTE` para siempre, sin que nadie en pantalla
+se entere de por qué.
+
+**Por qué le pasaba a una cuenta y no a otras:** `isAdmin()` en el frontend
+es una bandera en `localStorage`, escrita al iniciar sesión — no se
+revalida contra el backend en cada acción (módulo 1 y 2). Una cuenta cuya
+sesión guardada quedó desactualizada (o cuyo rol se corrigió en la base de
+datos después de haber iniciado sesión) sigue viendo el panel completo,
+pero el backend, al verificar contra la fila real de `roles`, la rechaza en
+el paso de moderación. Cerrar sesión y volver a entrar (para refrescar el
+token) resuelve el caso "el rol ya es correcto en la base, la sesión estaba
+vieja"; si sigue fallando después de eso, el rol en la base de datos
+**realmente no es admin**, y ningún relogin lo arregla.
+
+**Cómo se diagnosticó sin acceso directo a la base de datos:** comparando
+el número de POIs `APROBADO` que devuelve `GET /poi` (público, sin token)
+antes y después de que la cuenta afectada intentara crear uno — si el
+conteo no sube, el POI existe pero no se aprobó.
+
+### Íconos de Lucide que fallaban en silencio (o no tan en silencio)
+
+El proyecto importa una lista blanca curada de íconos de Lucide en vez del
+paquete completo (`utils/icons.js`), para no cargar cientos de SVGs que
+nunca se usan. El comentario original del archivo decía que un ícono
+faltante fallaba "sin ningún error visible en consola". **Es falso**, y se
+comprobó leyendo el código fuente de Lucide (`replaceElement.mjs`):
+```js
+if (!iconNode) {
+  return console.warn(`${element.outerHTML} icon name was not found...`);
+}
+```
+Lucide sí llama a `console.warn` por cada ícono ausente, en cada
+repintado — como `loadIcons()` corre en casi cada render, un solo ícono sin
+registrar puede inundar la consola. Se encontraron 5 íconos usados en el
+HTML (`data-lucide="..."` o como valores dinámicos en objetos JS) que nunca
+se habían agregado a la lista blanca —incluido el de la sección de
+Moderación del panel—, más uno que directamente **no existe** en esta
+versión de Lucide (`check-circle-2`; el nombre correcto es `circle-check`).
+
+**Lección:** un comentario en el código que describe el comportamiento de
+una librería de terceros puede quedar desactualizado (o estar mal desde el
+principio) sin que nadie lo note hasta que se lee el código fuente real de
+esa librería en vez de confiar en el comentario.
+
 ---
 
-## 10. Build, despliegue y configuración
+## 11. Build, despliegue y configuración
 
 **`netlify.toml` versionado, no configuración del panel.** Define
 `base`/`command`/`publish` (el frontend vive en un subdirectorio del repo,
@@ -703,7 +894,7 @@ usuario quería ver.
 
 ---
 
-## 11. Responsive y depuración de layout
+## 12. Responsive y depuración de layout
 
 Un principio de proceso, no solo de CSS, que vale la pena poder explicar:
 **medir, no adivinar**. Los solapamientos de UI en móvil no se
@@ -727,7 +918,7 @@ contenido cortado cuando aparecía.
 
 ---
 
-## 12. Flashcards de repaso rápido
+## 13. Flashcards de repaso rápido
 
 Preguntas cortas, para repasar rápido antes de la defensa. Tapate la
 respuesta.
@@ -762,3 +953,18 @@ respuesta.
 - **Dame un ejemplo real de bug de tipos en este proyecto.** → Comparar un
   UUID con `Number()`: da `NaN`, y `NaN !== NaN`, así que el `find()` nunca
   encuentra el elemento — sin ningún error en consola.
+- **¿Por qué las listas de pestañas/filtros con `t()` se definen como
+  función y no como constante?** → Una constante de módulo se evalúa una
+  sola vez, al importar el archivo, y queda congelada en el idioma que
+  estaba activo en ese momento; una función se reevalúa en cada render.
+- **¿Cómo se verifica un contrato de API cuando el código del backend está
+  vacío en todas las ramas?** → Contra el `openapi.json` del servidor
+  desplegado, no contra el repositorio. Dos peticiones sin token a rutas
+  candidatas distinguen sin ambigüedad cuál existe: 401/403 = existe (pide
+  auth), 404 = no existe.
+- **¿Por qué un POI creado por un admin a veces no se aprueba solo, y no
+  sale ningún error en pantalla?** → Crear (`POST /poi`) solo exige sesión;
+  aprobar (`PATCH /poi/{id}/moderation`) exige admin real verificado en la
+  base de datos. Si la sesión del frontend cree ser admin pero el backend
+  no lo reconoce, el paso de aprobación falla y el código lo atrapa en un
+  `console.warn` silencioso.
