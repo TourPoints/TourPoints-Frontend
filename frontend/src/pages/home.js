@@ -91,7 +91,7 @@ export function home() {
             <img src="/img/Explorar.jpg" alt="Interfaz principal de la aplicación" class="mockup-img" loading="lazy">
             </div>
             <div class="mockup-card mockup-card--main">
-              <img src="img/Explorar.jpg" alt="Interfaz principal de la aplicación" class="mockup-img" loading="lazy">
+              <img src="/img/Explorar.jpg" alt="Interfaz principal de la aplicación" class="mockup-img" loading="lazy">
               <div class="mockup-phone"></div>
             </div>
           </div>
