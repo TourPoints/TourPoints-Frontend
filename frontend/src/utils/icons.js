@@ -47,14 +47,24 @@ import {
   Check,
   Lock,
   ShieldAlert,
+  X,
   // Dashboard de usuario
-  LayoutDashboard
+  LayoutDashboard,
+  // Moderación
+  MessageSquareWarning,
+  // Filtros de recompensas
+  PackageCheck,
+  Wallet,
+  // Mapa / detalle de POI
+  Route
 } from "lucide";
 
 // Todo icono referenciado en el HTML vía data-lucide="..." debe estar aquí.
-// Si falta, Lucide simplemente no reemplaza el <i> y el icono no se ve,
-// sin ningún error visible en consola — por eso conviene mantener esta
-// lista sincronizada con los data-lucide usados en el proyecto.
+// Si falta, Lucide no reemplaza el <i> (queda vacío) Y deja un
+// `console.warn` por cada icono ausente en cada repintado -createIcons()
+// corre en cada render- así que un solo icono sin registrar puede inundar la
+// consola. Mantener esta lista sincronizada con los data-lucide del proyecto
+// evita ambas cosas.
 export const loadIcons = () => {
   createIcons({
     icons: {
@@ -102,7 +112,12 @@ export const loadIcons = () => {
       Check,
       Lock,
       ShieldAlert,
-      LayoutDashboard
+      X,
+      LayoutDashboard,
+      MessageSquareWarning,
+      PackageCheck,
+      Wallet,
+      Route
     },
   });
 };
