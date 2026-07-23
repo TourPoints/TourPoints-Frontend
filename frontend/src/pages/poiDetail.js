@@ -82,13 +82,12 @@ function buildDetailHTML(poi, reviews, favorite, visited, myReview) {
             <div class="poi-detail-map-header">
               <h2>Mapa</h2>
               <a
-                href="https://www.google.com/maps/search/?api=1&query=${poi.lat},${poi.lng}"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="/map?poi=${poi.id}"
+                data-link
                 class="btn btn--secondary poi-detail-map-link"
               >
-                <i data-lucide="external-link"></i>
-                <span>Abrir en Mapas</span>
+                <i data-lucide="route"></i>
+                <span>Ver en el mapa</span>
               </a>
             </div>
             <div id="poi-detail-map" class="poi-detail-map"></div>

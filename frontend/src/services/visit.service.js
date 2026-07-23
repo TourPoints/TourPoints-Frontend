@@ -49,6 +49,31 @@ export async function hasVisited(poiId) {
 }
 
 /**
+ * IDs de todos los POIs con visita (no rechazada) del usuario, en una sola
+ * consulta. Pensado para vistas con listas de POIs (mapa, explora) que antes
+ * habrían tenido que llamar a `hasVisited` una vez por tarjeta -N peticiones
+ * idénticas a /visits/me- para pintar el mismo dato.
+ * @returns {Promise<Set<string>>}
+ */
+export async function getMyVisitedPoiIds() {
+  if (isApiEnabled("visits")) {
+    try {
+      const items = await apiGetItems("/visits/me");
+      return new Set(
+        items
+          .filter((v) => v.estado !== "RECHAZADA")
+          .map((v) => String(v.poi_id ?? v.poi?.id))
+      );
+    } catch (error) {
+      if (error instanceof ApiError && (error.status === 401 || error.status === 403)) return new Set();
+      throw error;
+    }
+  }
+
+  return new Set(getStoredVisits().map(String));
+}
+
+/**
  * Registra una visita a un Punto de Interés.
  * @param {number|string} poiId - ID del POI.
  * @param {{ lat: number, lng: number, accuracy?: number }} coords - Ubicación

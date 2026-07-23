@@ -1,4 +1,5 @@
 import { getPois, getPoisNearby } from "../services/poi.service.js";
+import { getMyVisitedPoiIds } from "../services/visit.service.js";
 import { isApiEnabled } from "../services/api.client.js";
 import { loadIcons } from "../utils/icons.js";
 import { debounce, normalizeText } from "../utils/text.js";
@@ -28,12 +29,17 @@ let userMarker = null;
 let markersByPoiId = new Map();
 let userCoords = { ...DEFAULT_COORDS };
 let hasUserLocation = false;
+let visitedPoiIds = new Set();
 let currentCategory = ALL_CATEGORIES;
 let searchQuery = "";
 // Control de ruta de Leaflet Routing Machine (null si no hay ruta pintada) y
 // el POI que el usuario tiene abierto/seleccionado como destino de la ruta.
 let routingControl = null;
 let selectedPoiId = null;
+// POI a trazar automáticamente al llegar desde su detalle (?poi=<id> en la
+// URL). Se consume una sola vez -se limpia al usarlo- para que un "Centrar
+// en mi ubicación" posterior no vuelva a disparar la ruta sola.
+let autoRoutePoiId = null;
 
 // Icono de Lucide asociado a cada categoría.
 const CATEGORY_ICONS = {
@@ -126,7 +132,15 @@ export function map() {
 export async function initMap() {
   resetState();
 
+  // Llegar desde "Ver en el mapa" en el detalle de un POI: ?poi=<id> marca el
+  // destino de la ruta automática en cuanto se resuelva la ubicación.
+  autoRoutePoiId = new URLSearchParams(location.search).get("poi");
+
   await setupMapAndData();
+
+  if (autoRoutePoiId) {
+    focusPoi(autoRoutePoiId);
+  }
 
   requestUserLocation();
 }
@@ -140,9 +154,11 @@ function resetState() {
   searchQuery = "";
   userCoords = { ...DEFAULT_COORDS };
   hasUserLocation = false;
+  visitedPoiIds = new Set();
   markersByPoiId = new Map();
   routingControl = null;
   selectedPoiId = null;
+  autoRoutePoiId = null;
 
   if (mapInstance) {
     try {
@@ -171,6 +187,10 @@ async function setupMapAndData() {
     showSidebarError();
     return;
   }
+
+  // Una sola consulta para todo el mapa, no una por tarjeta: sin sesión
+  // devuelve un set vacío y ningún POI se pinta como visitado.
+  visitedPoiIds = await getMyVisitedPoiIds().catch(() => new Set());
 
   // El contenedor puede haber desaparecido si el usuario navegó durante la carga.
   if (!document.getElementById("map")) return;
@@ -247,7 +267,16 @@ function requestUserLocation() {
       hasUserLocation = true;
       setLocationButtonState("idle");
       hideLocationNotice();
-      updateUserLocationOnMap();
+      updateUserLocationOnMap().then(() => {
+        // Se consume una sola vez: si toggleRoute falla (POI fuera del radio
+        // recién cargado, servidor OSRM ocupado), no se reintenta solo en el
+        // próximo "Centrar en mi ubicación".
+        if (autoRoutePoiId) {
+          selectedPoiId = autoRoutePoiId;
+          autoRoutePoiId = null;
+          toggleRoute();
+        }
+      });
     },
     (error) => {
       console.warn("Geolocalización no disponible:", error.message);
@@ -575,12 +604,14 @@ function updateMarkers() {
 
   filteredPois.forEach((poi) => {
     const categoryClass = toCategoryClass(poi.category);
+    const visited = visitedPoiIds.has(String(poi.id));
 
     const markerIcon = L.divIcon({
       className: "custom-map-marker-wrapper",
       html: `
-        <div class="marker-pin-bubble ${categoryClass}">
+        <div class="marker-pin-bubble ${categoryClass} ${visited ? "marker-pin-bubble--visited" : ""}">
           <i data-lucide="${getCategoryIcon(poi.category)}"></i>
+          ${visited ? `<span class="marker-visited-check"><i data-lucide="check" aria-hidden="true"></i></span>` : ""}
         </div>
         <div class="marker-pin-shadow"></div>
       `,
@@ -655,11 +686,16 @@ function renderSidebarItem(poi) {
         ? t("map.distanceM", { m: Math.round(poi.distance * 1000) })
         : t("map.distanceKm", { km: poi.distance.toFixed(1) });
 
+  const visited = visitedPoiIds.has(String(poi.id));
+
   return `
-    <div class="sidebar-poi-item" data-poi-id="${poi.id}">
+    <div class="sidebar-poi-item ${visited ? "sidebar-poi-item--visited" : ""}" data-poi-id="${poi.id}">
       <img src="${poi.image}" alt="${poi.name}" class="item-thumb">
       <div class="item-info">
-        <h5 class="item-title">${poi.name}</h5>
+        <div class="item-title-row">
+          <h5 class="item-title">${poi.name}</h5>
+          ${visited ? `<span class="item-visited-badge"><i data-lucide="circle-check" aria-hidden="true"></i> ${t("map.visitedBadge")}</span>` : ""}
+        </div>
         <div class="item-rating-row">
           <i data-lucide="star" class="star-mini"></i>
           ${formatRating(poi.rating) ? `<span class="item-rating">${formatRating(poi.rating)}</span>` : ""}

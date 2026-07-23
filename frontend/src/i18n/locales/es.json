@@ -169,7 +169,8 @@
     "youAreHere": "Tu ubicación actual",
     "nearYouHeading": "CERCA DE TI",
     "distanceM": "A {{m}} m de distancia",
-    "distanceKm": "A {{km}} km de distancia"
+    "distanceKm": "A {{km}} km de distancia",
+    "visitedBadge": "Visitado"
   },
   "categories": {
     "todas": "Todas",
