@@ -58,11 +58,20 @@ export async function hasVisited(poiId) {
 export async function registerVisit(poiId, coords) {
   if (isApiEnabled("visits")) {
     try {
+      // El backend exige ubicacion_usuario como texto WKT "POINT(longitud
+      // latitud)" -no un objeto {lat,lng}- y en ese orden invertido respecto
+      // al resto del frontend. Mandar el objeto directo daba 422 antes de
+      // que el backend llegara siquiera a medir la distancia.
+      //
+      // precision_metros tampoco puede ir null con metodo_validacion GPS: el
+      // propio esquema lo exige. Sin accuracy del navegador (Firefox no
+      // siempre la reporta), se asume un GPS de gama media -20 m- en vez de
+      // bloquear el check-in por un dato que el dispositivo no dio.
       const visita = await apiPost("/visits", {
         poi_id: String(poiId),
         metodo_validacion: "GPS",
-        ubicacion_usuario: { lat: coords.lat, lng: coords.lng },
-        precision_metros: coords.accuracy ?? null,
+        ubicacion_usuario: `POINT(${coords.lng} ${coords.lat})`,
+        precision_metros: coords.accuracy ?? 20,
       });
 
       if (visita.estado === "VALIDADA") {
