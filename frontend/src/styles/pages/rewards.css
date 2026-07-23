@@ -223,3 +223,13 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Icono de los estados que piden sesión (vencida o inexistente). El candado
+   gris es el mismo que usa Favoritos sin sesión: un mismo significado no
+   puede tener dos iconos según la página. */
+.rewards-empty-icon {
+  width: 40px;
+  height: 40px;
+  color: #94a3b8;
+  margin-bottom: 0.5rem;
+}

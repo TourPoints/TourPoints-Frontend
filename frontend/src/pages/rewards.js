@@ -69,10 +69,12 @@ export async function initRewards() {
     if (grid) {
       grid.innerHTML = `
         <div class="empty-state">
+          <i class="rewards-empty-icon" data-lucide="lock" aria-hidden="true"></i>
           <p>${t("rewards.loginPrompt")}</p>
           <a href="/login" class="btn btn--primary" data-link>${t("rewards.loginCta")}</a>
         </div>
       `;
+      loadIcons();
     }
     return;
   }
@@ -256,10 +258,12 @@ function renderSessionExpired() {
   if (!grid) return;
   grid.innerHTML = `
     <div class="empty-state">
+      <i class="rewards-empty-icon" data-lucide="lock" aria-hidden="true"></i>
       <p>${t("rewards.sessionExpired")}</p>
       <a href="/login" class="btn btn--primary" data-link>${t("rewards.loginCta")}</a>
     </div>
   `;
+  loadIcons();
 }
 
 function showErrorState() {
